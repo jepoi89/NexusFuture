@@ -77,6 +77,7 @@
             <div class="flex items-center space-x-2 sm:space-x-4">
                 <!-- Timeframe Selectors -->
                 <div class="flex items-center bg-[#1e2329] rounded p-0.5 border border-gray-800" id="timeframeContainer">
+                    <button data-timeframe="1m" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1m</button>
                     <button data-timeframe="5m" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">5m</button>
                     <button data-timeframe="15m" class="px-2 py-1 text-xs font-semibold rounded bg-amber-500 text-black timeframe-btn">15m</button>
                     <button data-timeframe="1h" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1H</button>
@@ -115,10 +116,9 @@
             <aside id="watchlistSidebar" class="w-72 border-r border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 transition-all duration-300">
                 <div class="p-3 border-b border-gray-800 flex items-center justify-between">
                     <span class="font-semibold text-xs tracking-wider uppercase text-gray-400">Market Watchlist</span>
-                    <span class="text-[10px] bg-[#1e2329] text-gray-400 px-2 py-0.5 rounded border border-gray-800">Binance Spot/Futures</span>
+                    <span class="text-[10px] bg-[#1e2329] text-gray-400 px-2 py-0.5 rounded border border-gray-800">Binance Futures</span>
                 </div>
                 <div class="flex-1 overflow-y-auto" id="watchlistContainer">
-                    <!-- Watchlist items loaded dynamically -->
                     <div class="flex items-center justify-center h-40 text-gray-500 text-xs">
                         <div class="text-center">
                             <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-500 mx-auto mb-2"></div>
@@ -188,88 +188,180 @@
                 <!-- Bottom Summary and Signals Tabbed Layout -->
                 <div class="bg-[#181a20] p-4 flex flex-col border-b border-gray-800">
                     <div class="border-b border-gray-800 flex space-x-6 text-xs font-semibold uppercase tracking-wider mb-4">
-                        <button class="pb-2 border-b-2 border-amber-500 text-amber-500 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment">Indicator & Sentiment Summary</button>
+                        <button class="pb-2 border-b-2 border-amber-500 text-amber-500 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment">Market Intelligence Engine</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="signals">Recent AI Signal History</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="heatmap">Crypto Heatmap</button>
                     </div>
 
-                    <!-- Tab: Indicator & Sentiment Summary -->
-                    <div id="tabContentSentiment" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <!-- Score breakdown -->
-                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between">
-                            <div>
-                                <h3 class="text-xs text-gray-400 font-semibold mb-2">Technical Summary</h3>
-                                <div class="flex items-baseline space-x-2">
-                                    <span class="text-2xl font-bold" id="technicalScoreLabel">-- / 100</span>
-                                    <span class="text-xs font-semibold px-2 py-0.5 rounded text-white" id="technicalRecommendationBadge">HOLD</span>
+                    <!-- Tab: Market Intelligence Engine -->
+                    <div id="tabContentSentiment" class="space-y-4">
+                        <!-- Top Row: Config, Bias, and Probabilities -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <!-- Probabilities & Bias Block -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Dynamic Market Probabilities</h3>
+                                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                                    <div class="p-2 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400 block text-[10px] uppercase">Bullish</span>
+                                        <span class="text-green-500 font-bold text-lg" id="probBullishText">33%</span>
+                                    </div>
+                                    <div class="p-2 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400 block text-[10px] uppercase">Bearish</span>
+                                        <span class="text-red-500 font-bold text-lg" id="probBearishText">33%</span>
+                                    </div>
+                                    <div class="p-2 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400 block text-[10px] uppercase">Neutral</span>
+                                        <span class="text-gray-300 font-bold text-lg" id="probNeutralText">34%</span>
+                                    </div>
+                                </div>
+                                <!-- Split Probabilities Bar -->
+                                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden flex border border-gray-900">
+                                    <div class="bg-green-500 h-full transition-all duration-300" style="width: 33%" id="probBullishBar"></div>
+                                    <div class="bg-gray-500 h-full transition-all duration-300" style="width: 34%" id="probNeutralBar"></div>
+                                    <div class="bg-red-500 h-full transition-all duration-300" style="width: 33%" id="probBearishBar"></div>
                                 </div>
                             </div>
-                            <div class="mt-3 text-[11px] text-gray-400 space-y-1">
-                                <div class="flex justify-between"><span>EMA Alignment</span><span id="scoreValEma" class="font-semibold text-gray-300">--</span></div>
-                                <div class="flex justify-between"><span>Oscillators</span><span id="scoreValOsc" class="font-semibold text-gray-300">--</span></div>
-                                <div class="flex justify-between"><span>Trend Following</span><span id="scoreValTrend" class="font-semibold text-gray-300">--</span></div>
+
+                            <!-- Configurable Threshold & Trade Quality -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Setup Validation Settings</h3>
+                                    <span class="text-[10px] text-gray-500">Configurable Score</span>
+                                </div>
+                                <div>
+                                    <label class="text-xs text-gray-400 flex justify-between mb-1">
+                                        <span>Min Acceptable Quality:</span>
+                                        <span class="font-extrabold text-amber-500 text-sm" id="minQualityScoreLabel">70</span>
+                                    </label>
+                                    <input type="range" id="minQualityScoreSelect" min="50" max="95" value="70" class="w-full accent-amber-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer">
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-gray-400">Trade Quality Status:</span>
+                                    <span id="valTradeQualityBadge" class="px-2 py-0.5 rounded border text-[11px] font-bold text-gray-400 border-gray-700 bg-gray-800">--</span>
+                                </div>
+                            </div>
+
+                            <!-- Premium Metrics Block -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 grid grid-cols-2 gap-3 text-xs">
+                                <div class="col-span-2 border-b border-gray-800 pb-1.5">
+                                    <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Dashboard Metrics</h3>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-400 block uppercase">Trend Strength</span>
+                                    <span id="valTrendStrength" class="font-bold text-gray-200">--</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-400 block uppercase">Volatility Rating</span>
+                                    <span id="valVolatilityRating" class="font-bold text-gray-200">--</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-400 block uppercase">Risk Level</span>
+                                    <span id="valRiskLevel" class="font-bold">--</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-gray-400 block uppercase">Recommendation</span>
+                                    <span id="technicalRecommendationBadge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-400">HOLD</span>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Oscillator Gauges (RSI/MACD/Stoch) -->
-                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800">
-                            <h3 class="text-xs text-gray-400 font-semibold mb-2">Oscillator Status</h3>
-                            <div class="grid grid-cols-3 gap-2 text-center">
-                                <div class="p-1 rounded bg-[#181a20]">
-                                    <div class="text-[10px] text-gray-400">RSI (14)</div>
-                                    <div class="text-xs font-bold mt-1" id="valRsi">--</div>
-                                    <div class="text-[9px]" id="statusRsi">Neutral</div>
+                        <!-- Mid Row: Layer-by-Layer Findings Grid (Layers 1-10) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+                            <!-- L1 Structure -->
+                            <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between min-h-[140px]">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L1: Market Structure</span>
+                                    <i data-lucide="layers" class="w-3.5 h-3.5 text-amber-500"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerMarketStructureText">
+                                    Loading structure metrics...
                                 </div>
-                                <div class="p-1 rounded bg-[#181a20]">
-                                    <div class="text-[10px] text-gray-400">Stoch RSI</div>
-                                    <div class="text-xs font-bold mt-1" id="valStochRsi">--</div>
-                                    <div class="text-[9px]" id="statusStochRsi">Neutral</div>
+                            </div>
+
+                            <!-- L2 Price Action -->
+                            <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between min-h-[140px]">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L2: Price Action</span>
+                                    <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerPriceActionText">
+                                    Loading price patterns...
                                 </div>
-                                <div class="p-1 rounded bg-[#181a20]">
-                                    <div class="text-[10px] text-gray-400">MACD</div>
-                                    <div class="text-xs font-bold mt-1" id="valMacd">--</div>
-                                    <div class="text-[9px]" id="statusMacd">Neutral</div>
+                            </div>
+
+                            <!-- L3 Volume -->
+                            <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between min-h-[140px]">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L3: Volume Intelligence</span>
+                                    <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-purple-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerVolumeText">
+                                    Loading volume flows...
+                                </div>
+                            </div>
+
+                            <!-- L4 Momentum -->
+                            <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between min-h-[140px]">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L4: Momentum Engine</span>
+                                    <i data-lucide="zap" class="w-3.5 h-3.5 text-cyan-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerMomentumText">
+                                    Loading oscillators...
+                                </div>
+                            </div>
+
+                            <!-- L6 Volatility -->
+                            <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between min-h-[140px]">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L6: Volatility Engine</span>
+                                    <i data-lucide="compass" class="w-3.5 h-3.5 text-indigo-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerVolatilityText">
+                                    Loading range bands...
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Trend Indicators (SuperTrend/Ichimoku/SAR) -->
-                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800">
-                            <h3 class="text-xs text-gray-400 font-semibold mb-2">Trend Status</h3>
-                            <div class="grid grid-cols-3 gap-2 text-center">
-                                <div class="p-1 rounded bg-[#181a20]">
-                                    <div class="text-[10px] text-gray-400">SuperTrend</div>
-                                    <div class="text-xs font-bold mt-1" id="valSupertrend">--</div>
-                                    <div class="text-[9px] text-gray-400" id="statusSupertrend">--</div>
-                                </div>
-                                <div class="p-1 rounded bg-[#181a20]">
-                                    <div class="text-[10px] text-gray-400">Ichimoku</div>
-                                    <div class="text-xs font-bold mt-1" id="valIchimoku">--</div>
-                                    <div class="text-[9px] text-gray-400" id="statusIchimoku">--</div>
-                                </div>
-                                <div class="p-1 rounded bg-[#181a20]">
-                                    <div class="text-[10px] text-gray-400">Parabolic SAR</div>
-                                    <div class="text-xs font-bold mt-1" id="valSar">--</div>
-                                    <div class="text-[9px] text-gray-400" id="statusSar">--</div>
+                        <!-- Bottom Row: News Feed, Market Sentiment, and Trade Planning Notes -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <!-- News Panel -->
+                            <div class="bg-[#1e2329] p-3.5 rounded border border-gray-800 flex flex-col justify-between">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L9: Fundamentals & News Intelligence</span>
+                                    <i data-lucide="globe" class="w-3.5 h-3.5 text-amber-500"></i>
+                                </span>
+                                <div class="mt-2.5 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerNewsText">
+                                    Evaluating institutional headlines...
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Market Volatility & Pivot Points -->
-                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800">
-                            <h3 class="text-xs text-gray-400 font-semibold mb-2">Volatility & Pivot</h3>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div class="p-1 bg-[#181a20] rounded">
-                                    <span class="text-[10px] text-gray-400 block">ATR (14)</span>
-                                    <span class="font-bold" id="valAtr">--</span>
+                            <!-- Sentiment Panel -->
+                            <div class="bg-[#1e2329] p-3.5 rounded border border-gray-800 flex flex-col justify-between">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
+                                    <span>L10: Market Sentiment Engine</span>
+                                    <i data-lucide="users" class="w-3.5 h-3.5 text-green-400"></i>
+                                </span>
+                                <div class="mt-2.5 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerSentimentText">
+                                    Measuring retail order books and funding...
                                 </div>
-                                <div class="p-1 bg-[#181a20] rounded">
-                                    <span class="text-[10px] text-gray-400 block">ADX (14)</span>
-                                    <span class="font-bold" id="valAdx">--</span>
-                                </div>
-                                <div class="p-1 bg-[#181a20] rounded col-span-2 flex justify-between items-center text-[11px]">
-                                    <span class="text-gray-400">Pivots (R1/S1):</span>
-                                    <span class="font-semibold text-gray-200" id="valPivotRange">--</span>
+                            </div>
+
+                            <!-- Trade Planning Confirmation & Notes -->
+                            <div class="bg-amber-500/5 p-3.5 rounded border border-amber-500/20 flex flex-col justify-between space-y-2">
+                                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider border-b border-amber-500/10 pb-1 flex items-center justify-between">
+                                    <span>Trade Plan Notes & Triggers</span>
+                                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
+                                </span>
+                                <div class="text-xs space-y-1.5 flex-1">
+                                    <div class="leading-relaxed">
+                                        <span class="text-amber-500 font-bold block text-[11px]">Confirmation Trigger:</span>
+                                        <span class="text-gray-300 font-mono text-[11px]" id="valConfirmationTrigger">N/A</span>
+                                    </div>
+                                    <div class="leading-relaxed">
+                                        <span class="text-amber-400 font-bold block text-[11px]">Setup Strategy Notes:</span>
+                                        <p class="text-gray-300 text-[11px]" id="valTradeNotes">N/A</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -362,7 +454,7 @@
                 <!-- Section 3: Explanation -->
                 <div class="p-4 border-b border-gray-800 bg-[#14161c]">
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider">Technical Reasoning</h4>
+                        <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider">Transparent Reasoning</h4>
                         <span class="text-[10px] text-gray-500" id="reasoningCount">0 Indicators Agree</span>
                     </div>
                     <ul class="space-y-1.5 text-xs text-gray-300" id="aiExplanationContainer">
@@ -403,17 +495,17 @@
                 <!-- Section 5: Risk Management -->
                 <div class="p-4 bg-[#1a1c22]">
                     <div class="flex items-center justify-between mb-3 border-b border-gray-800 pb-2">
-                        <span class="text-xs uppercase tracking-wider font-bold text-gray-400">Risk Management</span>
-                        <span class="text-[10px] text-amber-500 font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">AI Automated</span>
+                        <span class="text-xs uppercase tracking-wider font-bold text-gray-400">Trade Planner</span>
+                        <span class="text-[10px] text-amber-500 font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">AI Target Matrix</span>
                     </div>
 
                     <div class="space-y-2.5 text-xs">
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-400">Suggested Position:</span>
-                            <span class="font-bold uppercase px-1.5 py-0.5 rounded text-[10px] bg-gray-700" id="valPositionType">HOLD</span>
+                            <span class="text-gray-400">Trading Pair:</span>
+                            <span class="font-bold uppercase px-1.5 py-0.5 rounded text-[10px] bg-amber-500 text-black font-extrabold" id="valPositionType">HOLD</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-400">Target Entry Price:</span>
+                            <span class="text-gray-400">Suggested Entry:</span>
                             <span class="font-bold text-white" id="valEntryPrice">--</span>
                         </div>
                         <div class="flex justify-between items-center">
@@ -435,10 +527,6 @@
                         <div class="flex justify-between items-center border-t border-gray-800/80 pt-2">
                             <span class="text-gray-400 font-semibold">Risk:Reward Ratio:</span>
                             <span class="font-bold text-blue-400" id="valRiskReward">--</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-gray-400">Recommended Leverage:</span>
-                            <span class="font-black text-amber-400" id="valLeverage">10x</span>
                         </div>
 
                         <!-- Liquidation Warnings -->

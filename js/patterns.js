@@ -187,6 +187,32 @@ export function isOutsideBar(c, prev) {
 }
 
 /**
+ * Detect Piercing Line Pattern (Bullish Reversal)
+ */
+export function isPiercingLine(c, prev) {
+    if (!prev) return false;
+    const isPrevBearish = prev.close < prev.open;
+    const isCurrBullish = c.close > c.open;
+    if (!isPrevBearish || !isCurrBullish) return false;
+
+    const prevMidpoint = prev.close + (prev.open - prev.close) / 2;
+    return c.open < prev.close && c.close > prevMidpoint && c.close < prev.open;
+}
+
+/**
+ * Detect Dark Cloud Cover Pattern (Bearish Reversal)
+ */
+export function isDarkCloudCover(c, prev) {
+    if (!prev) return false;
+    const isPrevBullish = prev.close > prev.open;
+    const isCurrBearish = c.close < c.open;
+    if (!isPrevBullish || !isCurrBearish) return false;
+
+    const prevMidpoint = prev.open + (prev.close - prev.open) / 2;
+    return c.open > prev.close && c.close < prevMidpoint && c.close > prev.open;
+}
+
+/**
  * Scans candlestick sequence and returns detected patterns at each index
  * @param {Array<object>} candles 
  * @returns {Array<Array<string>>}
@@ -213,6 +239,8 @@ export function detectPatterns(candles) {
         if (isPinBar(c)) patterns.push('Pin Bar');
         if (isInsideBar(c, prev)) patterns.push('Inside Bar');
         if (isOutsideBar(c, prev)) patterns.push('Outside Bar');
+        if (isPiercingLine(c, prev)) patterns.push('Piercing Line');
+        if (isDarkCloudCover(c, prev)) patterns.push('Dark Cloud Cover');
 
         results.push(patterns);
     }

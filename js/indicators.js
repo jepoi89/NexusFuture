@@ -619,3 +619,156 @@ export function calculateFibonacciRetracement(high, low) {
         level100: low
     };
 }
+
+/**
+ * Commodity Channel Index (CCI)
+ */
+export function calculateCCI(data, period = 20) {
+    const cci = [];
+    const tp = data.map(c => (c.high + c.low + c.close) / 3);
+
+    for (let i = 0; i < data.length; i++) {
+        if (i < period - 1) {
+            cci.push(null);
+            continue;
+        }
+
+        // Calculate SMA of Typical Price
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+            sum += tp[i - j];
+        }
+        const smaTp = sum / period;
+
+        // Calculate Mean Deviation
+        let devSum = 0;
+        for (let j = 0; j < period; j++) {
+            devSum += Math.abs(tp[i - j] - smaTp);
+        }
+        const meanDev = devSum / period;
+
+        if (meanDev === 0) {
+            cci.push(0);
+        } else {
+            const val = (tp[i] - smaTp) / (0.015 * meanDev);
+            cci.push(val);
+        }
+    }
+    return cci;
+}
+
+/**
+ * Rate of Change (ROC)
+ */
+export function calculateROC(data, period = 14) {
+    const roc = [];
+    for (let i = 0; i < data.length; i++) {
+        if (i < period) {
+            roc.push(null);
+            continue;
+        }
+        const prevClose = data[i - period].close;
+        if (prevClose === 0) {
+            roc.push(0);
+        } else {
+            const val = ((data[i].close - prevClose) / prevClose) * 100;
+            roc.push(val);
+        }
+    }
+    return roc;
+}
+
+/**
+ * Momentum Oscillator (MOM)
+ */
+export function calculateMomentum(data, period = 14) {
+    const mom = [];
+    for (let i = 0; i < data.length; i++) {
+        if (i < period) {
+            mom.push(null);
+            continue;
+        }
+        mom.push(data[i].close - data[i - period].close);
+    }
+    return mom;
+}
+
+/**
+ * Historical Volatility (HV)
+ */
+export function calculateHistoricalVolatility(data, period = 20) {
+    const hv = [];
+    if (data.length <= 1) return new Array(data.length).fill(null);
+
+    // Calculate daily/bar returns
+    const returns = [0];
+    for (let i = 1; i < data.length; i++) {
+        const prev = data[i - 1].close;
+        returns.push(prev === 0 ? 0 : Math.log(data[i].close / prev));
+    }
+
+    for (let i = 0; i < data.length; i++) {
+        if (i < period) {
+            hv.push(null);
+            continue;
+        }
+
+        // Calculate mean return
+        let sum = 0;
+        for (let j = 0; j < period; j++) {
+            sum += returns[i - j];
+        }
+        const mean = sum / period;
+
+        // Calculate variance
+        let varSum = 0;
+        for (let j = 0; j < period; j++) {
+            varSum += Math.pow(returns[i - j] - mean, 2);
+        }
+        const variance = varSum / (period - 1); // sample standard deviation
+        const stdDev = Math.sqrt(variance);
+
+        // Annualized volatility (assuming 365 daily intervals; standard multiplier is 100)
+        const annualized = stdDev * Math.sqrt(365) * 100;
+        hv.push(annualized);
+    }
+    return hv;
+}
+
+/**
+ * Bollinger Band Width (BBW)
+ */
+export function calculateBBW(data, period = 20, multiplier = 2) {
+    const bb = calculateBollingerBands(data, period, multiplier);
+    const bbw = [];
+    for (let i = 0; i < data.length; i++) {
+        if (bb.upper[i] === null || bb.lower[i] === null || bb.middle[i] === null || bb.middle[i] === 0) {
+            bbw.push(null);
+        } else {
+            bbw.push((bb.upper[i] - bb.lower[i]) / bb.middle[i]);
+        }
+    }
+    return bbw;
+}
+
+/**
+ * Keltner Channels (KC)
+ * Returns { upper, middle, lower }
+ */
+export function calculateKeltnerChannels(data, period = 20, atrPeriod = 10, multiplier = 2) {
+    const middle = calculateEMA(data, period);
+    const atr = calculateATR(data, atrPeriod);
+    const upper = [];
+    const lower = [];
+
+    for (let i = 0; i < data.length; i++) {
+        if (middle[i] === null || atr[i] === null) {
+            upper.push(null);
+            lower.push(null);
+        } else {
+            upper.push(middle[i] + multiplier * atr[i]);
+            lower.push(middle[i] - multiplier * atr[i]);
+        }
+    }
+    return { upper, middle, lower };
+}
