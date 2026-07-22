@@ -45,13 +45,25 @@ class AppController {
         this.bindEvents();
 
         // 2. Load Watchlist side navigation panel
-        await this.refreshWatchlist();
+        try {
+            await this.refreshWatchlist();
+        } catch (err) {
+            console.error("Failed to load watchlist during init:", err);
+        }
 
         // 3. Render main interactive charts
-        await this.loadActiveSymbol(this.currentSymbol);
+        try {
+            await this.loadActiveSymbol(this.currentSymbol);
+        } catch (err) {
+            console.error("Failed to load active symbol during init:", err);
+        }
 
         // 4. Initialise custom interactive AI Score Gauge
-        this.drawAiGauge(0);
+        try {
+            this.drawAiGauge(0);
+        } catch (err) {
+            console.error("Failed to draw initial AI gauge:", err);
+        }
     }
 
     bindEvents() {
