@@ -1,10 +1,32 @@
 /**
  * Binance API Client (REST & WebSockets) with automatic reconnection
- * Uses standard CORS-friendly fallbacks (using proxies or fallback loaders)
+ * Uses standard CORS-friendly fallbacks (using Coinbase or simulation)
  */
 
 const BINANCE_REST_BASE = 'https://api.binance.com';
 const BINANCE_WS_BASE = 'wss://stream.binance.com:9443/ws';
+
+/**
+ * Helper to fetch a resource with a timeout (CORS-safe fallback handling)
+ */
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 1500 } = options;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (err) {
+        clearTimeout(id);
+        throw err;
+    }
+}
 
 export class BinanceAPI {
     constructor() {
@@ -29,33 +51,69 @@ export class BinanceAPI {
     }
 
     /**
+     * Map common charting intervals to Coinbase granularity (in seconds)
+     */
+    mapCoinbaseGranularity(interval) {
+        const mapping = {
+            '1m': 60,
+            '3m': 300,
+            '5m': 300,
+            '15m': 900,
+            '30m': 3600,
+            '1h': 3600,
+            '4h': 21600, // 6 hours on Coinbase (closest to 4h)
+            '1d': 86400,
+            '1w': 86400
+        };
+        return mapping[interval.toLowerCase()] || 900;
+    }
+
+    /**
      * Fetch historical Klines (Candlesticks) via Public REST API
-     * Checks multiple dynamic options (direct, AllOrigins JSONP CORS proxy, and simulated generation fallback)
+     * Checks multiple dynamic options (direct, Coinbase CORS-enabled REST fallback, and simulated generation fallback)
      */
     async fetchKlines(symbol, interval, limit = 500) {
         const binanceInterval = this.mapInterval(interval);
         const url = `${BINANCE_REST_BASE}/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${binanceInterval}&limit=${limit}`;
         
+        // 1. Try direct Binance REST fetch
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const response = await fetchWithTimeout(url, { timeout: 1500 });
+            if (!response.ok) throw new Error(`Binance HTTP error! status: ${response.status}`);
             const data = await response.json();
             return this.mapKlines(data);
         } catch (error) {
-            console.warn(`Direct fetch failed due to CORS or network. Trying AllOrigins JSON API for ${symbol}...`, error);
-            try {
-                // Use AllOrigins get?url as JSON object wrapper
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`Proxy error! status: ${response.status}`);
-                const wrapper = await response.json();
-                const data = JSON.parse(wrapper.contents);
-                return this.mapKlines(data);
-            } catch (proxyError) {
-                console.error(`Proxy request failed too. Falling back to generated high-fidelity simulation candles for ${symbol}...`);
-                return this.generateSimulatedKlines(symbol, interval, limit);
-            }
+            console.warn(`Direct Binance fetch failed due to CORS or network for ${symbol}. Trying Coinbase API...`, error);
         }
+
+        // 2. Try Coinbase API (CORS-friendly, no proxy needed)
+        try {
+            const coin = symbol.toUpperCase().replace('USDT', '');
+            const cbInterval = this.mapCoinbaseGranularity(interval);
+
+            // Try USDT product first
+            let cbUrl = `https://api.exchange.coinbase.com/products/${coin}-USDT/candles?granularity=${cbInterval}&limit=${limit}`;
+            let response = await fetchWithTimeout(cbUrl, { timeout: 1500 });
+
+            // Try USD product if USDT returns 404/error
+            if (!response.ok) {
+                cbUrl = `https://api.exchange.coinbase.com/products/${coin}-USD/candles?granularity=${cbInterval}&limit=${limit}`;
+                response = await fetchWithTimeout(cbUrl, { timeout: 1500 });
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    return this.mapCoinbaseKlines(data);
+                }
+            }
+        } catch (cbError) {
+            console.warn(`Coinbase fetch failed for ${symbol}:`, cbError);
+        }
+
+        // 3. Simulated/Mock data fallback
+        console.warn(`All REST requests failed. Falling back to generated high-fidelity simulation candles for ${symbol}...`);
+        return this.generateSimulatedKlines(symbol, interval, limit);
     }
 
     mapKlines(data) {
@@ -69,23 +127,34 @@ export class BinanceAPI {
         }));
     }
 
+    mapCoinbaseKlines(data) {
+        return data.map(item => ({
+            time: item[0], // Already in seconds
+            open: parseFloat(item[3]),
+            high: parseFloat(item[2]),
+            low: parseFloat(item[1]),
+            close: parseFloat(item[4]),
+            volume: parseFloat(item[5])
+        })).reverse(); // Coinbase returns descending (newest first), charts need ascending
+    }
+
     /**
      * Fallback high-fidelity candlestick simulation to allow full technical evaluations in CORS-restricted sandboxes
      */
     generateSimulatedKlines(symbol, interval, limit) {
         const candles = [];
-        let basePrice = 50000; // default (BTC)
-        if (symbol.includes('ETH')) basePrice = 3000;
-        else if (symbol.includes('BNB')) basePrice = 550;
-        else if (symbol.includes('SOL')) basePrice = 140;
-        else if (symbol.includes('XRP')) basePrice = 0.55;
-        else if (symbol.includes('ADA')) basePrice = 0.45;
-        else if (symbol.includes('DOGE')) basePrice = 0.12;
-        else if (symbol.includes('SUI')) basePrice = 1.8;
-        else if (symbol.includes('LINK')) basePrice = 15;
-        else if (symbol.includes('AVAX')) basePrice = 25;
-        else if (symbol.includes('SHIB')) basePrice = 0.000017;
-        else if (symbol.includes('TRX')) basePrice = 0.12;
+        let basePrice = 95000; // default (BTC)
+        if (symbol.includes('ETH')) basePrice = 3200;
+        else if (symbol.includes('BNB')) basePrice = 600;
+        else if (symbol.includes('SOL')) basePrice = 220;
+        else if (symbol.includes('XRP')) basePrice = 2.50;
+        else if (symbol.includes('ADA')) basePrice = 0.80;
+        else if (symbol.includes('DOGE')) basePrice = 0.35;
+        else if (symbol.includes('SUI')) basePrice = 3.0;
+        else if (symbol.includes('LINK')) basePrice = 18;
+        else if (symbol.includes('AVAX')) basePrice = 28;
+        else if (symbol.includes('SHIB')) basePrice = 0.000025;
+        else if (symbol.includes('TRX')) basePrice = 0.20;
 
         let lastClose = basePrice;
         const nowMs = Date.now();
@@ -126,23 +195,13 @@ export class BinanceAPI {
     async fetch24hTickers(symbols) {
         const url = `${BINANCE_REST_BASE}/api/v3/ticker/24hr`;
         try {
-            const response = await fetch(url);
+            const response = await fetchWithTimeout(url, { timeout: 1500 });
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             return this.filterAndMapTickers(data, symbols);
         } catch (error) {
-            console.warn('Direct fetch for 24h tickers failed. Trying AllOrigins proxy...', error);
-            try {
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`Proxy error! status: ${response.status}`);
-                const wrapper = await response.json();
-                const data = JSON.parse(wrapper.contents);
-                return this.filterAndMapTickers(data, symbols);
-            } catch (proxyError) {
-                console.error('Proxy failed for tickers. Generating fallback watch rate tickers...');
-                return this.generateSimulatedTickers(symbols);
-            }
+            console.warn('Direct fetch for 24h tickers failed. Generating fallback watch rate tickers...', error);
+            return this.generateSimulatedTickers(symbols);
         }
     }
 
@@ -162,18 +221,18 @@ export class BinanceAPI {
     generateSimulatedTickers(symbols) {
         return symbols.map(symbol => {
             let lastPrice = 1.0;
-            if (symbol.includes('BTC')) lastPrice = 64500;
-            else if (symbol.includes('ETH')) lastPrice = 3450;
-            else if (symbol.includes('BNB')) lastPrice = 580;
-            else if (symbol.includes('SOL')) lastPrice = 145;
-            else if (symbol.includes('DOGE')) lastPrice = 0.125;
-            else if (symbol.includes('XRP')) lastPrice = 0.58;
-            else if (symbol.includes('ADA')) lastPrice = 0.48;
-            else if (symbol.includes('LINK')) lastPrice = 14.8;
-            else if (symbol.includes('AVAX')) lastPrice = 26.2;
-            else if (symbol.includes('SUI')) lastPrice = 1.84;
-            else if (symbol.includes('SHIB')) lastPrice = 0.0000185;
-            else if (symbol.includes('TRX')) lastPrice = 0.125;
+            if (symbol.includes('BTC')) lastPrice = 95000;
+            else if (symbol.includes('ETH')) lastPrice = 3200;
+            else if (symbol.includes('BNB')) lastPrice = 600;
+            else if (symbol.includes('SOL')) lastPrice = 220;
+            else if (symbol.includes('DOGE')) lastPrice = 0.35;
+            else if (symbol.includes('XRP')) lastPrice = 2.50;
+            else if (symbol.includes('ADA')) lastPrice = 0.80;
+            else if (symbol.includes('LINK')) lastPrice = 18;
+            else if (symbol.includes('AVAX')) lastPrice = 28;
+            else if (symbol.includes('SUI')) lastPrice = 3.0;
+            else if (symbol.includes('SHIB')) lastPrice = 0.000025;
+            else if (symbol.includes('TRX')) lastPrice = 0.20;
 
             const changePercent = (Math.random() - 0.45) * 8.0; // random -4% to +4% change
             return {
@@ -216,7 +275,7 @@ export class BinanceAPI {
                     this.simulatedInterval = null;
                 }
                 if (window.updateConnectionStatus) {
-                    window.updateConnectionStatus(true, 'Live feed streaming connected');
+                    window.updateConnectionStatus(true, 'Live Feed Connected');
                 }
             };
 
@@ -273,11 +332,18 @@ export class BinanceAPI {
     startSimulatedLiveUpdates() {
         if (this.simulatedInterval) clearInterval(this.simulatedInterval);
         
-        let currentPrice = 50000;
-        if (this.currentSymbol.includes('eth')) currentPrice = 3450;
-        else if (this.currentSymbol.includes('bnb')) currentPrice = 580;
-        else if (this.currentSymbol.includes('sol')) currentPrice = 145;
-        else if (this.currentSymbol.includes('xrp')) currentPrice = 0.58;
+        let currentPrice = 95000;
+        if (this.currentSymbol.includes('eth')) currentPrice = 3200;
+        else if (this.currentSymbol.includes('bnb')) currentPrice = 600;
+        else if (this.currentSymbol.includes('sol')) currentPrice = 220;
+        else if (this.currentSymbol.includes('xrp')) currentPrice = 2.50;
+        else if (this.currentSymbol.includes('ada')) currentPrice = 0.80;
+        else if (this.currentSymbol.includes('doge')) currentPrice = 0.35;
+        else if (this.currentSymbol.includes('sui')) currentPrice = 3.0;
+        else if (this.currentSymbol.includes('link')) currentPrice = 18;
+        else if (this.currentSymbol.includes('avax')) currentPrice = 28;
+        else if (this.currentSymbol.includes('shib')) currentPrice = 0.000025;
+        else if (this.currentSymbol.includes('trx')) currentPrice = 0.20;
 
         this.simulatedInterval = setInterval(() => {
             if (!this.currentSymbol) return;
