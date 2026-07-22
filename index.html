@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crypto Futures Trading Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        dark: {
+                            bg: '#0b0e11',
+                            card: '#181a20',
+                            border: '#2b3139',
+                            text: '#eaecef',
+                            muted: '#848e9c'
+                        },
+                        light: {
+                            bg: '#f8f9fa',
+                            card: '#ffffff',
+                            border: '#e2e8f0',
+                            text: '#1e293b',
+                            muted: '#64748b'
+                        },
+                        bullish: '#0ecb81',
+                        bearish: '#f6465d',
+                        warning: '#f0b90b'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- TradingView Lightweight Charts Standalone CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Chart.js for Gauges and indicator charts if needed -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#0b0e11] text-[#eaecef] font-sans overflow-x-hidden min-h-screen transition-colors duration-200">
+    <div class="flex flex-col h-screen">
+        <!-- Top Toolbar -->
+        <header class="h-14 border-b border-gray-800 bg-[#181a20] px-4 flex items-center justify-between z-10">
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-500 to-amber-600 flex items-center justify-center font-bold text-black text-lg">
+                        ⚡
+                    </div>
+                    <span class="font-bold text-lg tracking-wider hidden sm:inline-block">NEXUS<span class="text-amber-500">FUTURES</span></span>
+                </div>
+                
+                <!-- Search Symbol -->
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </span>
+                    <input type="text" id="symbolSearchInput" placeholder="Search Crypto (e.g. BTCUSDT)" 
+                           class="w-48 sm:w-64 bg-[#1e2329] border border-gray-700 text-sm rounded px-3 py-1.5 pl-9 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500">
+                    <div id="searchResults" class="absolute left-0 right-0 mt-1 bg-[#181a20] border border-gray-700 rounded shadow-2xl hidden max-h-60 overflow-y-auto z-50"></div>
+                </div>
+
+                <!-- Current Pair info tag -->
+                <div class="hidden md:flex items-center space-x-3 bg-[#1e2329] px-3 py-1.5 rounded text-xs border border-gray-800">
+                    <span class="font-bold text-sm text-yellow-500" id="currentSymbolTag">BTCUSDT</span>
+                    <span class="text-gray-400" id="currentPriceTag">---</span>
+                    <span id="currentChangeTag" class="font-medium text-green-500">---</span>
+                </div>
+            </div>
+
+            <!-- Toolbar Actions -->
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Timeframe Selectors -->
+                <div class="flex items-center bg-[#1e2329] rounded p-0.5 border border-gray-800" id="timeframeContainer">
+                    <button data-timeframe="5m" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">5m</button>
+                    <button data-timeframe="15m" class="px-2 py-1 text-xs font-semibold rounded bg-amber-500 text-black timeframe-btn">15m</button>
+                    <button data-timeframe="1h" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1H</button>
+                    <button data-timeframe="4h" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">4H</button>
+                    <button data-timeframe="1d" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1D</button>
+                </div>
+
+                <!-- Refresh -->
+                <button id="refreshBtn" title="Refresh data" class="p-2 hover:bg-[#1e2329] rounded transition text-gray-400 hover:text-white">
+                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Alerts Trigger -->
+                <button id="alertsModalTrigger" class="p-2 hover:bg-[#1e2329] rounded transition text-gray-400 hover:text-white relative">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                    <span id="alertCountBadge" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span>
+                </button>
+
+                <!-- Settings -->
+                <button id="settingsBtn" title="Indicators and Toggles" class="p-2 hover:bg-[#1e2329] rounded transition text-gray-400 hover:text-white">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button id="themeToggleBtn" title="Toggle light/dark mode" class="p-2 hover:bg-[#1e2329] rounded transition text-gray-400 hover:text-white">
+                    <i data-lucide="sun" class="w-4 h-4 block dark:hidden"></i>
+                    <i data-lucide="moon" class="w-4 h-4 hidden dark:block"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <div class="flex-1 flex overflow-hidden">
+            
+            <!-- Left Sidebar (Watchlist) -->
+            <aside id="watchlistSidebar" class="w-72 border-r border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 transition-all duration-300">
+                <div class="p-3 border-b border-gray-800 flex items-center justify-between">
+                    <span class="font-semibold text-xs tracking-wider uppercase text-gray-400">Market Watchlist</span>
+                    <span class="text-[10px] bg-[#1e2329] text-gray-400 px-2 py-0.5 rounded border border-gray-800">Binance Spot/Futures</span>
+                </div>
+                <div class="flex-1 overflow-y-auto" id="watchlistContainer">
+                    <!-- Watchlist items loaded dynamically -->
+                    <div class="flex items-center justify-center h-40 text-gray-500 text-xs">
+                        <div class="text-center">
+                            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-500 mx-auto mb-2"></div>
+                            Loading tickers...
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel (Candlestick Chart + Bottom Panels) -->
+            <main class="flex-1 flex flex-col min-w-0 bg-[#0b0e11] overflow-y-auto">
+                
+                <!-- Chart Area Container -->
+                <div class="flex-1 relative min-h-[400px] border-b border-gray-800 flex flex-col bg-[#181a20]">
+                    <!-- Chart Overlay Toolbar -->
+                    <div class="h-10 border-b border-gray-800 bg-[#1e2329]/80 backdrop-blur px-3 flex items-center justify-between z-10 text-xs">
+                        <div class="flex items-center space-x-3 overflow-x-auto whitespace-nowrap scrollbar-none">
+                            <span class="font-bold flex items-center space-x-1">
+                                <span id="chartSymbol">BTCUSDT</span>
+                                <span class="text-gray-400 font-normal" id="chartInterval">15m</span>
+                            </span>
+                            <div class="h-3 w-px bg-gray-700"></div>
+                            <!-- Indicators overlay toggles -->
+                            <div class="flex items-center space-x-2" id="indicatorQuickToggles">
+                                <button data-ind="ema9" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 9</button>
+                                <button data-ind="ema20" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 20</button>
+                                <button data-ind="ema50" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 50</button>
+                                <button data-ind="ema200" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 200</button>
+                                <button data-ind="bb" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">BB</button>
+                                <button data-ind="supertrend" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">SuperTrend</button>
+                                <button id="customIndicatorModalBtn" class="px-1.5 py-0.5 rounded border border-dashed border-gray-600 text-gray-400 hover:border-gray-400 hover:text-white transition">+ Indicators</button>
+                            </div>
+                        </div>
+
+                        <!-- Manual Drawing Tools -->
+                        <div class="flex items-center space-x-1 bg-[#181a20] rounded p-0.5 border border-gray-800">
+                            <button id="drawTrendlineBtn" title="Trendline Tool" class="p-1 hover:bg-gray-700 text-gray-400 hover:text-white rounded transition">
+                                <i data-lucide="git-commit" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button id="drawHorizontalBtn" title="Horizontal Support/Resistance" class="p-1 hover:bg-gray-700 text-gray-400 hover:text-white rounded transition">
+                                <i data-lucide="minus-square" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button id="drawFibBtn" title="Fibonacci Retracement Tool" class="p-1 hover:bg-gray-700 text-gray-400 hover:text-white rounded transition">
+                                <i data-lucide="columns" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button id="clearDrawingBtn" title="Clear all drawings" class="p-1 hover:bg-red-950 text-red-400 hover:text-red-200 rounded transition">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lightweight Charts div -->
+                    <div class="flex-1 w-full h-full relative" id="chartDiv"></div>
+                    
+                    <!-- Pattern Notification Bubble -->
+                    <div id="patternBubble" class="absolute top-14 left-4 z-10 bg-yellow-500/20 backdrop-blur border border-yellow-500 text-yellow-300 px-3 py-1.5 rounded text-xs hidden">
+                        <span class="font-bold mr-1">Pattern Spotted:</span> <span id="patternBubbleText">Hammer</span>
+                    </div>
+
+                    <!-- Connection status indicator -->
+                    <div class="absolute bottom-2 left-2 z-10 flex items-center space-x-1 text-[10px] bg-[#181a20]/90 backdrop-blur px-2 py-0.5 rounded border border-gray-800">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" id="connectionStatusDot"></span>
+                        <span class="text-gray-400" id="connectionStatusText">Live Feed Connected</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Summary and Signals Tabbed Layout -->
+                <div class="bg-[#181a20] p-4 flex flex-col border-b border-gray-800">
+                    <div class="border-b border-gray-800 flex space-x-6 text-xs font-semibold uppercase tracking-wider mb-4">
+                        <button class="pb-2 border-b-2 border-amber-500 text-amber-500 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment">Indicator & Sentiment Summary</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="signals">Recent AI Signal History</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="heatmap">Crypto Heatmap</button>
+                    </div>
+
+                    <!-- Tab: Indicator & Sentiment Summary -->
+                    <div id="tabContentSentiment" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Score breakdown -->
+                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800 flex flex-col justify-between">
+                            <div>
+                                <h3 class="text-xs text-gray-400 font-semibold mb-2">Technical Summary</h3>
+                                <div class="flex items-baseline space-x-2">
+                                    <span class="text-2xl font-bold" id="technicalScoreLabel">-- / 100</span>
+                                    <span class="text-xs font-semibold px-2 py-0.5 rounded text-white" id="technicalRecommendationBadge">HOLD</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-[11px] text-gray-400 space-y-1">
+                                <div class="flex justify-between"><span>EMA Alignment</span><span id="scoreValEma" class="font-semibold text-gray-300">--</span></div>
+                                <div class="flex justify-between"><span>Oscillators</span><span id="scoreValOsc" class="font-semibold text-gray-300">--</span></div>
+                                <div class="flex justify-between"><span>Trend Following</span><span id="scoreValTrend" class="font-semibold text-gray-300">--</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Oscillator Gauges (RSI/MACD/Stoch) -->
+                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800">
+                            <h3 class="text-xs text-gray-400 font-semibold mb-2">Oscillator Status</h3>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="p-1 rounded bg-[#181a20]">
+                                    <div class="text-[10px] text-gray-400">RSI (14)</div>
+                                    <div class="text-xs font-bold mt-1" id="valRsi">--</div>
+                                    <div class="text-[9px]" id="statusRsi">Neutral</div>
+                                </div>
+                                <div class="p-1 rounded bg-[#181a20]">
+                                    <div class="text-[10px] text-gray-400">Stoch RSI</div>
+                                    <div class="text-xs font-bold mt-1" id="valStochRsi">--</div>
+                                    <div class="text-[9px]" id="statusStochRsi">Neutral</div>
+                                </div>
+                                <div class="p-1 rounded bg-[#181a20]">
+                                    <div class="text-[10px] text-gray-400">MACD</div>
+                                    <div class="text-xs font-bold mt-1" id="valMacd">--</div>
+                                    <div class="text-[9px]" id="statusMacd">Neutral</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trend Indicators (SuperTrend/Ichimoku/SAR) -->
+                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800">
+                            <h3 class="text-xs text-gray-400 font-semibold mb-2">Trend Status</h3>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="p-1 rounded bg-[#181a20]">
+                                    <div class="text-[10px] text-gray-400">SuperTrend</div>
+                                    <div class="text-xs font-bold mt-1" id="valSupertrend">--</div>
+                                    <div class="text-[9px] text-gray-400" id="statusSupertrend">--</div>
+                                </div>
+                                <div class="p-1 rounded bg-[#181a20]">
+                                    <div class="text-[10px] text-gray-400">Ichimoku</div>
+                                    <div class="text-xs font-bold mt-1" id="valIchimoku">--</div>
+                                    <div class="text-[9px] text-gray-400" id="statusIchimoku">--</div>
+                                </div>
+                                <div class="p-1 rounded bg-[#181a20]">
+                                    <div class="text-[10px] text-gray-400">Parabolic SAR</div>
+                                    <div class="text-xs font-bold mt-1" id="valSar">--</div>
+                                    <div class="text-[9px] text-gray-400" id="statusSar">--</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Market Volatility & Pivot Points -->
+                        <div class="bg-[#1e2329] p-3 rounded border border-gray-800">
+                            <h3 class="text-xs text-gray-400 font-semibold mb-2">Volatility & Pivot</h3>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="p-1 bg-[#181a20] rounded">
+                                    <span class="text-[10px] text-gray-400 block">ATR (14)</span>
+                                    <span class="font-bold" id="valAtr">--</span>
+                                </div>
+                                <div class="p-1 bg-[#181a20] rounded">
+                                    <span class="text-[10px] text-gray-400 block">ADX (14)</span>
+                                    <span class="font-bold" id="valAdx">--</span>
+                                </div>
+                                <div class="p-1 bg-[#181a20] rounded col-span-2 flex justify-between items-center text-[11px]">
+                                    <span class="text-gray-400">Pivots (R1/S1):</span>
+                                    <span class="font-semibold text-gray-200" id="valPivotRange">--</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Recent AI Signal History -->
+                    <div id="tabContentSignals" class="hidden overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b border-gray-800 text-gray-400">
+                                    <th class="py-2">Time</th>
+                                    <th class="py-2">Symbol</th>
+                                    <th class="py-2">Type</th>
+                                    <th class="py-2">Price</th>
+                                    <th class="py-2">AI Score</th>
+                                    <th class="py-2">Confidence</th>
+                                    <th class="py-2">Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="signalHistoryBody">
+                                <!-- Populated dynamically -->
+                                <tr class="border-b border-gray-800/50 text-gray-400">
+                                    <td class="py-3" colspan="7 text-center">No signal triggers yet. Signal updates occur automatically when patterns are detected.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Tab: Crypto Heatmap -->
+                    <div id="tabContentHeatmap" class="hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                            <div class="bg-[#1e2329] p-2 rounded border border-gray-800">
+                                <h4 class="text-[11px] text-green-500 font-bold mb-1.5 uppercase tracking-wider">Top Bullish Coins</h4>
+                                <div class="space-y-1" id="heatmapBullish">--</div>
+                            </div>
+                            <div class="bg-[#1e2329] p-2 rounded border border-gray-800">
+                                <h4 class="text-[11px] text-red-500 font-bold mb-1.5 uppercase tracking-wider">Top Bearish Coins</h4>
+                                <div class="space-y-1" id="heatmapBearish">--</div>
+                            </div>
+                            <div class="bg-[#1e2329] p-2 rounded border border-gray-800">
+                                <h4 class="text-[11px] text-blue-500 font-bold mb-1.5 uppercase tracking-wider">Highest Volume</h4>
+                                <div class="space-y-1" id="heatmapVolume">--</div>
+                            </div>
+                            <div class="bg-[#1e2329] p-2 rounded border border-gray-800">
+                                <h4 class="text-[11px] text-purple-500 font-bold mb-1.5 uppercase tracking-wider">Highest Volatility</h4>
+                                <div class="space-y-1" id="heatmapVolatility">--</div>
+                            </div>
+                            <div class="bg-[#1e2329] p-2 rounded border border-gray-800">
+                                <h4 class="text-[11px] text-amber-500 font-bold mb-1.5 uppercase tracking-wider">Trending Coins</h4>
+                                <div class="space-y-1" id="heatmapTrending">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Right Sidebar (AI Analyst & Risk) -->
+            <aside class="w-80 border-l border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 overflow-y-auto">
+                
+                <!-- Section 1: AI Decision Gauge -->
+                <div class="p-4 border-b border-gray-800 flex flex-col items-center">
+                    <span class="text-xs uppercase tracking-wider text-gray-400 font-bold mb-2">AI Market Analyst</span>
+                    
+                    <!-- Gauge Canvas Container -->
+                    <div class="relative w-44 h-24 mb-2">
+                        <canvas id="aiGaugeCanvas"></canvas>
+                        <div class="absolute inset-x-0 bottom-0 flex flex-col items-center justify-center">
+                            <span class="text-3xl font-extrabold" id="gaugeScore">0</span>
+                            <span class="text-[10px] uppercase text-gray-400 tracking-widest font-bold" id="gaugeScoreText">NEUTRAL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Recommendation Level Card -->
+                <div class="p-4 border-b border-gray-800">
+                    <div class="p-3.5 rounded-lg border flex flex-col items-center justify-center text-center transition duration-300" id="aiRecCard">
+                        <span class="text-xs uppercase tracking-wider font-semibold opacity-75">Recommendation</span>
+                        <span class="text-xl font-black my-1" id="aiRecText">HOLD</span>
+                        <div class="flex items-center space-x-1.5 text-xs">
+                            <span>Confidence:</span>
+                            <span class="font-bold" id="aiConfidenceText">--</span>
+                        </div>
+                        <!-- Progress Bar style indicator -->
+                        <div class="w-full bg-black/40 h-1.5 rounded-full mt-2.5 overflow-hidden border border-gray-800">
+                            <div class="bg-gray-400 h-full transition-all duration-500" style="width: 0%" id="aiConfidenceBar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Explanation -->
+                <div class="p-4 border-b border-gray-800 bg-[#14161c]">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider">Technical Reasoning</h4>
+                        <span class="text-[10px] text-gray-500" id="reasoningCount">0 Indicators Agree</span>
+                    </div>
+                    <ul class="space-y-1.5 text-xs text-gray-300" id="aiExplanationContainer">
+                        <li class="flex items-start space-x-2">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-gray-500 mt-0.5"></i>
+                            <span>Fetching data to compile intelligence indicators...</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Section 4: Multi-Timeframe Analysis -->
+                <div class="p-4 border-b border-gray-800">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Multi-Timeframe Status</h4>
+                    <div class="grid grid-cols-5 gap-1.5 text-center text-[10px]">
+                        <div class="bg-[#1e2329] p-1.5 rounded">
+                            <span class="text-gray-400 block font-medium">5m</span>
+                            <span class="font-bold uppercase text-gray-300 mt-1 block" id="mtf5m">HOLD</span>
+                        </div>
+                        <div class="bg-[#1e2329] p-1.5 rounded">
+                            <span class="text-gray-400 block font-medium">15m</span>
+                            <span class="font-bold uppercase text-gray-300 mt-1 block" id="mtf15m">HOLD</span>
+                        </div>
+                        <div class="bg-[#1e2329] p-1.5 rounded">
+                            <span class="text-gray-400 block font-medium">1H</span>
+                            <span class="font-bold uppercase text-gray-300 mt-1 block" id="mtf1h">HOLD</span>
+                        </div>
+                        <div class="bg-[#1e2329] p-1.5 rounded">
+                            <span class="text-gray-400 block font-medium">4H</span>
+                            <span class="font-bold uppercase text-gray-300 mt-1 block" id="mtf4h">HOLD</span>
+                        </div>
+                        <div class="bg-[#1e2329] p-1.5 rounded">
+                            <span class="text-gray-400 block font-medium">1D</span>
+                            <span class="font-bold uppercase text-gray-300 mt-1 block" id="mtf1d">HOLD</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Risk Management -->
+                <div class="p-4 bg-[#1a1c22]">
+                    <div class="flex items-center justify-between mb-3 border-b border-gray-800 pb-2">
+                        <span class="text-xs uppercase tracking-wider font-bold text-gray-400">Risk Management</span>
+                        <span class="text-[10px] text-amber-500 font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">AI Automated</span>
+                    </div>
+
+                    <div class="space-y-2.5 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Suggested Position:</span>
+                            <span class="font-bold uppercase px-1.5 py-0.5 rounded text-[10px] bg-gray-700" id="valPositionType">HOLD</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Target Entry Price:</span>
+                            <span class="font-bold text-white" id="valEntryPrice">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Stop Loss (SL):</span>
+                            <span class="font-bold text-red-500" id="valStopLoss">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Take Profit 1 (TP1):</span>
+                            <span class="font-bold text-green-500" id="valTp1">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Take Profit 2 (TP2):</span>
+                            <span class="font-bold text-green-500" id="valTp2">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Take Profit 3 (TP3):</span>
+                            <span class="font-bold text-green-500" id="valTp3">--</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-gray-800/80 pt-2">
+                            <span class="text-gray-400 font-semibold">Risk:Reward Ratio:</span>
+                            <span class="font-bold text-blue-400" id="valRiskReward">--</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Recommended Leverage:</span>
+                            <span class="font-black text-amber-400" id="valLeverage">10x</span>
+                        </div>
+
+                        <!-- Liquidation Warnings -->
+                        <div class="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-[10px] text-yellow-300 leading-relaxed hidden" id="valLiquidationWarning">
+                            ⚠️ <span class="font-bold">Liquidation Hazard:</span> Extreme leverage recommended due to low coin volatility. Maintain strict stop losses and hedge when needed.
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Alert Modal / UI overlays -->
+    <div id="alertsModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+        <div class="bg-[#181a20] border border-gray-700 rounded-lg max-w-lg w-full p-5 shadow-2xl relative">
+            <button id="closeAlertsModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                <i data-lucide="bell" class="text-amber-500 w-5 h-5"></i>
+                <span>Manage Real-Time Alert Triggers</span>
+            </h2>
+
+            <div class="space-y-4 mb-5">
+                <!-- Add Alert Form -->
+                <div class="bg-[#1e2329] p-3 rounded border border-gray-800 space-y-2.5">
+                    <span class="text-xs font-bold text-gray-300 uppercase tracking-wider block">Set New Alert</span>
+                    <div class="grid grid-cols-2 gap-2 text-xs text-gray-300">
+                        <div>
+                            <label class="block mb-1">Target Criteria</label>
+                            <select id="alertTypeSelect" class="w-full bg-[#181a20] border border-gray-700 rounded p-1.5 text-white">
+                                <option value="rsi_below">RSI Below 30 (Oversold)</option>
+                                <option value="rsi_above">RSI Above 70 (Overbought)</option>
+                                <option value="macd_cross_up">MACD Golden Cross (Up)</option>
+                                <option value="macd_cross_down">MACD Death Cross (Down)</option>
+                                <option value="ema_cross_up">EMA 9 Crosses Above 20</option>
+                                <option value="ema_cross_down">EMA 9 Crosses Below 20</option>
+                                <option value="score_above">AI Score Exceeds +80</option>
+                                <option value="score_below">AI Score Under -80</option>
+                                <option value="confidence_above">AI Confidence Above 90%</option>
+                                <option value="price_cross_above">Price Crosses Above Level</option>
+                                <option value="price_cross_below">Price Crosses Below Level</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-1">Trigger Target Level / Value</label>
+                            <input type="number" id="alertTriggerValueInput" placeholder="e.g. 50000 (Optional)" 
+                                   class="w-full bg-[#181a20] border border-gray-700 rounded p-1.5 text-white focus:outline-none">
+                        </div>
+                    </div>
+                    <button id="addAlertBtn" class="w-full bg-amber-500 text-black font-bold py-1.5 rounded hover:bg-amber-400 transition text-xs">
+                        Create Alert
+                    </button>
+                </div>
+
+                <!-- Active Alerts List -->
+                <div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Active Alerts</span>
+                    <div class="max-h-40 overflow-y-auto space-y-1.5" id="activeAlertsList">
+                        <!-- Populated dynamically -->
+                        <div class="text-center text-gray-500 text-xs py-4">No active alerts set for this coin.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- General Settings / Indicators Panel Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 hidden">
+        <div class="bg-[#181a20] border border-gray-700 rounded-lg max-w-lg w-full p-5 shadow-2xl relative">
+            <button id="closeSettingsModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <h2 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                <i data-lucide="sliders" class="text-amber-500 w-5 h-5"></i>
+                <span>Indicators & Overlay Settings</span>
+            </h2>
+
+            <div class="space-y-4 max-h-[400px] overflow-y-auto pr-1 text-xs text-gray-300">
+                <p class="text-gray-400 leading-normal">
+                    Select which indicators to draw on your chart canvas. Note: Oscillators like RSI or MACD will render in dedicated panes if chosen.
+                </p>
+
+                <!-- Checkbox list of overlays -->
+                <div class="grid grid-cols-2 gap-3 bg-[#1e2329] p-3 rounded border border-gray-800">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="ema9" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0 focus:ring-offset-0">
+                        <span>EMA 9 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="ema20" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>EMA 20 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="ema50" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>EMA 50 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="ema100" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>EMA 100 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="ema200" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>EMA 200 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="sma50" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>SMA 50 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="sma200" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>SMA 200 Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="bb" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>Bollinger Bands Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="supertrend" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>SuperTrend Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="psar" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>Parabolic SAR Overlay</span>
+                    </label>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" data-settings-ind="ichimoku" class="settings-ind-checkbox h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>Ichimoku Cloud Overlay</span>
+                    </label>
+                </div>
+
+                <div class="border-t border-gray-800 pt-3">
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Application Settings</span>
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" id="browserSoundToggle" class="h-4 w-4 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-0">
+                        <span>Enable Audio Warning Alerts on Indicator Crossovers</span>
+                    </label>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end">
+                <button id="saveSettingsBtn" class="bg-amber-500 text-black px-4 py-2 rounded font-bold hover:bg-amber-400 transition text-xs">
+                    Apply Settings
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Javascript Modules (ES6) -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+/* Premium Crypto Futures Dark/Light theme overrides */
+
+/* Hide standard scrollbars but allow scrolling on specific container cards */
+.scrollbar-none::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-none {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Custom dark/light styles */
+body.dark {
+    --bg-main: #0b0e11;
+    --bg-card: #181a20;
+    --border-color: #2b3139;
+    --text-primary: #eaecef;
+    --text-muted: #848e9c;
+}
+
+body {
+    --bg-main: #f8f9fa;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-muted: #64748b;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+}
+
+body.dark {
+    background-color: #0b0e11;
+    color: #eaecef;
+}
+
+/* Glowing text and card shadows for indicators */
+.glow-green {
+    box-shadow: 0 0 10px rgba(14, 203, 129, 0.25);
+    border-color: #0ecb81 !important;
+}
+
+.glow-red {
+    box-shadow: 0 0 10px rgba(246, 70, 93, 0.25);
+    border-color: #f6465d !important;
+}
+
+.glow-yellow {
+    box-shadow: 0 0 10px rgba(240, 185, 11, 0.25);
+    border-color: #f0b90b !important;
+}
+
+/* Animated AI score gauge styling */
+#aiGaugeCanvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Transitions for layout sizing and sidebar toggles */
+aside {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom transitions for recommendation card highlights */
+#aiRecCard {
+    transition: all 0.3s ease;
+}
+
+/* Quick active toggle buttons styling */
+.quick-ind-btn.active {
+    background-color: #f0b90b !important;
+    border-color: #f0b90b !important;
+    color: #000000 !important;
+    font-weight: 700;
+}
+
+/* Table scroll bars styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #181a20;
+}
+::-webkit-scrollbar-thumb {
+    background: #2b3139;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #474f59;
+}
