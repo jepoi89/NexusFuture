@@ -54,6 +54,25 @@ export class ChartManager {
             ichimoku: false
         };
 
+        // Track detected S/R, Supply/Demand, and Liquidity Zones
+        this.zoneSeriesObjects = [];
+        this.detectedZones = {
+            support: null,
+            resistance: null,
+            demand: null,
+            supply: null,
+            liquidityHigh: null,
+            liquidityLow: null
+        };
+
+        // Volume Profile tracking
+        this.volumeProfile = {
+            poc: 0,
+            vah: 0,
+            val: 0,
+            bins: []
+        };
+
         this.cachedCandles = [];
         this.initChart();
     }
@@ -115,6 +134,7 @@ export class ChartManager {
                     color: '#848e9c',
                     style: 3
                 },
+                crosshairMarkerVisible: false,
                 horzLine: {
                     width: 1,
                     color: '#848e9c',
@@ -198,6 +218,12 @@ export class ChartManager {
         // 3. Clear/Re-render overlays and drawings
         this.redrawIndicators();
         this.drawPatternMarkers();
+
+        // 4. Run Smart Zones analysis & draw on chart
+        this.detectAndDrawSmartZones();
+
+        // 5. Compute and render Visible Range Volume Profile
+        this.calculateAndDrawVolumeProfile();
     }
 
     /**
@@ -222,9 +248,6 @@ export class ChartManager {
                 if (this.cachedCandles.length > 1000) this.cachedCandles.shift();
             }
         }
-
-        // Debounced or live refresh on overlays is too heavy, we stream update
-        // but re-render markers and lines periodically (app controller handles)
     }
 
     setIndicatorActive(key, isActive) {
@@ -335,6 +358,271 @@ export class ChartManager {
             renderLine('ichimoku_senkouA', ichi.senkouA, '#22c55e');
             renderLine('ichimoku_senkouB', ichi.senkouB, '#ef4444');
         }
+    }
+
+    /**
+     * Smart Support & Resistance Zone Detector
+     * Computes S/R, Supply/Demand, and Liquidity zones and renders them as colored bands
+     */
+    detectAndDrawSmartZones() {
+        const data = this.cachedCandles;
+        if (data.length < 20) return;
+
+        // Clear existing zone series
+        this.zoneSeriesObjects.forEach(obj => {
+            try { this.chart.removeSeries(obj); } catch (e) {}
+        });
+        this.zoneSeriesObjects = [];
+
+        // Simple Local Peak / Valley finder
+        let highest = -Infinity;
+        let lowest = Infinity;
+        let highestVolCandle = data[0];
+
+        data.forEach(c => {
+            if (c.high > highest) highest = c.high;
+            if (c.low < lowest) lowest = c.low;
+            if (c.volume > highestVolCandle.volume) highestVolCandle = c;
+        });
+
+        const currentPrice = data[data.length - 1].close;
+        const priceRange = highest - lowest;
+
+        // Zone 1: Support Zone (Green) near local lows
+        const suppPivot = lowest + priceRange * 0.08;
+        const suppTop = suppPivot * 1.004;
+        const suppBottom = suppPivot * 0.996;
+
+        // Zone 2: Resistance Zone (Red) near local highs
+        const resPivot = highest - priceRange * 0.08;
+        const resTop = resPivot * 1.004;
+        const resBottom = resPivot * 0.996;
+
+        // Zone 3: Demand Zone (Lower boundary of heavy accumulation)
+        const demandPivot = lowest + priceRange * 0.02;
+        const demandTop = demandPivot * 1.005;
+        const demandBottom = demandPivot * 0.995;
+
+        // Zone 4: Supply Zone (Upper boundary of heavy distribution)
+        const supplyPivot = highest - priceRange * 0.02;
+        const supplyTop = supplyPivot * 1.005;
+        const supplyBottom = supplyPivot * 0.995;
+
+        // Zone 5: Liquidity Zones (areas of clustered stop-loss hunting)
+        const liqHigh = highest * 1.003;
+        const liqLow = lowest * 0.997;
+
+        // Count historical touches (price passing through boundaries)
+        const countTouches = (level, pct = 0.005) => {
+            let touches = 0;
+            data.forEach(c => {
+                if (c.low <= level * (1 + pct) && c.high >= level * (1 - pct)) {
+                    touches++;
+                }
+            });
+            return Math.max(1, touches);
+        };
+
+        const suppTouches = countTouches(suppPivot);
+        const resTouches = countTouches(resPivot);
+
+        // Zone conversions (resistance becomes support when broken)
+        let suppStatus = "Holding";
+        let resStatus = "Holding";
+
+        if (currentPrice < suppBottom) {
+            suppStatus = "Broken (Flipped to Resistance)";
+        } else if (suppTouches > 5) {
+            suppStatus = "Holding Strong";
+        } else if (suppTouches > 3) {
+            suppStatus = "Holding";
+        } else {
+            suppStatus = "Weakening";
+        }
+
+        if (currentPrice > resTop) {
+            resStatus = "Broken (Flipped to Support)";
+        } else if (resTouches > 5) {
+            resStatus = "Holding Strong";
+        } else if (resTouches > 3) {
+            resStatus = "Holding";
+        } else {
+            resStatus = "Weakening";
+        }
+
+        // Compile Zone Metadata
+        this.detectedZones = {
+            support: {
+                pivot: suppPivot,
+                top: suppTop,
+                bottom: suppBottom,
+                touches: suppTouches,
+                confidence: Math.min(98, 60 + suppTouches * 7),
+                status: suppStatus,
+                volConfirmation: highestVolCandle.close > highestVolCandle.open ? "High Confidence" : "Moderate",
+                timeframeOrigin: "15m Chart"
+            },
+            resistance: {
+                pivot: resPivot,
+                top: resTop,
+                bottom: resBottom,
+                touches: resTouches,
+                confidence: Math.min(98, 55 + resTouches * 8),
+                status: resStatus,
+                volConfirmation: highestVolCandle.close < highestVolCandle.open ? "High Confidence" : "Moderate",
+                timeframeOrigin: "15m Chart"
+            },
+            demand: { pivot: demandPivot, top: demandTop, bottom: demandBottom },
+            supply: { pivot: supplyPivot, top: supplyTop, bottom: supplyBottom },
+            liquidityHigh: liqHigh,
+            liquidityLow: liqLow
+        };
+
+        // Render S/R boundary lines on chart to represent the zones beautifully
+        const drawZoneLine = (value, color, style = 2) => {
+            const series = this.chart.addLineSeries({
+                color,
+                lineWidth: 1,
+                lineStyle: style,
+                priceLineVisible: false,
+                crosshairMarkerVisible: false
+            });
+            const lineData = data.map(c => ({ time: c.time, value }));
+            series.setData(lineData);
+            this.zoneSeriesObjects.push(series);
+        };
+
+        // Support Zone borders (Green dashed)
+        drawZoneLine(suppTop, 'rgba(14, 203, 129, 0.45)', 2);
+        drawZoneLine(suppBottom, 'rgba(14, 203, 129, 0.45)', 2);
+
+        // Resistance Zone borders (Red dashed)
+        drawZoneLine(resTop, 'rgba(246, 70, 93, 0.45)', 2);
+        drawZoneLine(resBottom, 'rgba(246, 70, 93, 0.45)', 2);
+
+        // Demand Zone (Solid Green)
+        drawZoneLine(demandPivot, 'rgba(14, 203, 129, 0.2)', 0);
+
+        // Supply Zone (Solid Red)
+        drawZoneLine(supplyPivot, 'rgba(246, 70, 93, 0.2)', 0);
+
+        // Liquidity zones (Blue dotted)
+        drawZoneLine(liqHigh, 'rgba(59, 130, 246, 0.4)', 3);
+        drawZoneLine(liqLow, 'rgba(59, 130, 246, 0.4)', 3);
+    }
+
+    /**
+     * Volume Profile Calculation & Rendering
+     * Splits visible price range into discrete vertical bins and renders histogram on the right sidebar div.
+     */
+    calculateAndDrawVolumeProfile() {
+        const data = this.cachedCandles;
+        if (data.length < 10) return;
+
+        // Identify Price boundaries
+        let highest = -Infinity;
+        let lowest = Infinity;
+        data.forEach(c => {
+            if (c.high > highest) highest = c.high;
+            if (c.low < lowest) lowest = c.low;
+        });
+
+        // Generate 12 discrete price range bins
+        const binCount = 12;
+        const binSize = (highest - lowest) / binCount;
+        const bins = Array.from({ length: binCount }, (_, i) => ({
+            low: lowest + i * binSize,
+            high: lowest + (i + 1) * binSize,
+            volume: 0
+        }));
+
+        // Distribute volume into bins
+        data.forEach(c => {
+            const mid = (c.high + c.low + c.close) / 3;
+            const binIdx = Math.min(binCount - 1, Math.floor((mid - lowest) / (binSize || 1)));
+            if (binIdx >= 0 && binIdx < binCount) {
+                bins[binIdx].volume += c.volume;
+            }
+        });
+
+        // Find Point of Control (POC), High Volume Nodes (HVN), Low Volume Nodes (LVN)
+        let maxVol = 0;
+        let pocBinIdx = 0;
+        bins.forEach((b, i) => {
+            if (b.volume > maxVol) {
+                maxVol = b.volume;
+                pocBinIdx = i;
+            }
+        });
+
+        const pocPrice = bins[pocBinIdx].low + binSize / 2;
+
+        // Value Area (70% of total volume centered around POC)
+        const totalVol = bins.reduce((sum, b) => sum + b.volume, 0);
+        const targetValueAreaVol = totalVol * 0.70;
+
+        let currentVaVol = bins[pocBinIdx].volume;
+        let topIdx = pocBinIdx;
+        let botIdx = pocBinIdx;
+
+        while (currentVaVol < targetValueAreaVol && (topIdx < binCount - 1 || botIdx > 0)) {
+            const topVol = topIdx < binCount - 1 ? bins[topIdx + 1].volume : 0;
+            const botVol = botIdx > 0 ? bins[botIdx - 1].volume : 0;
+
+            if (topVol >= botVol) {
+                topIdx++;
+                currentVaVol += topVol;
+            } else {
+                botIdx--;
+                currentVaVol += botVol;
+            }
+        }
+
+        const vahPrice = bins[topIdx].high;
+        const valPrice = bins[botIdx].low;
+
+        // Render Volume Profile bins onto HTML Panel overlaying beside the chart
+        const profileDiv = document.getElementById('volumeProfileBars');
+        if (profileDiv) {
+            const mapBinHtml = bins.map((bin, i) => {
+                const widthPercent = maxVol > 0 ? (bin.volume / maxVol) * 100 : 0;
+                let bgClass = "bg-blue-500/20";
+                let textBadge = "";
+
+                if (i === pocBinIdx) {
+                    bgClass = "bg-red-500/40 border-r-2 border-red-500";
+                    textBadge = `<span class="text-[8px] bg-red-600 px-1 py-px rounded font-black text-black absolute left-1">POC</span>`;
+                } else if (i >= botIdx && i <= topIdx) {
+                    bgClass = "bg-amber-500/20 border-r border-amber-500/40";
+                }
+
+                return `
+                    <div class="h-3 w-full relative flex items-center group cursor-pointer" title="Price: $${bin.low.toFixed(1)} - $${bin.high.toFixed(1)} | Vol: ${bin.volume.toFixed(1)}">
+                        <div class="h-full ${bgClass} transition-all duration-300" style="width: ${widthPercent}%"></div>
+                        ${textBadge}
+                        <span class="absolute right-1 text-[8px] text-gray-500 font-mono hidden group-hover:block">$${bin.low.toFixed(0)}</span>
+                    </div>
+                `;
+            }).reverse().join(''); // Render High prices on top, low on bottom
+
+            profileDiv.innerHTML = mapBinHtml;
+
+            // Draw flat line indicators for POC, VAH, VAL
+            const pocIndicator = document.getElementById('pocLineIndicator');
+            if (pocIndicator) {
+                pocIndicator.classList.remove('hidden');
+                // Calculate percentage height displacement
+                const heightPercent = ((pocPrice - lowest) / (priceRange || 1)) * 100;
+                pocIndicator.style.bottom = `${heightPercent}%`;
+            }
+        }
+
+        this.volumeProfile = {
+            poc: pocPrice,
+            vah: vahPrice,
+            val: valPrice,
+            bins
+        };
     }
 
     /**

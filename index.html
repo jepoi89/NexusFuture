@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Crypto Futures Trading Dashboard</title>
+    <title>NEXUS FUTURES v2 – Professional Trading Terminal</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -43,16 +43,17 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-[#0b0e11] text-[#eaecef] font-sans overflow-x-hidden min-h-screen transition-colors duration-200">
+<body class="bg-[#0b0e11] text-[#eaecef] font-sans overflow-x-hidden min-h-screen transition-colors duration-200 selection:bg-amber-500/30 selection:text-white">
     <div class="flex flex-col h-screen">
-        <!-- Top Toolbar -->
+
+        <!-- TOP TOOLBAR & SYSTEM BAR (Row 1) -->
         <header class="h-14 border-b border-gray-800 bg-[#181a20] px-4 flex items-center justify-between z-50">
             <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-500 to-amber-600 flex items-center justify-center font-bold text-black text-lg">
+                <div class="flex items-center space-x-2 cursor-pointer group">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-yellow-500 to-amber-600 flex items-center justify-center font-bold text-black text-lg shadow-[0_0_15px_rgba(245,158,11,0.2)] group-hover:scale-105 transition duration-150">
                         ⚡
                     </div>
-                    <span class="font-bold text-lg tracking-wider hidden sm:inline-block">NEXUS<span class="text-amber-500">FUTURES</span></span>
+                    <span class="font-bold text-lg tracking-wider hidden sm:inline-block">NEXUS<span class="text-amber-500 font-black">FUTURES</span><span class="text-[9px] align-super bg-amber-500/10 text-amber-500 px-1 py-0.5 rounded ml-1 border border-amber-500/20">V2 PRO</span></span>
                 </div>
                 
                 <!-- Search Symbol -->
@@ -60,21 +61,21 @@
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                         <i data-lucide="search" class="w-4 h-4"></i>
                     </span>
-                    <input type="text" id="symbolSearchInput" placeholder="Search Crypto (e.g. BTCUSDT)" 
-                           class="w-48 sm:w-64 bg-[#1e2329] border border-gray-700 text-sm rounded px-3 py-1.5 pl-9 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500">
+                    <input type="text" id="symbolSearchInput" placeholder="Search Assets (e.g. BTCUSDT)"
+                           class="w-48 sm:w-64 bg-[#1e2329] border border-gray-700 text-sm rounded px-3 py-1.5 pl-9 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 transition duration-150">
                     <div id="searchResults" class="absolute left-0 right-0 mt-1 bg-[#181a20] border border-gray-700 rounded shadow-2xl hidden max-h-60 overflow-y-auto z-50"></div>
                 </div>
 
                 <!-- Current Pair info tag -->
-                <div class="hidden md:flex items-center space-x-3 bg-[#1e2329] px-3 py-1.5 rounded text-xs border border-gray-800">
+                <div class="hidden lg:flex items-center space-x-3 bg-[#1e2329] px-3 py-1.5 rounded text-xs border border-gray-800 shadow-inner">
                     <span class="font-bold text-sm text-yellow-500" id="currentSymbolTag">BTCUSDT</span>
-                    <span class="text-gray-400" id="currentPriceTag">---</span>
+                    <span class="font-mono text-gray-300 font-semibold" id="currentPriceTag">---</span>
                     <span id="currentChangeTag" class="font-medium text-green-500">---</span>
                 </div>
             </div>
 
             <!-- Toolbar Actions -->
-            <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-3">
                 <!-- Timeframe Selectors -->
                 <div class="flex items-center bg-[#1e2329] rounded p-0.5 border border-gray-800" id="timeframeContainer">
                     <button data-timeframe="1m" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1m</button>
@@ -83,6 +84,13 @@
                     <button data-timeframe="1h" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1H</button>
                     <button data-timeframe="4h" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">4H</button>
                     <button data-timeframe="1d" class="px-2 py-1 text-xs font-semibold rounded hover:bg-gray-700 hover:text-white transition timeframe-btn">1D</button>
+                </div>
+
+                <!-- Workspace View Controls -->
+                <div class="hidden md:flex items-center bg-[#1e2329] rounded p-0.5 border border-gray-800 text-xs text-gray-400" id="workspaceViewSelector">
+                    <button data-layout="compact" class="px-2 py-1 rounded hover:text-white transition whitespace-nowrap">Compact</button>
+                    <button data-layout="standard" class="px-2 py-1 rounded bg-amber-500/10 text-amber-500 font-semibold border border-amber-500/20 whitespace-nowrap">Standard</button>
+                    <button data-layout="pro" class="px-2 py-1 rounded hover:text-white transition whitespace-nowrap">Pro Terminal</button>
                 </div>
 
                 <!-- Refresh -->
@@ -109,16 +117,112 @@
             </div>
         </header>
 
-        <!-- Main Workspace -->
+        <!-- INSTITUTIONAL-GRADE SUMMARY TOP BAR (Row 2) -->
+        <div class="bg-[#12141a] border-b border-gray-800 px-4 py-1.5 flex flex-wrap items-center justify-between text-xs overflow-x-auto whitespace-nowrap scrollbar-none shadow-md">
+            <div class="flex items-center space-x-6">
+                <!-- Asset Tickers -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-1 border-r border-gray-800 pr-3">
+                        <span class="text-gray-400">24H High:</span>
+                        <span class="font-mono text-gray-200 font-semibold" id="top24hHigh">---</span>
+                    </div>
+                    <div class="flex items-center space-x-1 border-r border-gray-800 pr-3">
+                        <span class="text-gray-400">24H Low:</span>
+                        <span class="font-mono text-gray-200 font-semibold" id="top24hLow">---</span>
+                    </div>
+                    <div class="flex items-center space-x-1 border-r border-gray-800 pr-3">
+                        <span class="text-gray-400">24H Vol:</span>
+                        <span class="font-mono text-gray-200 font-semibold" id="top24hVol">---</span>
+                    </div>
+                    <div class="flex items-center space-x-1 border-r border-gray-800 pr-3">
+                        <span class="text-gray-400">Open Interest:</span>
+                        <span class="font-mono text-amber-500 font-semibold" id="topOpenInterest">---</span>
+                    </div>
+                    <div class="flex items-center space-x-1 border-r border-gray-800 pr-3">
+                        <span class="text-gray-400">Funding Rate:</span>
+                        <span class="font-mono text-green-400 font-semibold" id="topFundingRate">---</span>
+                    </div>
+                </div>
+
+                <!-- Global Stats -->
+                <div class="flex items-center space-x-4 border-l border-gray-800 pl-4">
+                    <div class="flex items-center space-x-1">
+                        <span class="text-gray-400">BTC Dom:</span>
+                        <span class="font-mono text-white font-bold" id="globalBtcDom">57.4%</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="text-gray-400">Total Cap:</span>
+                        <span class="font-mono text-white font-bold" id="globalMarketCap">$3.12T</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="text-gray-400">Total Vol:</span>
+                        <span class="font-mono text-white font-bold" id="globalMarketVol">$124.8B</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <span class="text-gray-400">Stable Dom:</span>
+                        <span class="font-mono text-white font-bold" id="globalStableDom">4.1%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Server and Live Feeds status -->
+            <div class="flex items-center space-x-3 text-[10px] uppercase font-bold text-gray-400 mt-1 md:mt-0">
+                <div class="flex items-center space-x-1 bg-[#1e2329] px-2 py-0.5 rounded border border-gray-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500" id="serverConnectionDot"></span>
+                    <span class="text-gray-400 font-semibold" id="serverStatusText">WS CONNECTED</span>
+                </div>
+                <div class="flex items-center space-x-1 bg-[#1e2329] px-2 py-0.5 rounded border border-gray-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500" id="liveMarketDot"></span>
+                    <span class="text-gray-400 font-semibold" id="liveMarketStatusText">LIVE FEEDS</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPACT RUNNING STATISTICS TICKER (Row 3) -->
+        <div class="bg-[#181a20]/90 border-b border-gray-800 h-6 overflow-hidden flex items-center relative text-[10px] uppercase text-gray-400">
+            <div class="absolute left-0 bottom-0 top-0 bg-[#181a20] px-3 z-20 flex items-center border-r border-gray-800 font-bold text-amber-500 tracking-wider">
+                ⚡ NEXUS INSIGHTS:
+            </div>
+            <div class="marquee-container w-full h-full flex items-center pl-[120px]">
+                <div class="marquee-content whitespace-nowrap animate-marquee flex space-x-10">
+                    <span class="flex items-center"><span class="w-1 h-1 bg-green-500 rounded-full mr-1.5"></span>BTC SHORT LIQUIDATIONS EXCEED $43M</span>
+                    <span class="flex items-center"><span class="w-1 h-1 bg-red-500 rounded-full mr-1.5"></span>SOL FUNDING RATE AT ALL-TIME MONTHLY HIGH (+0.038%)</span>
+                    <span class="flex items-center"><span class="w-1 h-1 bg-green-500 rounded-full mr-1.5"></span>USDT STABLECOIN NET INFLOWS EXCEED $1.2B</span>
+                    <span class="flex items-center"><span class="w-1 h-1 bg-blue-500 rounded-full mr-1.5"></span>CME BITCOIN OPEN INTEREST RISES TO RECORD $21.3B</span>
+                    <span class="flex items-center"><span class="w-1 h-1 bg-green-500 rounded-full mr-1.5"></span>MARKET BREADTH BULLISH WITH 74% ALIGNMENT INDEX</span>
+                    <span class="flex items-center"><span class="w-1 h-1 bg-yellow-500 rounded-full mr-1.5"></span>US FEDERAL RESERVE ECONOMIC ANNOUNCEMENT EXPECTED IN 14H</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN WORKSPACE -->
         <div class="flex-1 flex overflow-hidden">
             
-            <!-- Left Sidebar (Watchlist) -->
-            <aside id="watchlistSidebar" class="w-72 border-r border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 transition-all duration-300">
-                <div class="p-3 border-b border-gray-800 flex items-center justify-between">
-                    <span class="font-semibold text-xs tracking-wider uppercase text-gray-400">Market Watchlist</span>
-                    <span class="text-[10px] bg-[#1e2329] text-gray-400 px-2 py-0.5 rounded border border-gray-800">Binance Futures</span>
+            <!-- LEFT SIDEBAR (WATCHLIST) -->
+            <aside id="watchlistSidebar" class="w-80 border-r border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 transition-all duration-300">
+                <div class="p-3 border-b border-gray-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-xs tracking-wider uppercase text-gray-400">Asset Watchlist</span>
+                        <button id="toggleFavoritesFilterBtn" title="Show Favorites Only" class="p-1 rounded hover:bg-gray-800 text-gray-400 hover:text-yellow-500 transition">
+                            <i data-lucide="star" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <!-- Watchlist Sorting selectors -->
+                    <div class="flex items-center space-x-1.5 text-[10px] text-gray-400">
+                        <span>Sort:</span>
+                        <select id="watchlistSortSelect" class="bg-[#1e2329] border border-gray-800 rounded px-1.5 py-0.5 text-white font-semibold cursor-pointer outline-none focus:border-amber-500">
+                            <option value="volume">Volume (24H)</option>
+                            <option value="volatility">Volatility</option>
+                            <option value="ai_score">AI Analyst Score</option>
+                            <option value="bull_prob">Bullish Prob %</option>
+                            <option value="market_cap">Market Cap</option>
+                            <option value="alphabetical">Alphabetical</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="flex-1 overflow-y-auto" id="watchlistContainer">
+                <!-- Dynamic Watchlist Container -->
+                <div class="flex-1 overflow-y-auto scrollbar-thin" id="watchlistContainer">
                     <div class="flex items-center justify-center h-40 text-gray-500 text-xs">
                         <div class="text-center">
                             <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-500 mx-auto mb-2"></div>
@@ -128,28 +232,28 @@
                 </div>
             </aside>
 
-            <!-- Center Panel (Candlestick Chart + Bottom Panels) -->
-            <main class="flex-1 flex flex-col min-w-0 bg-[#0b0e11] overflow-y-auto">
+            <!-- CENTER WORKSPACE PANEL (Main Chart + Bottom Analytics) -->
+            <main class="flex-1 flex flex-col min-w-0 bg-[#0b0e11] overflow-y-auto scrollbar-none">
                 
                 <!-- Chart Area Container -->
-                <div class="flex-1 relative min-h-[400px] border-b border-gray-800 flex flex-col bg-[#181a20]">
+                <div class="flex-1 relative min-h-[440px] border-b border-gray-800 flex flex-col bg-[#181a20]">
                     <!-- Chart Overlay Toolbar -->
                     <div class="h-10 border-b border-gray-800 bg-[#1e2329]/80 backdrop-blur px-3 flex items-center justify-between z-10 text-xs">
                         <div class="flex items-center space-x-3 overflow-x-auto whitespace-nowrap scrollbar-none">
-                            <span class="font-bold flex items-center space-x-1">
+                            <span class="font-bold flex items-center space-x-1 text-white text-[13px]">
                                 <span id="chartSymbol">BTCUSDT</span>
-                                <span class="text-gray-400 font-normal" id="chartInterval">15m</span>
+                                <span class="text-gray-400 font-normal text-xs" id="chartInterval">15m</span>
                             </span>
                             <div class="h-3 w-px bg-gray-700"></div>
                             <!-- Indicators overlay toggles -->
-                            <div class="flex items-center space-x-2" id="indicatorQuickToggles">
-                                <button data-ind="ema9" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 9</button>
-                                <button data-ind="ema20" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 20</button>
-                                <button data-ind="ema50" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 50</button>
-                                <button data-ind="ema200" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">EMA 200</button>
-                                <button data-ind="bb" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">BB</button>
-                                <button data-ind="supertrend" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition">SuperTrend</button>
-                                <button id="customIndicatorModalBtn" class="px-1.5 py-0.5 rounded border border-dashed border-gray-600 text-gray-400 hover:border-gray-400 hover:text-white transition">+ Indicators</button>
+                            <div class="flex items-center space-x-1.5" id="indicatorQuickToggles">
+                                <button data-ind="ema9" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition text-[10px]">EMA 9</button>
+                                <button data-ind="ema20" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition text-[10px]">EMA 20</button>
+                                <button data-ind="ema50" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition text-[10px]">EMA 50</button>
+                                <button data-ind="ema200" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition text-[10px]">EMA 200</button>
+                                <button data-ind="bb" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition text-[10px]">BB</button>
+                                <button data-ind="supertrend" class="quick-ind-btn px-1.5 py-0.5 rounded border border-gray-700 text-gray-400 hover:text-white transition text-[10px]">SuperTrend</button>
+                                <button id="customIndicatorModalBtn" class="px-1.5 py-0.5 rounded border border-dashed border-gray-600 text-gray-400 hover:border-gray-400 hover:text-white transition text-[10px]">+ Indicators</button>
                             </div>
                         </div>
 
@@ -170,12 +274,29 @@
                         </div>
                     </div>
 
-                    <!-- Lightweight Charts div -->
-                    <div class="flex-1 w-full h-full relative" id="chartDiv"></div>
+                    <!-- Volume Profile & Smart Zone Panels Layout -->
+                    <div class="flex-1 w-full h-full relative flex">
+                        <!-- Lightweight Charts div -->
+                        <div class="flex-1 h-full relative" id="chartDiv"></div>
+
+                        <!-- Visible Range Volume Profile panel -->
+                        <div class="w-[90px] border-l border-gray-800 bg-[#12141a]/95 flex flex-col relative" id="volumeProfileOverlay">
+                            <div class="p-1.5 border-b border-gray-800 text-[9px] uppercase font-bold text-gray-400 text-center tracking-wider bg-[#181a20]">
+                                Vol Profile
+                            </div>
+                            <div id="volumeProfileBars" class="flex-1 flex flex-col justify-around py-2 px-1 relative">
+                                <!-- POC line overlay inside script -->
+                                <div class="absolute left-0 right-0 h-px border-t border-dashed border-red-500 z-10 hidden" id="pocLineIndicator">
+                                    <span class="absolute left-1 bg-red-600 text-black px-1 font-bold rounded text-[7px]" style="transform: translateY(-50%)">POC</span>
+                                </div>
+                                <div class="text-center text-[9px] text-gray-500 my-auto">Computing nodes...</div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <!-- Pattern Notification Bubble -->
-                    <div id="patternBubble" class="absolute top-14 left-4 z-10 bg-yellow-500/20 backdrop-blur border border-yellow-500 text-yellow-300 px-3 py-1.5 rounded text-xs hidden">
-                        <span class="font-bold mr-1">Pattern Spotted:</span> <span id="patternBubbleText">Hammer</span>
+                    <div id="patternBubble" class="absolute top-14 left-4 z-10 bg-yellow-500/20 backdrop-blur border border-yellow-500 text-yellow-300 px-3 py-1.5 rounded text-xs hidden shadow-lg animate-pulse">
+                        <span class="font-bold mr-1">⚡ Pattern Spotted:</span> <span id="patternBubbleText">Hammer</span>
                     </div>
 
                     <!-- Connection status indicator -->
@@ -185,53 +306,59 @@
                     </div>
                 </div>
 
-                <!-- Bottom Summary and Signals Tabbed Layout -->
+                <!-- INSTITUTIONAL TABBED LAYOUT (Bottom Panel) -->
                 <div class="bg-[#181a20] p-4 flex flex-col border-b border-gray-800">
-                    <div class="border-b border-gray-800 flex space-x-6 text-xs font-semibold uppercase tracking-wider mb-4">
-                        <button class="pb-2 border-b-2 border-amber-500 text-amber-500 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment">Market Intelligence Engine</button>
+                    <div class="border-b border-gray-800 flex space-x-4 text-[11px] font-bold uppercase tracking-wider mb-4 overflow-x-auto whitespace-nowrap scrollbar-none" id="bottomTabHeaders">
+                        <button class="pb-2 border-b-2 border-amber-500 text-amber-500 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment">Market Intelligence & Sentiment</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="orderflow">Order Flow Panel</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="liquidation">Liquidation Analysis</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="news">News Intelligence Center</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="journal">AI Trade Journal</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="signals">Recent AI Signal History</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="heatmap">Crypto Heatmap</button>
                     </div>
 
-                    <!-- Tab: Market Intelligence Engine -->
+                    <!-- Tab Content: Market Intelligence & Sentiment -->
                     <div id="tabContentSentiment" class="space-y-4">
-                        <!-- Top Row: Config, Bias, and Probabilities -->
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                            <!-- Probabilities & Bias Block -->
-                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3">
-                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Dynamic Market Probabilities</h3>
+                            <!-- Probabilities Block -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3 shadow-inner">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between">
+                                    <span>Dynamic Market Probabilities</span>
+                                    <span class="text-[9px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">Analytical Weighting</span>
+                                </h3>
                                 <div class="grid grid-cols-3 gap-2 text-center text-xs">
                                     <div class="p-2 bg-[#181a20] rounded border border-gray-800">
-                                        <span class="text-gray-400 block text-[10px] uppercase">Bullish</span>
-                                        <span class="text-green-500 font-bold text-lg" id="probBullishText">33%</span>
+                                        <span class="text-gray-400 block text-[9px] uppercase">Bullish</span>
+                                        <span class="text-green-500 font-bold text-lg font-mono" id="probBullishText">33%</span>
                                     </div>
                                     <div class="p-2 bg-[#181a20] rounded border border-gray-800">
-                                        <span class="text-gray-400 block text-[10px] uppercase">Bearish</span>
-                                        <span class="text-red-500 font-bold text-lg" id="probBearishText">33%</span>
+                                        <span class="text-gray-400 block text-[9px] uppercase">Bearish</span>
+                                        <span class="text-red-500 font-bold text-lg font-mono" id="probBearishText">33%</span>
                                     </div>
                                     <div class="p-2 bg-[#181a20] rounded border border-gray-800">
-                                        <span class="text-gray-400 block text-[10px] uppercase">Neutral</span>
-                                        <span class="text-gray-300 font-bold text-lg" id="probNeutralText">34%</span>
+                                        <span class="text-gray-300 block text-[9px] uppercase">Neutral</span>
+                                        <span class="text-gray-300 font-bold text-lg font-mono" id="probNeutralText">34%</span>
                                     </div>
                                 </div>
                                 <!-- Split Probabilities Bar -->
-                                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden flex border border-gray-900">
+                                <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden flex border border-gray-900 shadow">
                                     <div class="bg-green-500 h-full transition-all duration-300" style="width: 33%" id="probBullishBar"></div>
                                     <div class="bg-gray-500 h-full transition-all duration-300" style="width: 34%" id="probNeutralBar"></div>
                                     <div class="bg-red-500 h-full transition-all duration-300" style="width: 33%" id="probBearishBar"></div>
                                 </div>
                             </div>
 
-                            <!-- Configurable Threshold & Trade Quality -->
+                            <!-- Setup Validation Settings -->
                             <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between space-y-3">
                                 <div class="flex justify-between items-center">
                                     <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Setup Validation Settings</h3>
-                                    <span class="text-[10px] text-gray-500">Configurable Score</span>
+                                    <span class="text-[10px] text-gray-500">Configurable Quality Threshold</span>
                                 </div>
                                 <div>
                                     <label class="text-xs text-gray-400 flex justify-between mb-1">
                                         <span>Min Acceptable Quality:</span>
-                                        <span class="font-extrabold text-amber-500 text-sm" id="minQualityScoreLabel">70</span>
+                                        <span class="font-extrabold text-amber-500 text-sm font-mono" id="minQualityScoreLabel">70</span>
                                     </label>
                                     <input type="range" id="minQualityScoreSelect" min="50" max="95" value="70" class="w-full accent-amber-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer">
                                 </div>
@@ -241,26 +368,26 @@
                                 </div>
                             </div>
 
-                            <!-- Premium Metrics Block -->
-                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 grid grid-cols-2 gap-3 text-xs">
-                                <div class="col-span-2 border-b border-gray-800 pb-1.5">
-                                    <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Dashboard Metrics</h3>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-gray-400 block uppercase">Trend Strength</span>
-                                    <span id="valTrendStrength" class="font-bold text-gray-200">--</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-gray-400 block uppercase">Volatility Rating</span>
-                                    <span id="valVolatilityRating" class="font-bold text-gray-200">--</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-gray-400 block uppercase">Risk Level</span>
-                                    <span id="valRiskLevel" class="font-bold">--</span>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-gray-400 block uppercase">Recommendation</span>
-                                    <span id="technicalRecommendationBadge" class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-gray-800 text-gray-400">HOLD</span>
+                            <!-- Smart Support & Resistance Strength indicators -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-2">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Smart Support/Resistance Zones</h3>
+                                <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                    <div class="p-1.5 bg-[#181a20] rounded border border-green-950/40">
+                                        <span class="text-green-500 font-bold uppercase block mb-0.5">Primary Support</span>
+                                        <span id="topSupportPrice" class="font-bold text-gray-200 font-mono">---</span>
+                                        <div class="text-gray-400 text-[8px] mt-1 space-y-0.5">
+                                            <div>Confidence: <span class="font-bold text-white font-mono" id="suppZoneConf">91%</span></div>
+                                            <div>Status: <span class="text-green-400 font-bold" id="suppZoneStatus">Holding (4 Touch)</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="p-1.5 bg-[#181a20] rounded border border-red-950/40">
+                                        <span class="text-red-500 font-bold uppercase block mb-0.5">Primary Resistance</span>
+                                        <span id="topResistancePrice" class="font-bold text-gray-200 font-mono">---</span>
+                                        <div class="text-gray-400 text-[8px] mt-1 space-y-0.5">
+                                            <div>Confidence: <span class="font-bold text-white font-mono" id="resZoneConf">84%</span></div>
+                                            <div>Status: <span class="text-red-400 font-bold" id="resZoneStatus">Holding (3 Touch)</span></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -323,68 +450,287 @@
                             </div>
                         </div>
 
-                        <!-- Bottom Row: News Feed, Market Sentiment, and Trade Planning Notes -->
+                        <!-- Bottom row: Market Sentiment Dashboard specific widgets -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#14161c] p-4 rounded border border-gray-800">
+                            <!-- Fear & Greed Index -->
+                            <div class="space-y-1">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold flex items-center justify-between">
+                                    <span>Fear & Greed Index</span>
+                                    <span id="fgTrend" class="text-green-500 font-bold font-mono">▲ +4</span>
+                                </span>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xl font-bold font-mono" id="fgIndexVal">74</span>
+                                    <span class="text-[10px] uppercase font-bold text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">Greed</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
+                                    <div class="bg-green-500 h-full" style="width: 74%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Funding Rates -->
+                            <div class="space-y-1">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold flex items-center justify-between">
+                                    <span>Long/Short Ratio</span>
+                                    <span id="lsTrend" class="text-red-500 font-bold font-mono">▼ -1.2%</span>
+                                </span>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xl font-bold font-mono" id="lsRatioVal">1.64</span>
+                                    <span class="text-xs text-gray-400">62.1% Longs</span>
+                                </div>
+                                <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden flex">
+                                    <div class="bg-green-500 h-full" style="width: 62%"></div>
+                                    <div class="bg-red-500 h-full" style="width: 38%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Whale Activity & Stable Flows -->
+                            <div class="space-y-1">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold flex items-center justify-between">
+                                    <span>Whale Activity Index</span>
+                                    <span class="text-green-500 font-bold font-mono">▲ BULLISH</span>
+                                </span>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xl font-bold text-gray-200" id="whaleActivityLabel">Accumulation</span>
+                                    <span class="text-[9px] text-gray-400">Flow: +$142M</span>
+                                </div>
+                            </div>
+
+                            <!-- Market Breadth index -->
+                            <div class="space-y-1">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold flex items-center justify-between">
+                                    <span>Market Breadth Index</span>
+                                    <span class="text-green-500 font-bold font-mono">▲ HIGH</span>
+                                </span>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xl font-bold text-gray-200 font-mono" id="marketBreadthVal">78.5%</span>
+                                    <span class="text-[9px] text-gray-400">Across 12 Assets</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Professional Order Flow Panel -->
+                    <div id="tabContentOrderflow" class="hidden space-y-4">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                            <!-- News Panel -->
-                            <div class="bg-[#1e2329] p-3.5 rounded border border-gray-800 flex flex-col justify-between">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
-                                    <span>L9: Fundamentals & News Intelligence</span>
-                                    <i data-lucide="globe" class="w-3.5 h-3.5 text-amber-500"></i>
-                                </span>
-                                <div class="mt-2.5 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerNewsText">
-                                    Evaluating institutional headlines...
-                                </div>
-                            </div>
-
-                            <!-- Sentiment Panel -->
-                            <div class="bg-[#1e2329] p-3.5 rounded border border-gray-800 flex flex-col justify-between">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800/80 pb-1 flex items-center justify-between">
-                                    <span>L10: Market Sentiment Engine</span>
-                                    <i data-lucide="users" class="w-3.5 h-3.5 text-green-400"></i>
-                                </span>
-                                <div class="mt-2.5 text-xs flex-1 flex flex-col justify-center text-gray-300" id="layerSentimentText">
-                                    Measuring retail order books and funding...
-                                </div>
-                            </div>
-
-                            <!-- Trade Planning Confirmation & Notes -->
-                            <div class="bg-amber-500/5 p-3.5 rounded border border-amber-500/20 flex flex-col justify-between space-y-2">
-                                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider border-b border-amber-500/10 pb-1 flex items-center justify-between">
-                                    <span>Trade Plan Notes & Triggers</span>
-                                    <i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-400"></i>
-                                </span>
-                                <div class="text-xs space-y-1.5 flex-1">
-                                    <div class="leading-relaxed">
-                                        <span class="text-amber-500 font-bold block text-[11px]">Confirmation Trigger:</span>
-                                        <span class="text-gray-300 font-mono text-[11px]" id="valConfirmationTrigger">N/A</span>
+                            <!-- Live Order Book -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider mb-2 flex items-center justify-between">
+                                    <span>Live Order Book</span>
+                                    <span class="text-[9px] text-gray-400">Spread: <span class="font-mono text-white font-bold" id="ofSpread">0.01</span></span>
+                                </h3>
+                                <div class="grid grid-cols-2 gap-4 text-xs">
+                                    <!-- Ask side (Asks / Red / Top down) -->
+                                    <div class="space-y-1">
+                                        <div class="text-red-500 font-bold border-b border-gray-800 pb-1 text-[10px] uppercase">Asks (Sell Orders)</div>
+                                        <div class="space-y-0.5 font-mono text-[11px]" id="orderBookAsks">
+                                            <!-- Dynamically generated asks -->
+                                            <div class="flex justify-between text-red-400"><span class="price">96,540.2</span><span class="amount">1.45</span></div>
+                                            <div class="flex justify-between text-red-400"><span class="price">96,520.0</span><span class="amount">0.98</span></div>
+                                            <div class="flex justify-between text-red-400"><span class="price">96,510.5</span><span class="amount">2.51</span></div>
+                                        </div>
                                     </div>
-                                    <div class="leading-relaxed">
-                                        <span class="text-amber-400 font-bold block text-[11px]">Setup Strategy Notes:</span>
-                                        <p class="text-gray-300 text-[11px]" id="valTradeNotes">N/A</p>
+                                    <!-- Bid side (Bids / Green / Bottom up) -->
+                                    <div class="space-y-1">
+                                        <div class="text-green-500 font-bold border-b border-gray-800 pb-1 text-[10px] uppercase">Bids (Buy Orders)</div>
+                                        <div class="space-y-0.5 font-mono text-[11px]" id="orderBookBids">
+                                            <!-- Dynamically generated bids -->
+                                            <div class="flex justify-between text-green-400"><span class="price">96,490.0</span><span class="amount">3.41</span></div>
+                                            <div class="flex justify-between text-green-400"><span class="price">96,480.2</span><span class="amount">1.04</span></div>
+                                            <div class="flex justify-between text-green-400"><span class="price">96,470.5</span><span class="amount">5.89</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bid/Ask Imbalance & Wall Detection -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider border-b border-gray-800/80 pb-1.5 flex items-center justify-between">
+                                    <span>Order Book Analytics</span>
+                                    <span class="text-[9px] bg-red-500/10 text-red-500 px-1.5 py-0.5 rounded font-bold border border-red-500/10">IMBALANCE ALERT</span>
+                                </h3>
+                                <div class="space-y-3 text-xs">
+                                    <div>
+                                        <div class="flex justify-between text-gray-400 text-[10px] mb-1">
+                                            <span>BIDS PRESSURE: <span class="font-bold text-green-400" id="ofBidsPct">42%</span></span>
+                                            <span>ASKS PRESSURE: <span class="font-bold text-red-400" id="ofAsksPct">58%</span></span>
+                                        </div>
+                                        <div class="w-full h-2.5 bg-gray-800 rounded-full overflow-hidden flex">
+                                            <div class="bg-green-500 h-full transition-all duration-300" style="width: 42%" id="ofBidsBar"></div>
+                                            <div class="bg-red-500 h-full transition-all duration-300" style="width: 58%" id="ofAsksBar"></div>
+                                        </div>
+                                    </div>
+                                    <div class="p-2.5 bg-[#181a20] rounded border border-gray-800 space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-400 text-[10px]">BUY WALL DETECTED:</span>
+                                            <span class="font-bold text-green-400 font-mono" id="buyWallPrice">--</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-400 text-[10px]">SELL WALL DETECTED:</span>
+                                            <span class="font-bold text-red-400 font-mono" id="sellWallPrice">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Large Orders Tracker & Market Depth -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider mb-2">Block Trades / Large Orders</h3>
+                                <div class="flex-1 overflow-y-auto max-h-32 text-[11px] font-mono space-y-1 pr-1" id="largeTradesTracker">
+                                    <!-- Dynamic large trade notifications -->
+                                    <div class="flex justify-between text-green-400"><span class="time">10:42:01</span><span>BUY 14.85 BTC ($1.43M)</span></div>
+                                    <div class="flex justify-between text-red-400"><span class="time">10:41:25</span><span>SELL 8.42 BTC ($810K)</span></div>
+                                    <div class="flex justify-between text-green-400"><span class="time">10:39:51</span><span>BUY 24.11 BTC ($2.32M)</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Liquidation Analysis -->
+                    <div id="tabContentLiquidation" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Liquidation figures -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider">Historical Liquidations (24H)</h3>
+                                <div class="grid grid-cols-2 gap-2 text-center text-xs">
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400 block text-[9px] uppercase">Long Liquidations</span>
+                                        <span class="text-red-500 font-bold text-lg font-mono" id="liqLongs">---</span>
+                                    </div>
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400 block text-[9px] uppercase">Short Liquidations</span>
+                                        <span class="text-green-500 font-bold text-lg font-mono" id="liqShorts">---</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Liquidation Clusters -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider mb-1">Liquidation Clusters & Leverage Levels</h3>
+                                <div class="text-xs space-y-2 flex-1 justify-center flex flex-col" id="liqClustersList">
+                                    <div class="flex justify-between p-1.5 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400">High Leveraged Cluster:</span>
+                                        <span class="font-bold text-red-400 font-mono" id="liqHighCluster">---</span>
+                                    </div>
+                                    <div class="flex justify-between p-1.5 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400">Squeeze Risk Zone:</span>
+                                        <span class="font-bold text-yellow-500 font-semibold" id="liqSqueezeZone">High Risk Long Squeeze</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Estimated Stop Hunt Areas -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider mb-1">Estimated Stop Hunt Areas</h3>
+                                <div class="text-xs space-y-2 flex-1 justify-center flex flex-col" id="liqStopHuntAreas">
+                                    <div class="flex justify-between p-1.5 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400">Estimated Bull Hunt:</span>
+                                        <span class="font-bold text-green-400 font-mono" id="liqBullHunt">---</span>
+                                    </div>
+                                    <div class="flex justify-between p-1.5 bg-[#181a20] rounded border border-gray-800">
+                                        <span class="text-gray-400">Estimated Bear Hunt:</span>
+                                        <span class="font-bold text-red-400 font-mono" id="liqBearHunt">---</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Tab Content: News Intelligence Center -->
+                    <div id="tabContentNews" class="hidden space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-3 bg-[#1e2329] p-3 rounded border border-gray-800 text-xs">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-gray-400">Category:</span>
+                                    <select id="newsCategorySelect" class="bg-[#181a20] border border-gray-800 rounded px-2 py-1 text-white cursor-pointer outline-none focus:border-amber-500">
+                                        <option value="all">All News</option>
+                                        <option value="regulation">Regulations</option>
+                                        <option value="ETF">ETF News</option>
+                                        <option value="announcement">Exchange Announcements</option>
+                                        <option value="unlock">Token Unlocks</option>
+                                        <option value="upgrade">Network Upgrades</option>
+                                    </select>
+                                </div>
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-gray-400">Impact:</span>
+                                    <select id="newsImpactSelect" class="bg-[#181a20] border border-gray-800 rounded px-2 py-1 text-white cursor-pointer outline-none focus:border-amber-500">
+                                        <option value="all">All Impact</option>
+                                        <option value="high">High Impact</option>
+                                        <option value="med">Medium Impact</option>
+                                        <option value="low">Low Impact</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-gray-500 uppercase font-bold" id="newsStats">Compiled from Bloomberg, Coinglass, Reuters</span>
+                        </div>
+
+                        <!-- News Articles List -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="newsFeedList">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: AI Trade Journal -->
+                    <div id="tabContentJournal" class="hidden space-y-4">
+                        <!-- Journal Stats and Analytics -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#14161c] p-4 rounded border border-gray-800 text-xs">
+                            <div class="space-y-1 text-center">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold">Total Journal Trades</span>
+                                <span class="text-2xl font-black font-mono text-white" id="journalTotalTrades">0</span>
+                            </div>
+                            <div class="space-y-1 text-center">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold">Win Rate</span>
+                                <span class="text-2xl font-black font-mono text-green-400" id="journalWinRate">0.0%</span>
+                            </div>
+                            <div class="space-y-1 text-center">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold">Average Risk/Reward</span>
+                                <span class="text-2xl font-black font-mono text-blue-400" id="journalAvgRR">1:2.4</span>
+                            </div>
+                            <div class="space-y-1 text-center">
+                                <span class="text-[10px] text-gray-400 uppercase block font-bold">Most Successful Setup</span>
+                                <span class="text-sm font-bold text-amber-500 block mt-1" id="journalBestSetup">Demand Zone Bounce</span>
+                            </div>
+                        </div>
+
+                        <!-- Journal Log list -->
+                        <div class="bg-[#1e2329] rounded border border-gray-800 overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[700px]">
+                                <thead>
+                                    <tr class="border-b border-gray-800 text-gray-400 bg-[#181a20]">
+                                        <th class="p-3">Date</th>
+                                        <th class="p-3">Asset</th>
+                                        <th class="p-3">Recommendation</th>
+                                        <th class="p-3 font-mono">Targets (SL/TP)</th>
+                                        <th class="p-3 font-mono">Confidence</th>
+                                        <th class="p-3">Quality</th>
+                                        <th class="p-3">Outcome Status</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="journalTableBody">
+                                    <!-- Dynamic rows loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <!-- Tab: Recent AI Signal History -->
                     <div id="tabContentSignals" class="hidden overflow-x-auto">
-                        <table class="w-full text-left text-xs">
+                        <table class="w-full text-left text-xs min-w-[600px]">
                             <thead>
-                                <tr class="border-b border-gray-800 text-gray-400">
-                                    <th class="py-2">Time</th>
-                                    <th class="py-2">Symbol</th>
-                                    <th class="py-2">Type</th>
-                                    <th class="py-2">Price</th>
-                                    <th class="py-2">AI Score</th>
-                                    <th class="py-2">Confidence</th>
-                                    <th class="py-2">Result</th>
+                                <tr class="border-b border-gray-800 text-gray-400 bg-[#181a20]">
+                                    <th class="p-3">Time</th>
+                                    <th class="p-3">Symbol</th>
+                                    <th class="p-3">Type</th>
+                                    <th class="p-3">Price</th>
+                                    <th class="p-3">AI Score</th>
+                                    <th class="p-3">Confidence</th>
+                                    <th class="p-3 text-right">Result</th>
                                 </tr>
                             </thead>
                             <tbody id="signalHistoryBody">
                                 <!-- Populated dynamically -->
                                 <tr class="border-b border-gray-800/50 text-gray-400">
-                                    <td class="py-3" colspan="7 text-center">No signal triggers yet. Signal updates occur automatically when patterns are detected.</td>
+                                    <td class="p-3" colspan="7 text-center">No signal triggers yet. Signal updates occur automatically when patterns are detected.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -418,8 +764,8 @@
                 </div>
             </main>
 
-            <!-- Right Sidebar (AI Analyst & Risk) -->
-            <aside class="w-80 border-l border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 overflow-y-auto">
+            <!-- RIGHT SIDEBAR (AI ANALYST, EXPLAINABILITY & TRADE PLANNER) -->
+            <aside class="w-80 border-l border-gray-800 bg-[#181a20] flex flex-col flex-shrink-0 overflow-y-auto scrollbar-thin">
                 
                 <!-- Section 1: AI Decision Gauge -->
                 <div class="p-4 border-b border-gray-800 flex flex-col items-center">
@@ -451,21 +797,48 @@
                     </div>
                 </div>
 
-                <!-- Section 3: Explanation -->
+                <!-- Section 3: Expected Move Metrics -->
                 <div class="p-4 border-b border-gray-800 bg-[#14161c]">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">Expected Move Analytics</h4>
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+                        <div class="bg-[#1e2329] p-2 rounded border border-gray-800/60">
+                            <span class="text-gray-400 block mb-0.5">EST PRICE</span>
+                            <span class="font-bold text-white font-mono" id="expPriceMove">---</span>
+                        </div>
+                        <div class="bg-[#1e2329] p-2 rounded border border-gray-800/60">
+                            <span class="text-gray-400 block mb-0.5">VOLATILITY</span>
+                            <span class="font-bold text-amber-500 font-mono" id="expVolatility">---</span>
+                        </div>
+                        <div class="bg-[#1e2329] p-2 rounded border border-gray-800/60">
+                            <span class="text-gray-400 block mb-0.5">DURATION</span>
+                            <span class="font-bold text-white" id="expDuration">---</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: AI Explainability (Transparent Reasoning & Invalidation) -->
+                <div class="p-4 border-b border-gray-800 bg-[#14161c]/50">
                     <div class="flex items-center justify-between mb-2">
                         <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider">Transparent Reasoning</h4>
                         <span class="text-[10px] text-gray-500" id="reasoningCount">0 Indicators Agree</span>
                     </div>
                     <ul class="space-y-1.5 text-xs text-gray-300" id="aiExplanationContainer">
                         <li class="flex items-start space-x-2">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-gray-500 mt-0.5"></i>
+                            <span class="text-amber-500 font-bold mr-1 text-[11px] select-none">✔</span>
                             <span>Fetching data to compile intelligence indicators...</span>
                         </li>
                     </ul>
+
+                    <!-- What Could Invalidate This Trade -->
+                    <div class="mt-4 pt-3 border-t border-gray-800">
+                        <span class="text-[10px] font-bold text-red-400 uppercase tracking-wider block mb-1.5">Setup Invalidation Scenarios</span>
+                        <p class="text-[11px] text-gray-400 leading-relaxed" id="aiInvalidationText">
+                            Setup remains valid unless key support bounds are broken with high selling volume structure on hourly interval.
+                        </p>
+                    </div>
                 </div>
 
-                <!-- Section 4: Multi-Timeframe Analysis -->
+                <!-- Section 5: Multi-Timeframe Analysis -->
                 <div class="p-4 border-b border-gray-800">
                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Multi-Timeframe Status</h4>
                     <div class="grid grid-cols-5 gap-1.5 text-center text-[10px]">
@@ -492,42 +865,81 @@
                     </div>
                 </div>
 
-                <!-- Section 5: Risk Management -->
+                <!-- Section 6: Upgraded Trade Planner with Position Size Calculator -->
                 <div class="p-4 bg-[#1a1c22]">
                     <div class="flex items-center justify-between mb-3 border-b border-gray-800 pb-2">
                         <span class="text-xs uppercase tracking-wider font-bold text-gray-400">Trade Planner</span>
                         <span class="text-[10px] text-amber-500 font-bold px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">AI Target Matrix</span>
                     </div>
 
+                    <!-- Calculator inputs -->
+                    <div class="grid grid-cols-2 gap-2 mb-3 bg-black/20 p-2.5 rounded border border-gray-800 text-[11px]">
+                        <div>
+                            <label class="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">Balance ($)</label>
+                            <input type="number" id="calcAccountSize" value="10000" class="w-full bg-[#1e2329] border border-gray-700 rounded px-1.5 py-0.5 font-mono text-white text-xs outline-none focus:border-amber-500">
+                        </div>
+                        <div>
+                            <label class="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">Risk %</label>
+                            <input type="number" id="calcRiskPct" value="2.0" step="0.5" class="w-full bg-[#1e2329] border border-gray-700 rounded px-1.5 py-0.5 font-mono text-white text-xs outline-none focus:border-amber-500">
+                        </div>
+                    </div>
+
+                    <!-- Core metrics list -->
                     <div class="space-y-2.5 text-xs">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-400">Trading Pair:</span>
                             <span class="font-bold uppercase px-1.5 py-0.5 rounded text-[10px] bg-amber-500 text-black font-extrabold" id="valPositionType">HOLD</span>
                         </div>
                         <div class="flex justify-between items-center">
+                            <span class="text-gray-400 font-bold">Suggested Position Size:</span>
+                            <span class="font-bold text-white font-mono" id="valPositionSize">--</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <span>Max Risk Loss:</span>
+                            <span class="font-semibold text-red-400 font-mono" id="valMaxLoss">$200.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <span>Leverage Suggestion:</span>
+                            <span class="font-bold text-amber-500 font-mono" id="valLeverage">10x</span>
+                        </div>
+                        <div class="flex justify-between items-center">
                             <span class="text-gray-400">Suggested Entry:</span>
-                            <span class="font-bold text-white" id="valEntryPrice">--</span>
+                            <span class="font-bold text-white font-mono" id="valEntryPrice">--</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-400">Stop Loss (SL):</span>
-                            <span class="font-bold text-red-500" id="valStopLoss">--</span>
+                            <span class="font-bold text-red-500 font-mono" id="valStopLoss">--</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <span>Invalidation Point:</span>
+                            <span class="font-semibold text-gray-300 font-mono" id="valInvalidation">--</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-400">Take Profit 1 (TP1):</span>
-                            <span class="font-bold text-green-500" id="valTp1">--</span>
+                            <span class="font-bold text-green-500 font-mono" id="valTp1">--</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-400">Take Profit 2 (TP2):</span>
-                            <span class="font-bold text-green-500" id="valTp2">--</span>
+                            <span class="font-bold text-green-500 font-mono" id="valTp2">--</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-400">Take Profit 3 (TP3):</span>
-                            <span class="font-bold text-green-500" id="valTp3">--</span>
+                            <span class="font-bold text-green-500 font-mono" id="valTp3">--</span>
                         </div>
                         <div class="flex justify-between items-center border-t border-gray-800/80 pt-2">
                             <span class="text-gray-400 font-semibold">Risk:Reward Ratio:</span>
                             <span class="font-bold text-blue-400" id="valRiskReward">--</span>
                         </div>
+                        <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <span>Expected Hold Time:</span>
+                            <span class="font-medium text-gray-300" id="valHoldTime">2.5 Hours</span>
+                        </div>
+
+                        <!-- Manual signal log button for the trade journal -->
+                        <button id="addJournalSignalBtn" class="w-full bg-amber-500 text-black font-bold py-2 rounded hover:bg-amber-400 transition text-[11px] mt-2 shadow flex items-center justify-center space-x-1">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Save Trade Setup to Journal</span>
+                        </button>
 
                         <!-- Liquidation Warnings -->
                         <div class="p-2 bg-yellow-500/10 border border-yellow-500/20 rounded text-[10px] text-yellow-300 leading-relaxed hidden" id="valLiquidationWarning">
