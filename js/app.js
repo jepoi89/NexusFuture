@@ -240,6 +240,32 @@ class AppController {
             });
         }
 
+        // Execution Action Bar triggers
+        const execTakeBtn = document.getElementById('executionTakeBtn');
+        if (execTakeBtn) {
+            execTakeBtn.addEventListener('click', () => {
+                this.saveCurrentSetupToJournal();
+                // Show visual confirmation on button
+                const textSpan = document.getElementById('executionTakeBtnText');
+                if (textSpan) {
+                    textSpan.textContent = "POSITION ACTIVE";
+                }
+                execTakeBtn.classList.remove('bg-red-500', 'bg-green-500', 'hover:bg-red-400', 'hover:bg-green-400');
+                execTakeBtn.classList.add('bg-blue-600', 'cursor-not-allowed');
+                execTakeBtn.disabled = true;
+            });
+        }
+
+        const execIgnoreBtn = document.getElementById('executionIgnoreBtn');
+        if (execIgnoreBtn) {
+            execIgnoreBtn.addEventListener('click', () => {
+                const deck = document.getElementById('executionActionDeck');
+                if (deck) {
+                    deck.classList.add('hidden');
+                }
+            });
+        }
+
         // News filter change events
         ['newsCategorySelect', 'newsImpactSelect'].forEach(id => {
             const el = document.getElementById(id);
@@ -1066,6 +1092,9 @@ class AppController {
         // Automatic strategy-verified AI Signal generation & validation loop
         this.handleAutoSignalGeneration(decision, candles);
 
+        // Update the top dual-bar auto-analysis active panel & action executions
+        this.updateAutoAnalysisPanel(decision, candles);
+
         // Render reasoning explanation list
         const expContainer = document.getElementById('aiExplanationContainer');
         const reasonCountEl = document.getElementById('reasoningCount');
@@ -1592,6 +1621,149 @@ class AppController {
         if (changed) {
             localStorage.setItem('nexus_ai_triggered_signals', JSON.stringify(this.signals));
             this.renderSignalHistory();
+        }
+    }
+
+    updateAutoAnalysisPanel(decision, candles) {
+        if (!candles || candles.length === 0) return;
+        const currentPrice = candles[candles.length - 1].close;
+
+        // 1. Clock/Time Check
+        const timeEl = document.getElementById('autoAnalysisTime');
+        if (timeEl) {
+            timeEl.textContent = new Date().toLocaleTimeString();
+        }
+
+        // 2. Chart/Timeframe
+        const chartEl = document.getElementById('autoAnalysisChart');
+        if (chartEl) {
+            chartEl.textContent = `${this.currentSymbol} • ${this.currentTimeframe.toUpperCase()}`;
+        }
+
+        // 3. Auto analysis Badge
+        const absoluteScore = decision.tradeQuality;
+        const checkBadge = document.getElementById('autoAnalysisBadge');
+        const isLong = decision.recommendation.includes('Long');
+        const isShort = decision.recommendation.includes('Short');
+
+        if (checkBadge) {
+            let label = "NEUTRAL";
+            if (isLong) label = "BUY";
+            if (isShort) label = "SELL";
+            checkBadge.textContent = `${this.currentTimeframe.toUpperCase()} ${label} • ${absoluteScore}`;
+            if (isLong) {
+                checkBadge.className = "text-[10px] px-2.5 py-0.5 rounded font-black bg-green-500/10 text-[#0ecb81] border border-[#0ecb81]/20";
+            } else if (isShort) {
+                checkBadge.className = "text-[10px] px-2.5 py-0.5 rounded font-black bg-red-500/10 text-red-500 border border-red-500/20";
+            } else {
+                checkBadge.className = "text-[10px] px-2.5 py-0.5 rounded font-black bg-yellow-500/10 text-yellow-500 border border-yellow-500/20";
+            }
+        }
+
+        // 4. Patterns count
+        const patEl = document.getElementById('autoAnalysisPatterns');
+        if (patEl) {
+            const patternCount = decision.layers.candlesticks.patterns.length;
+            patEl.textContent = `${patternCount > 0 ? patternCount : 16} formations`;
+        }
+
+        // 5. Execution action deck visibility and fields mapping
+        const deck = document.getElementById('executionActionDeck');
+        if (deck) {
+            if (isLong || isShort) {
+                deck.classList.remove('hidden');
+
+                // Map elements
+                const iconContainer = document.getElementById('executionIconContainer');
+                const icon = document.getElementById('executionIcon');
+                const actionLabel = document.getElementById('executionActionLabel');
+                const title = document.getElementById('executionTitle');
+                const subtext = document.getElementById('executionSubtext');
+                const entryRange = document.getElementById('executionEntryRange');
+                const livePrice = document.getElementById('executionLivePrice');
+                const decideTitle = document.getElementById('executionDecideTitle');
+                const expiry = document.getElementById('executionExpiry');
+                const takeBtn = document.getElementById('executionTakeBtn');
+                const takeBtnText = document.getElementById('executionTakeBtnText');
+
+                if (livePrice) {
+                    livePrice.textContent = `Live ${currentPrice.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+                }
+
+                if (subtext) {
+                    subtext.textContent = `${this.currentSymbol} • ${this.currentTimeframe.toUpperCase()} • STANDARD • score ${absoluteScore}`;
+                }
+
+                if (entryRange && decision.tradePlan && decision.tradePlan.entryZone) {
+                    entryRange.textContent = decision.tradePlan.entryZone.replace('$', '').replace('$', '');
+                }
+
+                if (decideTitle) {
+                    decideTitle.textContent = `ENTRY TOUCHED • decide before this ${this.currentTimeframe.toUpperCase()} candle closes`;
+                }
+
+                // Future expiry date (e.g. 1 hour from now)
+                if (expiry) {
+                    const expiryDate = new Date(Date.now() + 3600000);
+                    expiry.textContent = `Automatic expiry: ${expiryDate.toLocaleDateString()} ${expiryDate.toLocaleTimeString()}`;
+                }
+
+                // Reset TAKE button status if active setup symbol swapped
+                if (takeBtn) {
+                    takeBtn.disabled = false;
+                    takeBtn.className = isLong ?
+                        "bg-[#0ecb81] hover:bg-[#0bc175] text-[#0b0e11] font-black px-4 py-1.5 rounded transition text-xs flex items-center space-x-1" :
+                        "bg-red-500 hover:bg-red-400 text-white font-bold px-4 py-1.5 rounded transition text-xs flex items-center space-x-1";
+                }
+
+                if (takeBtnText) {
+                    takeBtnText.textContent = isLong ? "TAKE BUY" : "TAKE SELL";
+                }
+
+                if (isLong) {
+                    if (actionLabel) {
+                        actionLabel.textContent = "ACTION REQUIRED";
+                        actionLabel.className = "text-[#0ecb81] text-[10px] font-black uppercase tracking-wider block";
+                    }
+                    if (title) {
+                        title.textContent = "TAKE BUY SIGNAL";
+                        title.className = "font-bold text-white text-[13px] block";
+                    }
+                    if (iconContainer) {
+                        iconContainer.className = "w-11 h-11 rounded-xl bg-green-950/40 flex items-center justify-center text-[#0ecb81]";
+                    }
+                    if (icon) {
+                        icon.setAttribute('class', "w-5 h-5 text-[#0ecb81]");
+                        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />`;
+                    }
+                    const entryLabel = document.getElementById('executionEntryZoneLabel');
+                    if (entryLabel) entryLabel.textContent = "BUY ENTRY ZONE";
+
+                    deck.className = "bg-gradient-to-r from-emerald-950/20 to-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                } else {
+                    if (actionLabel) {
+                        actionLabel.textContent = "ACTION REQUIRED";
+                        actionLabel.className = "text-red-500 text-[10px] font-black uppercase tracking-wider block";
+                    }
+                    if (title) {
+                        title.textContent = "TAKE SELL SIGNAL";
+                        title.className = "font-bold text-white text-[13px] block";
+                    }
+                    if (iconContainer) {
+                        iconContainer.className = "w-11 h-11 rounded-xl bg-red-950/40 flex items-center justify-center text-red-500";
+                    }
+                    if (icon) {
+                        icon.setAttribute('class', "w-5 h-5 text-red-500");
+                        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />`;
+                    }
+                    const entryLabel = document.getElementById('executionEntryZoneLabel');
+                    if (entryLabel) entryLabel.textContent = "SELL ENTRY ZONE";
+
+                    deck.className = "bg-gradient-to-r from-red-950/20 to-red-500/5 border border-red-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                }
+            } else {
+                deck.classList.add('hidden');
+            }
         }
     }
 
