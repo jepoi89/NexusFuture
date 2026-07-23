@@ -273,16 +273,17 @@ export class BinanceAPI {
     /**
      * Establish WebSocket stream for live ticker and kline updates
      */
-    connectLiveStream(symbol, interval, onCandleUpdate, onTickerUpdate) {
+    connectLiveStream(symbol, interval, onCandleUpdate, onTickerUpdate, startingPrice = null) {
         this.currentSymbol = symbol.toLowerCase();
         this.currentInterval = this.mapInterval(interval);
         this.onCandleUpdateCallback = onCandleUpdate;
         this.onTickerUpdateCallback = onTickerUpdate;
+        this.currentStartingPrice = startingPrice;
 
         this.disconnect();
 
         // Start simulated fallback live updates in parallel to guarantee charting activity
-        this.startSimulatedLiveUpdates();
+        this.startSimulatedLiveUpdates(startingPrice);
 
         // WebSocket URLs (WebSockets typically do NOT have CORS restrictions in browsers)
         const wsUrl = `${BINANCE_WS_BASE}/${this.currentSymbol}@kline_${this.currentInterval}/${this.currentSymbol}@ticker`;
@@ -309,6 +310,7 @@ export class BinanceAPI {
                     if (data.e === 'kline') {
                         const kline = data.k;
                         const formattedCandle = {
+                            symbol: data.s ? data.s.toUpperCase() : this.currentSymbol.toUpperCase(),
                             time: kline.t / 1000,
                             open: parseFloat(kline.o),
                             high: parseFloat(kline.h),
@@ -322,7 +324,7 @@ export class BinanceAPI {
                         }
                     } else if (data.e === '24hrTicker') {
                         const formattedTicker = {
-                            symbol: data.s,
+                            symbol: data.s ? data.s.toUpperCase() : this.currentSymbol.toUpperCase(),
                             price: parseFloat(data.c),
                             changePercent: parseFloat(data.P),
                             volume: parseFloat(data.v)
@@ -352,21 +354,24 @@ export class BinanceAPI {
         }
     }
 
-    startSimulatedLiveUpdates() {
+    startSimulatedLiveUpdates(startingPrice = null) {
         if (this.simulatedInterval) clearInterval(this.simulatedInterval);
         
-        let currentPrice = 95000;
-        if (this.currentSymbol.includes('eth')) currentPrice = 3200;
-        else if (this.currentSymbol.includes('bnb')) currentPrice = 600;
-        else if (this.currentSymbol.includes('sol')) currentPrice = 220;
-        else if (this.currentSymbol.includes('xrp')) currentPrice = 2.50;
-        else if (this.currentSymbol.includes('ada')) currentPrice = 0.80;
-        else if (this.currentSymbol.includes('doge')) currentPrice = 0.35;
-        else if (this.currentSymbol.includes('sui')) currentPrice = 3.0;
-        else if (this.currentSymbol.includes('link')) currentPrice = 18;
-        else if (this.currentSymbol.includes('avax')) currentPrice = 28;
-        else if (this.currentSymbol.includes('shib')) currentPrice = 0.000025;
-        else if (this.currentSymbol.includes('trx')) currentPrice = 0.20;
+        let currentPrice = startingPrice;
+        if (currentPrice === null || currentPrice === undefined) {
+            currentPrice = 95000;
+            if (this.currentSymbol.includes('eth')) currentPrice = 3200;
+            else if (this.currentSymbol.includes('bnb')) currentPrice = 600;
+            else if (this.currentSymbol.includes('sol')) currentPrice = 220;
+            else if (this.currentSymbol.includes('xrp')) currentPrice = 2.50;
+            else if (this.currentSymbol.includes('ada')) currentPrice = 0.80;
+            else if (this.currentSymbol.includes('doge')) currentPrice = 0.35;
+            else if (this.currentSymbol.includes('sui')) currentPrice = 3.0;
+            else if (this.currentSymbol.includes('link')) currentPrice = 18;
+            else if (this.currentSymbol.includes('avax')) currentPrice = 28;
+            else if (this.currentSymbol.includes('shib')) currentPrice = 0.000025;
+            else if (this.currentSymbol.includes('trx')) currentPrice = 0.20;
+        }
 
         this.simulatedInterval = setInterval(() => {
             if (!this.currentSymbol) return;
@@ -378,6 +383,7 @@ export class BinanceAPI {
 
             if (this.onCandleUpdateCallback) {
                 this.onCandleUpdateCallback({
+                    symbol: this.currentSymbol.toUpperCase(),
                     time,
                     open: currentPrice,
                     high: Math.max(currentPrice, nextPrice) * 1.001,
@@ -400,7 +406,8 @@ export class BinanceAPI {
                     this.currentSymbol, 
                     this.currentInterval, 
                     this.onCandleUpdateCallback, 
-                    this.onTickerUpdateCallback
+                    this.onTickerUpdateCallback,
+                    this.currentStartingPrice
                 );
             }
         }, 5000);

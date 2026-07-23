@@ -706,12 +706,21 @@ class AppController {
             this.currentSymbol,
             this.currentTimeframe,
             (tick) => {
+                if (tick.symbol && tick.symbol.toUpperCase() !== this.currentSymbol.toUpperCase()) {
+                    console.log(`Discarding mismatched live tick: tick symbol ${tick.symbol} vs current ${this.currentSymbol}`);
+                    return;
+                }
                 this.chartManager.updateData(tick);
                 this.onLiveCandleTick(tick);
             },
             (ticker) => {
+                if (ticker.symbol && ticker.symbol.toUpperCase() !== this.currentSymbol.toUpperCase()) {
+                    console.log(`Discarding mismatched live ticker: ticker symbol ${ticker.symbol} vs current ${this.currentSymbol}`);
+                    return;
+                }
                 this.onLiveTickerTick(ticker);
-            }
+            },
+            lastCandle ? lastCandle.close : null
         );
     }
 
@@ -900,6 +909,9 @@ class AppController {
     }
 
     onLiveCandleTick(tick) {
+        if (tick.symbol && tick.symbol.toUpperCase() !== this.currentSymbol.toUpperCase()) {
+            return;
+        }
         const candles = [...this.chartManager.cachedCandles];
         candles.symbol = this.chartManager.cachedCandles.symbol || this.currentSymbol;
         this.runAiEvaluation(candles);
