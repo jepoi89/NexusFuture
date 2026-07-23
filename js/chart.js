@@ -200,9 +200,11 @@ export class ChartManager {
     /**
      * Render entire candlestick and volume history onto the chart
      * @param {Array<object>} candles - List of historical candles
+     * @param {string} symbol - The symbol associated with the candles
      */
-    setData(candles) {
+    setData(candles, symbol = '') {
         this.cachedCandles = candles;
+        this.cachedCandles.symbol = symbol;
         
         // 1. Candlestick prices
         this.candleSeries.setData(candles);
