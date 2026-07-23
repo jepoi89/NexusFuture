@@ -160,17 +160,40 @@ export class BinanceAPI {
         const nowMs = Date.now();
         const intervalSeconds = this.getIntervalInSeconds(interval);
 
+        // Define symbol-specific biases
+        let drift = 0.0001;
+        let volatilityMultiplier = 1.0;
+
+        const symUpper = symbol.toUpperCase();
+        if (symUpper.includes('BTC')) {
+            drift = 0.0006; // strongly bullish
+            volatilityMultiplier = 0.8;
+        } else if (symUpper.includes('ETH')) {
+            drift = -0.0005; // strongly bearish
+            volatilityMultiplier = 1.1;
+        } else if (symUpper.includes('SOL')) {
+            drift = 0.0008; // volatile bullish
+            volatilityMultiplier = 1.5;
+        } else if (symUpper.includes('XRP')) {
+            drift = 0.0004; // bullish
+            volatilityMultiplier = 1.3;
+        } else if (symUpper.includes('BNB')) {
+            drift = 0.0002; // mildly bullish
+            volatilityMultiplier = 0.7;
+        } else {
+            drift = (symUpper.charCodeAt(0) % 5 - 2) * 0.0001; // sideways/range/noise
+            volatilityMultiplier = 1.0;
+        }
+
         for (let i = limit; i >= 0; i--) {
             const time = Math.floor((nowMs - i * intervalSeconds * 1000) / 1000);
             
-            // Random walk with a slight upward drift bias
-            const drift = 0.0001; 
-            const changePercent = (Math.random() - 0.49) * 0.015 + drift;
+            const changePercent = (Math.random() - 0.49) * 0.015 * volatilityMultiplier + drift;
             const open = lastClose;
             const close = open * (1 + changePercent);
             
-            const high = Math.max(open, close) * (1 + Math.random() * 0.005);
-            const low = Math.min(open, close) * (1 - Math.random() * 0.005);
+            const high = Math.max(open, close) * (1 + Math.random() * 0.005 * volatilityMultiplier);
+            const low = Math.min(open, close) * (1 - Math.random() * 0.005 * volatilityMultiplier);
             const volume = 100 + Math.random() * 900;
 
             candles.push({ time, open, high, low, close, volume });
