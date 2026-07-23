@@ -253,7 +253,16 @@ export class AIDecisionEngine {
             Math.abs(candlesScore) * 0.1
         );
 
-        qualityScore = Math.round(baseAlignment);
+        // Scale qualityScore more dynamically: we want it to be robust and reach 75-96% for trending setups
+        // Boost based on the absolute value of weightedScore (which shows strong consensus)
+        qualityScore = Math.round(baseAlignment * 1.35 + Math.abs(weightedScore) * 0.45);
+
+        // Let's also ensure it gets a baseline boost if trend is strong
+        if (marketStructure.trendStrength === 'Strong') {
+            qualityScore += 15;
+        } else if (marketStructure.trendStrength === 'Moderate') {
+            qualityScore += 8;
+        }
 
         // Adjust trade quality based on volatility suitability & multi-timeframe alignment
         if (mtfInt.agreement === 'Full Alignment') qualityScore += 12;

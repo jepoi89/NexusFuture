@@ -782,17 +782,32 @@
                 </div>
 
                 <!-- Section 2: Recommendation Level Card -->
-                <div class="p-4 border-b border-gray-800">
-                    <div class="p-3.5 rounded-lg border flex flex-col items-center justify-center text-center transition duration-300" id="aiRecCard">
-                        <span class="text-xs uppercase tracking-wider font-semibold opacity-75">Recommendation</span>
-                        <span class="text-xl font-black my-1" id="aiRecText">HOLD</span>
-                        <div class="flex items-center space-x-1.5 text-xs">
-                            <span>Confidence:</span>
-                            <span class="font-bold" id="aiConfidenceText">--</span>
+                <div class="p-3 border-b border-gray-800">
+                    <div class="p-3 rounded-lg border flex items-center justify-between transition duration-300 space-x-2 bg-[#1e2329]/30 border-gray-800" id="aiRecCard">
+                        <!-- Left Icon: Rounded Square -->
+                        <div class="w-11 h-11 rounded-xl bg-gray-800/40 flex items-center justify-center flex-shrink-0" id="aiRecIconContainer">
+                            <svg id="aiRecIcon" class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
                         </div>
-                        <!-- Progress Bar style indicator -->
-                        <div class="w-full bg-black/40 h-1.5 rounded-full mt-2.5 overflow-hidden border border-gray-800">
-                            <div class="bg-gray-400 h-full transition-all duration-500" style="width: 0%" id="aiConfidenceBar"></div>
+
+                        <!-- Middle: Text Content -->
+                        <div class="flex-1 min-w-0">
+                            <span class="text-[9px] uppercase tracking-wider font-bold text-gray-400 block">STRATEGY-VERIFIED SIGNAL</span>
+                            <span class="text-[13px] font-black tracking-wide uppercase truncate block text-white" id="aiRecText">HOLD / NEUTRAL</span>
+                            <span class="text-[10px] text-gray-400 block truncate" id="aiRecDesc">Awaiting strong trend alignment...</span>
+                        </div>
+
+                        <!-- Right: Circular Score Gauge -->
+                        <div class="relative w-14 h-14 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                <path class="text-gray-800" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="aiRecCircleProgress" class="text-gray-500 transition-all duration-500" stroke-dasharray="0, 100" stroke-width="3.2" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                <span class="text-xs font-black text-white leading-none" id="aiRecCircleScore">--</span>
+                                <span class="text-[7px] uppercase font-bold text-gray-400 mt-0.5">SCORE</span>
+                            </div>
                         </div>
                     </div>
                 </div>
