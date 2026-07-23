@@ -33,19 +33,19 @@ body.dark {
     color: #eaecef;
 }
 
-/* Glowing text and card shadows for indicators */
+/* Glowing text and card shadows for active signals */
 .glow-green {
-    box-shadow: 0 0 10px rgba(14, 203, 129, 0.25);
+    box-shadow: 0 0 12px rgba(14, 203, 129, 0.3);
     border-color: #0ecb81 !important;
 }
 
 .glow-red {
-    box-shadow: 0 0 10px rgba(246, 70, 93, 0.25);
+    box-shadow: 0 0 12px rgba(246, 70, 93, 0.3);
     border-color: #f6465d !important;
 }
 
 .glow-yellow {
-    box-shadow: 0 0 10px rgba(240, 185, 11, 0.25);
+    box-shadow: 0 0 12px rgba(240, 185, 11, 0.3);
     border-color: #f0b90b !important;
 }
 
@@ -71,6 +71,22 @@ aside {
     border-color: #f0b90b !important;
     color: #000000 !important;
     font-weight: 700;
+}
+
+/* Horizontal scrolling ticker styles */
+@keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marquee 35s linear infinite;
+}
+
+.animate-marquee:hover {
+    animation-play-state: paused;
 }
 
 /* Table scroll bars styling */

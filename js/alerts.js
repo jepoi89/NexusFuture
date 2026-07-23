@@ -144,10 +144,14 @@ export class AlertsManager {
         
         // 1. Browser Notification
         if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(title, { body: message });
+            try {
+                new Notification(title, { body: message });
+            } catch (err) {
+                console.warn("Native Notification failed (usually safe in sandbox headless tests):", err);
+            }
         }
 
-        // 2. Audio Beep (synthesized with Web Audio API)
+        // 2. Audio Chime (synthesized with Web Audio API)
         if (this.soundEnabled) {
             try {
                 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();

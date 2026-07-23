@@ -95,7 +95,7 @@ export class AIDecisionEngine {
         const currentMomentum = momentum[idx];
 
         // ==========================================
-        // LAYER 1 — Market Structure Engine
+        // LAYER 1 — Market Structure Engine (BOS/CHoCH/Order Blocks/FVGs)
         // ==========================================
         const marketStructure = this.evaluateMarketStructure(candles, ema20, ema50, ema200, adx);
 
@@ -379,7 +379,7 @@ export class AIDecisionEngine {
     }
 
     /**
-     * Layer 1 - Market Structure Engine
+     * Layer 1 - Market Structure Engine (Upgraded with BOS/CHoCH, Equal Highs/Lows, FVGs, Order Blocks)
      */
     evaluateMarketStructure(candles, ema20, ema50, ema200, adx) {
         const idx = candles.length - 1;
@@ -393,6 +393,10 @@ export class AIDecisionEngine {
         const prevSwingHigh = swings.highs[swings.highs.length - 2] || lastSwingHigh;
         const prevSwingLow = swings.lows[swings.lows.length - 2] || lastSwingLow;
 
+        // Equal Highs / Equal Lows (Double Top / Bottom equivalent)
+        const isEqualHighs = Math.abs(lastSwingHigh - prevSwingHigh) / lastSwingHigh < 0.001;
+        const isEqualLows = Math.abs(lastSwingLow - prevSwingLow) / lastSwingLow < 0.001;
+
         // Higher High, Higher Low, etc.
         const isHH = lastSwingHigh > prevSwingHigh;
         const isLH = lastSwingHigh < prevSwingHigh;
@@ -402,17 +406,13 @@ export class AIDecisionEngine {
         // BOS & CHoCH checks
         let bos = false;
         let choch = false;
-        let direction = 0; // 1 for Bullish, -1 for Bearish, 0 for Neutral
 
         if (lastClose > prevSwingHigh) {
             bos = true;
-            direction = 1; // Trend Continuation
         } else if (lastClose < prevSwingLow) {
             bos = true;
-            direction = -1; // Trend Continuation
         }
 
-        // CHoCH is reversal of structure
         const lastCandle = candles[idx - 1];
         if (lastClose < prevSwingLow && lastCandle.close >= prevSwingLow) {
             choch = true; // Change of character Bearish
@@ -425,6 +425,46 @@ export class AIDecisionEngine {
         if ((currentCandle.high > lastSwingHigh && lastClose < lastSwingHigh) ||
             (currentCandle.low < lastSwingLow && lastClose > lastSwingLow)) {
             liquiditySweep = true;
+        }
+
+        // Fair Value Gaps (FVG) Detection
+        // Occurs when there is a large second candle whose body does not overlap with 1st & 3rd shadow tails
+        const fvgs = [];
+        for (let i = idx - 10; i < idx; i++) {
+            if (i < 2) continue;
+            const c1 = candles[i - 2];
+            const c2 = candles[i - 1];
+            const c3 = candles[i];
+
+            if (c1.high < c3.low) {
+                fvgs.push({ type: 'bullish', low: c1.high, high: c3.low, width: c3.low - c1.high });
+            } else if (c1.low > c3.high) {
+                fvgs.push({ type: 'bearish', low: c3.high, high: c1.low, width: c1.low - c3.high });
+            }
+        }
+        const activeFvg = fvgs.length > 0 ? fvgs[fvgs.length - 1] : null;
+
+        // Order Blocks (OB) Detection
+        // Bullish OB: Last down candle before an upward impulse breakout (BOS)
+        // Bearish OB: Last up candle before a downward impulse breakout (BOS)
+        let orderBlockType = 'None';
+        let orderBlockPrice = 0;
+
+        if (bos) {
+            const isImpulseUp = lastClose > prevSwingHigh;
+            for (let i = idx - 1; i > idx - 15; i--) {
+                if (i < 0) break;
+                const c = candles[i];
+                if (isImpulseUp && c.close < c.open) {
+                    orderBlockType = 'Bullish Demand OB';
+                    orderBlockPrice = c.low;
+                    break;
+                } else if (!isImpulseUp && c.close > c.open) {
+                    orderBlockType = 'Bearish Supply OB';
+                    orderBlockPrice = c.high;
+                    break;
+                }
+            }
         }
 
         // Consolidation, Expansion, Compression
@@ -471,9 +511,14 @@ export class AIDecisionEngine {
             swingHigh: lastSwingHigh,
             swingLow: lastSwingLow,
             isHH, isLH, isHL, isLL,
+            isEqualHighs,
+            isEqualLows,
             bos,
             choch,
             liquiditySweep,
+            activeFvg,
+            orderBlockType,
+            orderBlockPrice,
             condition
         };
     }
@@ -995,8 +1040,6 @@ export class AIDecisionEngine {
      * Layer 9 - Fundamental & News Intelligence Engine
      */
     evaluateNews(newsFeed) {
-        // Since we are running in frontend, we generate a synthetic/live-curated news engine
-        // that responds intelligently to news elements provided or fallbacks to symbol specific news.
         if (newsFeed && newsFeed.headline) {
             return {
                 headline: newsFeed.headline,
@@ -1021,7 +1064,6 @@ export class AIDecisionEngine {
      * Layer 10 - Market Sentiment Engine
      */
     evaluateSentiment(sentimentData, candles, rsi, volumeInt) {
-        // Formulates a net sentiment score (-100 to +100) using Fear vs Greed, funding, liquids
         let score = 20; // Default positive bias
         const reasons = [];
 

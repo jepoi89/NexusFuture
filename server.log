@@ -1,89 +1,84 @@
-127.0.0.1 - - [22/Jul/2026 14:00:38] "HEAD /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:18] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:18] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:18] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:01:19] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:07] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:07] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:07] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:08] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:02:55] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /index.html HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 14:04:42] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:17] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:17] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:17] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:32:18] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:42] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:42] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:42] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:33:43] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:38:53] "GET /js/patterns.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /css/style.css HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/app.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/risk.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/ai-engine.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/utils.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/api.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/chart.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/alerts.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/indicators.js HTTP/1.1" 200 -
-127.0.0.1 - - [22/Jul/2026 15:56:41] "GET /js/patterns.js HTTP/1.1" 200 -
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/http/server.py", line 1329, in <module>
+    test(
+  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/http/server.py", line 1276, in test
+    with ServerClass(addr, HandlerClass) as httpd:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/socketserver.py", line 457, in __init__
+    self.server_bind()
+  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/http/server.py", line 1323, in server_bind
+    return super().server_bind()
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/http/server.py", line 140, in server_bind
+    socketserver.TCPServer.server_bind(self)
+  File "/home/jules/.pyenv/versions/3.12.13/lib/python3.12/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 98] Address already in use
+127.0.0.1 - - [22/Jul/2026 15:37:35] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:35] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:35] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/indicators.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:37:36] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:25] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:25] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:25] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/indicators.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:41:26] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:01] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:01] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:01] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/indicators.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:45:02] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:50] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:50] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:50] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/indicators.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:49:51] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:20] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:20] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:20] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/indicators.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:53:21] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:36] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:36] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:36] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [22/Jul/2026 15:54:37] "GET /js/indicators.js HTTP/1.1" 200 -
