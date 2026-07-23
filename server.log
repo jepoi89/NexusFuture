@@ -192,3 +192,14 @@ OSError: [Errno 98] Address already in use
 127.0.0.1 - - [23/Jul/2026 08:16:34] "GET /js/alerts.js HTTP/1.1" 200 -
 127.0.0.1 - - [23/Jul/2026 08:16:34] "GET /js/indicators.js HTTP/1.1" 200 -
 127.0.0.1 - - [23/Jul/2026 08:16:34] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:29] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:29] "GET /css/style.css HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:29] "GET /js/app.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:30] "GET /js/api.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:30] "GET /js/chart.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:30] "GET /js/utils.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:30] "GET /js/alerts.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:30] "GET /js/ai-engine.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:30] "GET /js/risk.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:31] "GET /js/patterns.js HTTP/1.1" 200 -
+127.0.0.1 - - [23/Jul/2026 10:19:31] "GET /js/indicators.js HTTP/1.1" 200 -
