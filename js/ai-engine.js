@@ -1129,18 +1129,20 @@ export class AIDecisionEngine {
      */
     generateTradePlan(candles, action, priceAction, atr) {
         const currentClose = candles[candles.length - 1].close;
-        const isLong = action.includes('Long');
-        const isShort = action.includes('Short');
+
+        // Even if recommendation is "Avoid Trade" or "Wait", we want to plan a prospective setup
+        // so that the UI fields (Entry, SL, TP, Risk Reward) are always populated with professional target matrices.
+        // If not a strong direction, we can default to a long or short based on close vs EMA/midpoint.
+        let isLong = action.includes('Long');
+        let isShort = action.includes('Short');
 
         if (!isLong && !isShort) {
-            return {
-                entryZone: 'No active trade setup.',
-                confirmationTrigger: 'N/A',
-                stopLoss: 0,
-                tp1: 0, tp2: 0, tp3: 0,
-                riskRewardRatio: 'N/A',
-                notes: 'Market conditions do not support a clean risk-managed setup. Maintain cash positions.'
-            };
+            // Default setup based on whether price action favors a prospective breakout or bounce
+            if (currentClose > (priceAction.support + priceAction.resistance) / 2) {
+                isLong = true;
+            } else {
+                isShort = true;
+            }
         }
 
         // Compute Entry Zone
