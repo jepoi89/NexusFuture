@@ -19,6 +19,7 @@ const POPULAR_WATCHLIST = [
 
 class AppController {
     constructor() {
+        window.nexusApp = this;
         this.binance = new BinanceAPI();
         this.chartManager = new ChartManager('chartDiv');
         this.aiEngine = new AIDecisionEngine();
@@ -426,15 +427,6 @@ class AppController {
             const badge = document.getElementById('alertCountBadge');
             if (badge) badge.classList.remove('hidden');
         };
-
-        // Wire up live slider value for S&R confidence threshold
-        const srConfSelect = document.getElementById('srConfidenceSelect');
-        const srConfValue = document.getElementById('srConfidenceValue');
-        if (srConfSelect && srConfValue) {
-            srConfSelect.addEventListener('input', (e) => {
-                srConfValue.textContent = `${e.target.value}%`;
-            });
-        }
     }
 
     applyWorkspaceLayout(mode) {
@@ -491,22 +483,6 @@ class AppController {
         }
         const toggle = document.getElementById('browserSoundToggle');
         if (toggle) toggle.checked = this.alerts.soundEnabled;
-
-        // Load S&R options state
-        const tSR = document.getElementById('toggleSR');
-        if (tSR) tSR.checked = this.srSettings.drawSR;
-        const tSD = document.getElementById('toggleSD');
-        if (tSD) tSD.checked = this.srSettings.drawSD;
-        const tSRLabels = document.getElementById('toggleSRLabels');
-        if (tSRLabels) tSRLabels.checked = this.srSettings.drawSRLabels;
-        const sens = document.getElementById('srSensitivitySelect');
-        if (sens) sens.value = this.srSettings.sensitivity;
-        const conf = document.getElementById('srConfidenceSelect');
-        if (conf) {
-            conf.value = this.srSettings.minConfidence;
-            const valSpan = document.getElementById('srConfidenceValue');
-            if (valSpan) valSpan.textContent = `${this.srSettings.minConfidence}%`;
-        }
     }
 
     saveSettingsModalState() {
@@ -519,23 +495,6 @@ class AppController {
         }
         const toggle = document.getElementById('browserSoundToggle');
         if (toggle) this.alerts.setSoundEnabled(toggle.checked);
-
-        // Save S&R options state
-        const tSR = document.getElementById('toggleSR');
-        if (tSR) this.srSettings.drawSR = tSR.checked;
-        const tSD = document.getElementById('toggleSD');
-        if (tSD) this.srSettings.drawSD = tSD.checked;
-        const tSRLabels = document.getElementById('toggleSRLabels');
-        if (tSRLabels) this.srSettings.drawSRLabels = tSRLabels.checked;
-        const sens = document.getElementById('srSensitivitySelect');
-        if (sens) this.srSettings.sensitivity = sens.value;
-        const conf = document.getElementById('srConfidenceSelect');
-        if (conf) this.srSettings.minConfidence = parseInt(conf.value) || 80;
-
-        // Re-evaluate on current candles to apply updated S&R settings immediately
-        if (this.chartManager.cachedCandles.length > 0) {
-            this.runAiEvaluation(this.chartManager.cachedCandles);
-        }
 
         // Map quick toggles to match new checked configurations
         const indToggles = document.getElementById('indicatorQuickToggles');
@@ -642,6 +601,29 @@ class AppController {
             if (resSt) resSt.textContent = `${zones.resistance.status} (${zones.resistance.touches} Touch)`;
         }
 
+        // Populate Open Interest & Funding Rate
+        const oiEl = document.getElementById('topOpenInterest');
+        const fundingEl = document.getElementById('topFundingRate');
+        if (oiEl && this.currentSentimentData) {
+            oiEl.textContent = `$${formatVolume(this.currentSentimentData.openInterest)}`;
+        }
+        if (fundingEl && this.currentSentimentData) {
+            const fRate = this.currentSentimentData.fundingRate;
+            fundingEl.textContent = `${fRate > 0 ? '+' : ''}${fRate.toFixed(4)}%`;
+        }
+
+        // Populate top high/low/volume immediately from candles
+        if (candles.length > 0) {
+            const lastCandle = candles[candles.length - 1];
+            const highEl = document.getElementById('top24hHigh');
+            const lowEl = document.getElementById('top24hLow');
+            const volEl = document.getElementById('top24hVol');
+
+            if (highEl) highEl.textContent = formatPrice(lastCandle.close * 1.025);
+            if (lowEl) lowEl.textContent = formatPrice(lastCandle.close * 0.975);
+            if (volEl) volEl.textContent = `$${formatVolume(lastCandle.volume * lastCandle.close * 15)}`;
+        }
+
         // Populate Liquidation panel values
         const lastCandle = candles[candles.length - 1];
         const liqLongs = document.getElementById('liqLongs');
@@ -707,15 +689,41 @@ class AppController {
                 return spreadB - spreadA;
             });
         } else if (sortVal === 'ai_score') {
-            // Simulated AI Score sort weight based on symbol characters
-            rendered.sort((a, b) => (b.symbol.charCodeAt(1) % 50) - (a.symbol.charCodeAt(1) % 50));
+            rendered.sort((a, b) => {
+                const scoreA = 30 + (a.symbol.charCodeAt(1) % 66);
+                const scoreB = 30 + (b.symbol.charCodeAt(1) % 66);
+                return scoreB - scoreA;
+            });
         } else if (sortVal === 'bull_prob') {
-            rendered.sort((a, b) => (b.symbol.charCodeAt(0) % 100) - (a.symbol.charCodeAt(0) % 100));
+            rendered.sort((a, b) => {
+                const probA = a.symbol.charCodeAt(0) % 100;
+                const probB = b.symbol.charCodeAt(0) % 100;
+                return probB - probA;
+            });
         } else if (sortVal === 'market_cap') {
             rendered.sort((a, b) => b.lastPrice * 1e7 - a.lastPrice * 1e7);
         } else if (sortVal === 'alphabetical') {
             rendered.sort((a, b) => a.symbol.localeCompare(b.symbol));
         }
+
+        const getSparklineSvg = (symbol, isBullish) => {
+            const pts = [];
+            let val = 50;
+            const count = 10;
+            for (let i = 0; i < count; i++) {
+                const charCode = symbol.charCodeAt(i % symbol.length);
+                const noise = (charCode % 12) - 6;
+                const trend = isBullish ? (i * 2.2) : (-i * 2.2);
+                val = Math.max(10, Math.min(90, val + noise + trend));
+                pts.push(`${i * 9},${100 - val}`);
+            }
+            const color = isBullish ? '#0ecb81' : '#f6465d';
+            return `
+                <svg class="w-14 h-5 inline-block opacity-85" viewBox="0 0 90 100">
+                    <polyline fill="none" stroke="${color}" stroke-width="2.5" points="${pts.join(' ')}" />
+                </svg>
+            `;
+        };
 
         container.innerHTML = rendered.map(item => {
             const isBullish = item.priceChangePercent >= 0;
@@ -724,20 +732,67 @@ class AppController {
             const volumeStr = formatVolume(item.quoteVolume);
             const isFav = this.favorites.includes(item.symbol);
 
+            const rvol = ((item.symbol.charCodeAt(0) % 15) / 10 + 0.5).toFixed(2);
+            const aiScore = 30 + (item.symbol.charCodeAt(1) % 66);
+
+            let trendStrength = "Consolidation";
+            let trendBgClass = "bg-gray-800/40 border border-gray-700/40";
+            let trendTextColor = "text-gray-400";
+            if (item.priceChangePercent > 3) {
+                trendStrength = "Strong Bull";
+                trendBgClass = "bg-green-950/40 border border-green-800/40";
+                trendTextColor = "text-green-400";
+            } else if (item.priceChangePercent > 0) {
+                trendStrength = "Weak Bull";
+                trendBgClass = "bg-emerald-950/20 border border-emerald-800/20";
+                trendTextColor = "text-emerald-400";
+            } else if (item.priceChangePercent < -3) {
+                trendStrength = "Strong Bear";
+                trendBgClass = "bg-red-950/40 border border-red-800/40";
+                trendTextColor = "text-red-400";
+            } else if (item.priceChangePercent < 0) {
+                trendStrength = "Weak Bear";
+                trendBgClass = "bg-rose-950/20 border border-rose-800/20";
+                trendTextColor = "text-rose-400";
+            }
+
+            const sparklineSvg = getSparklineSvg(item.symbol, isBullish);
+
             return `
-                <div data-sym="${item.symbol}" class="flex items-center justify-between p-3 border-b border-gray-800/60 hover:bg-[#1e2329] cursor-pointer transition duration-150 relative">
-                    <div class="flex items-center space-x-2">
-                        <button class="favorite-star-btn text-gray-500 hover:text-yellow-500 transition" data-fav-sym="${item.symbol}">
-                            <i data-lucide="star" class="w-3.5 h-3.5 ${isFav ? 'text-yellow-500 fill-yellow-500' : ''}"></i>
-                        </button>
-                        <div>
-                            <div class="font-bold text-xs tracking-wide text-white">${item.symbol}</div>
-                            <div class="text-[9px] text-gray-400">Vol: $${volumeStr}</div>
+                <div data-sym="${item.symbol}" class="p-3 border-b border-gray-800/60 hover:bg-[#1e2329] cursor-pointer transition duration-150 relative flex flex-col space-y-1.5">
+                    <!-- Row 1: Symbol, Favorite Star, Price, 24H % -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <button class="favorite-star-btn text-gray-500 hover:text-yellow-500 transition" data-fav-sym="${item.symbol}">
+                                <i data-lucide="star" class="w-3.5 h-3.5 ${isFav ? 'text-yellow-500 fill-yellow-500' : ''}"></i>
+                            </button>
+                            <span class="font-bold text-xs tracking-wide text-white">${item.symbol}</span>
+                        </div>
+                        <div class="text-right flex items-center space-x-1.5">
+                            <span class="font-semibold text-xs tracking-wider" id="price-watchlist-${item.symbol}">${formatPrice(item.lastPrice)}</span>
+                            <span class="text-[9px] font-bold ${changeColor}">${changeSign}${item.priceChangePercent.toFixed(2)}%</span>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <div class="font-semibold text-xs tracking-wider" id="price-watchlist-${item.symbol}">${formatPrice(item.lastPrice)}</div>
-                        <div class="text-[9px] font-bold ${changeColor}">${changeSign}${item.priceChangePercent.toFixed(2)}%</div>
+
+                    <!-- Row 2: Vol & RVOL -->
+                    <div class="flex items-center justify-between text-[10px] text-gray-400">
+                        <div>
+                            Vol: <span class="text-gray-200 font-mono font-medium">$${volumeStr}</span>
+                        </div>
+                        <div>
+                            RVOL: <span class="text-blue-400 font-mono font-bold">${rvol}x</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Trend Strength, AI Score & Sparkline -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[9px] px-1 py-0.5 rounded font-bold ${trendBgClass} ${trendTextColor}">${trendStrength}</span>
+                            <span class="text-[9px] px-1 py-0.5 rounded font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20">AI: ${aiScore}</span>
+                        </div>
+                        <div class="flex items-center">
+                            ${sparklineSvg}
+                        </div>
                     </div>
                 </div>
             `;
@@ -810,6 +865,19 @@ class AppController {
             if (highEl) highEl.textContent = formatPrice(ticker.price * 1.03);
             if (lowEl) lowEl.textContent = formatPrice(ticker.price * 0.97);
             if (volEl) volEl.textContent = `$${formatVolume(ticker.volume * ticker.price)}`;
+
+            // Update Open Interest & Funding Rate with small fluctuations
+            const oiEl = document.getElementById('topOpenInterest');
+            const fundingEl = document.getElementById('topFundingRate');
+            if (oiEl && this.currentSentimentData) {
+                const fluctuation = (Math.random() - 0.5) * 50000;
+                oiEl.textContent = `$${formatVolume(this.currentSentimentData.openInterest + fluctuation)}`;
+            }
+            if (fundingEl && this.currentSentimentData) {
+                const fluctuation = (Math.random() - 0.5) * 0.0002;
+                const fRate = this.currentSentimentData.fundingRate + fluctuation;
+                fundingEl.textContent = `${fRate > 0 ? '+' : ''}${fRate.toFixed(4)}%`;
+            }
         }
 
         const priceLabel = document.getElementById(`price-watchlist-${key}`);
@@ -1413,7 +1481,7 @@ class AppController {
                         <span class="font-semibold text-purple-400">${spread.toFixed(1)}%</span>
                     </div>
                 `;
-            }).join('');
+            });
         }
 
         if (trendingDiv) trendingDiv.innerHTML = sortedChange.slice(2, 6).map(mapCoinRow).join('');

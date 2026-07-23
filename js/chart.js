@@ -635,14 +635,24 @@ export class ChartManager {
         const patterns = detectPatterns(data);
         const markers = [];
 
+        // Focus on high conviction reversal patterns only for clean visual indicators
+        const highConvictionPatterns = [
+            'Bullish Engulfing', 'Bearish Engulfing',
+            'Morning Star', 'Evening Star',
+            'Hammer', 'Shooting Star', 'Pin Bar', 'Three White Soldiers', 'Three Black Crows'
+        ];
+
         for (let i = 0; i < data.length; i++) {
             const pList = patterns[i];
             if (pList && pList.length > 0) {
-                // Focus on primary key patterns to avoid visual clutter
-                const primaryPattern = pList[0];
+                // Filter the patterns list for high conviction only
+                const filteredPatterns = pList.filter(p => highConvictionPatterns.includes(p));
+                if (filteredPatterns.length === 0) continue;
+
+                const primaryPattern = filteredPatterns[0];
                 
                 const isBullish = [
-                    'Hammer', 'Morning Star', 'Bullish Engulfing', 'Three White Soldiers', 'Inside Bar'
+                    'Hammer', 'Morning Star', 'Bullish Engulfing', 'Three White Soldiers', 'Pin Bar'
                 ].includes(primaryPattern);
 
                 markers.push({
@@ -656,7 +666,10 @@ export class ChartManager {
             }
         }
 
-        this.candleSeries.setMarkers(markers);
+        // To completely eliminate overlap and clutter, only take the most recent 4 markers
+        const cleanMarkers = markers.slice(-4);
+
+        this.candleSeries.setMarkers(cleanMarkers);
     }
 
     /**
