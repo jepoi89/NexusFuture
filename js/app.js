@@ -426,6 +426,15 @@ class AppController {
             const badge = document.getElementById('alertCountBadge');
             if (badge) badge.classList.remove('hidden');
         };
+
+        // Wire up live slider value for S&R confidence threshold
+        const srConfSelect = document.getElementById('srConfidenceSelect');
+        const srConfValue = document.getElementById('srConfidenceValue');
+        if (srConfSelect && srConfValue) {
+            srConfSelect.addEventListener('input', (e) => {
+                srConfValue.textContent = `${e.target.value}%`;
+            });
+        }
     }
 
     applyWorkspaceLayout(mode) {
@@ -482,6 +491,22 @@ class AppController {
         }
         const toggle = document.getElementById('browserSoundToggle');
         if (toggle) toggle.checked = this.alerts.soundEnabled;
+
+        // Load S&R options state
+        const tSR = document.getElementById('toggleSR');
+        if (tSR) tSR.checked = this.srSettings.drawSR;
+        const tSD = document.getElementById('toggleSD');
+        if (tSD) tSD.checked = this.srSettings.drawSD;
+        const tSRLabels = document.getElementById('toggleSRLabels');
+        if (tSRLabels) tSRLabels.checked = this.srSettings.drawSRLabels;
+        const sens = document.getElementById('srSensitivitySelect');
+        if (sens) sens.value = this.srSettings.sensitivity;
+        const conf = document.getElementById('srConfidenceSelect');
+        if (conf) {
+            conf.value = this.srSettings.minConfidence;
+            const valSpan = document.getElementById('srConfidenceValue');
+            if (valSpan) valSpan.textContent = `${this.srSettings.minConfidence}%`;
+        }
     }
 
     saveSettingsModalState() {
@@ -494,6 +519,23 @@ class AppController {
         }
         const toggle = document.getElementById('browserSoundToggle');
         if (toggle) this.alerts.setSoundEnabled(toggle.checked);
+
+        // Save S&R options state
+        const tSR = document.getElementById('toggleSR');
+        if (tSR) this.srSettings.drawSR = tSR.checked;
+        const tSD = document.getElementById('toggleSD');
+        if (tSD) this.srSettings.drawSD = tSD.checked;
+        const tSRLabels = document.getElementById('toggleSRLabels');
+        if (tSRLabels) this.srSettings.drawSRLabels = tSRLabels.checked;
+        const sens = document.getElementById('srSensitivitySelect');
+        if (sens) this.srSettings.sensitivity = sens.value;
+        const conf = document.getElementById('srConfidenceSelect');
+        if (conf) this.srSettings.minConfidence = parseInt(conf.value) || 80;
+
+        // Re-evaluate on current candles to apply updated S&R settings immediately
+        if (this.chartManager.cachedCandles.length > 0) {
+            this.runAiEvaluation(this.chartManager.cachedCandles);
+        }
 
         // Map quick toggles to match new checked configurations
         const indToggles = document.getElementById('indicatorQuickToggles');
@@ -1371,7 +1413,7 @@ class AppController {
                         <span class="font-semibold text-purple-400">${spread.toFixed(1)}%</span>
                     </div>
                 `;
-            });
+            }).join('');
         }
 
         if (trendingDiv) trendingDiv.innerHTML = sortedChange.slice(2, 6).map(mapCoinRow).join('');
