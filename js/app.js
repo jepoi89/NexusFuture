@@ -636,7 +636,8 @@ class AppController {
         }
 
         // Render chart candles
-        this.chartManager.setData(candles);
+        candles.symbol = this.currentSymbol;
+        this.chartManager.setData(candles, this.currentSymbol);
 
         // Run multi-timeframe evaluation
         await this.runMtfAnalysis();
@@ -900,6 +901,7 @@ class AppController {
 
     onLiveCandleTick(tick) {
         const candles = [...this.chartManager.cachedCandles];
+        candles.symbol = this.chartManager.cachedCandles.symbol || this.currentSymbol;
         this.runAiEvaluation(candles);
 
         // Track and resolve live signals
@@ -997,6 +999,12 @@ class AppController {
      * @param {Array<object>} candles 
      */
     runAiEvaluation(candles) {
+        const candlesSymbol = candles.symbol || this.currentSymbol;
+        if (candlesSymbol !== this.currentSymbol) {
+            console.log(`Mismatched candles symbol (${candlesSymbol}) vs current symbol (${this.currentSymbol}), skipping AI evaluation during swap.`);
+            return;
+        }
+
         const mtf = this.cachedMtfData;
         const news = this.currentNewsFeed || this.generateNewsFeed(this.currentSymbol);
         const sentiment = this.currentSentimentData || this.generateSentimentData(this.currentSymbol);
@@ -1670,7 +1678,10 @@ class AppController {
         // 5. Execution action deck visibility and fields mapping
         const deck = document.getElementById('executionActionDeck');
         if (deck) {
-            if (isLong || isShort) {
+            const isGoodSetup = isLong || isShort;
+            const isPossibleEntry = !isGoodSetup && decision.tradePlan;
+
+            if (isGoodSetup || isPossibleEntry) {
                 deck.classList.remove('hidden');
 
                 // Map elements
@@ -1691,7 +1702,9 @@ class AppController {
                 }
 
                 if (subtext) {
-                    subtext.textContent = `${this.currentSymbol} • ${this.currentTimeframe.toUpperCase()} • STANDARD • score ${absoluteScore}`;
+                    subtext.textContent = isGoodSetup ?
+                        `${this.currentSymbol} • ${this.currentTimeframe.toUpperCase()} • STANDARD • score ${absoluteScore}` :
+                        `${this.currentSymbol} • ${this.currentTimeframe.toUpperCase()} • PENDING • score ${absoluteScore}`;
                 }
 
                 if (entryRange && decision.tradePlan && decision.tradePlan.entryZone) {
@@ -1699,7 +1712,9 @@ class AppController {
                 }
 
                 if (decideTitle) {
-                    decideTitle.textContent = `ENTRY TOUCHED • decide before this ${this.currentTimeframe.toUpperCase()} candle closes`;
+                    decideTitle.textContent = isGoodSetup ?
+                        `ENTRY TOUCHED • decide before this ${this.currentTimeframe.toUpperCase()} candle closes` :
+                        `AWAITING TRIGGER • potential entry or bounce setup`;
                 }
 
                 // Future expiry date (e.g. 1 hour from now)
@@ -1711,55 +1726,92 @@ class AppController {
                 // Reset TAKE button status if active setup symbol swapped
                 if (takeBtn) {
                     takeBtn.disabled = false;
-                    takeBtn.className = isLong ?
-                        "bg-[#0ecb81] hover:bg-[#0bc175] text-[#0b0e11] font-black px-4 py-1.5 rounded transition text-xs flex items-center space-x-1" :
-                        "bg-red-500 hover:bg-red-400 text-white font-bold px-4 py-1.5 rounded transition text-xs flex items-center space-x-1";
+                    if (isGoodSetup) {
+                        takeBtn.className = isLong ?
+                            "bg-[#0ecb81] hover:bg-[#0bc175] text-[#0b0e11] font-black px-4 py-1.5 rounded transition text-xs flex items-center space-x-1" :
+                            "bg-red-500 hover:bg-red-400 text-white font-bold px-4 py-1.5 rounded transition text-xs flex items-center space-x-1";
+                    } else {
+                        takeBtn.className = "bg-amber-500 hover:bg-amber-400 text-[#0b0e11] font-black px-4 py-1.5 rounded transition text-xs flex items-center space-x-1";
+                    }
                 }
 
                 if (takeBtnText) {
-                    takeBtnText.textContent = isLong ? "TAKE BUY" : "TAKE SELL";
+                    if (isGoodSetup) {
+                        takeBtnText.textContent = isLong ? "TAKE BUY" : "TAKE SELL";
+                    } else {
+                        const isDirLong = decision.tradePlan && decision.tradePlan.direction === 'LONG';
+                        takeBtnText.textContent = isDirLong ? "TAKE POTENTIAL BUY" : "TAKE POTENTIAL SELL";
+                    }
                 }
 
-                if (isLong) {
-                    if (actionLabel) {
-                        actionLabel.textContent = "ACTION REQUIRED";
-                        actionLabel.className = "text-[#0ecb81] text-[10px] font-black uppercase tracking-wider block";
-                    }
-                    if (title) {
-                        title.textContent = "TAKE BUY SIGNAL";
-                        title.className = "font-bold text-white text-[13px] block";
-                    }
-                    if (iconContainer) {
-                        iconContainer.className = "w-11 h-11 rounded-xl bg-green-950/40 flex items-center justify-center text-[#0ecb81]";
-                    }
-                    if (icon) {
-                        icon.setAttribute('class', "w-5 h-5 text-[#0ecb81]");
-                        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />`;
-                    }
-                    const entryLabel = document.getElementById('executionEntryZoneLabel');
-                    if (entryLabel) entryLabel.textContent = "BUY ENTRY ZONE";
+                if (isGoodSetup) {
+                    if (isLong) {
+                        if (actionLabel) {
+                            actionLabel.textContent = "ACTION REQUIRED";
+                            actionLabel.className = "text-[#0ecb81] text-[10px] font-black uppercase tracking-wider block";
+                        }
+                        if (title) {
+                            title.textContent = "TAKE BUY SIGNAL";
+                            title.className = "font-bold text-white text-[13px] block";
+                        }
+                        if (iconContainer) {
+                            iconContainer.className = "w-11 h-11 rounded-xl bg-green-950/40 flex items-center justify-center text-[#0ecb81]";
+                        }
+                        if (icon) {
+                            icon.setAttribute('class', "w-5 h-5 text-[#0ecb81]");
+                            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />`;
+                        }
+                        const entryLabel = document.getElementById('executionEntryZoneLabel');
+                        if (entryLabel) entryLabel.textContent = "BUY ENTRY ZONE";
 
-                    deck.className = "bg-gradient-to-r from-emerald-950/20 to-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                        deck.className = "bg-gradient-to-r from-emerald-950/20 to-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                    } else {
+                        if (actionLabel) {
+                            actionLabel.textContent = "ACTION REQUIRED";
+                            actionLabel.className = "text-red-500 text-[10px] font-black uppercase tracking-wider block";
+                        }
+                        if (title) {
+                            title.textContent = "TAKE SELL SIGNAL";
+                            title.className = "font-bold text-white text-[13px] block";
+                        }
+                        if (iconContainer) {
+                            iconContainer.className = "w-11 h-11 rounded-xl bg-red-950/40 flex items-center justify-center text-red-500";
+                        }
+                        if (icon) {
+                            icon.setAttribute('class', "w-5 h-5 text-red-500");
+                            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />`;
+                        }
+                        const entryLabel = document.getElementById('executionEntryZoneLabel');
+                        if (entryLabel) entryLabel.textContent = "SELL ENTRY ZONE";
+
+                        deck.className = "bg-gradient-to-r from-red-950/20 to-red-500/5 border border-red-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                    }
                 } else {
+                    // Possible Setup
+                    const isDirLong = decision.tradePlan && decision.tradePlan.direction === 'LONG';
                     if (actionLabel) {
-                        actionLabel.textContent = "ACTION REQUIRED";
-                        actionLabel.className = "text-red-500 text-[10px] font-black uppercase tracking-wider block";
+                        actionLabel.textContent = "POSSIBLE ENTRY";
+                        actionLabel.className = "text-amber-500 text-[10px] font-black uppercase tracking-wider block";
                     }
                     if (title) {
-                        title.textContent = "TAKE SELL SIGNAL";
+                        title.textContent = isDirLong ? "POTENTIAL BUY SETUP" : "POTENTIAL SELL SETUP";
                         title.className = "font-bold text-white text-[13px] block";
                     }
                     if (iconContainer) {
-                        iconContainer.className = "w-11 h-11 rounded-xl bg-red-950/40 flex items-center justify-center text-red-500";
+                        iconContainer.className = "w-11 h-11 rounded-xl bg-yellow-950/40 flex items-center justify-center text-amber-500";
                     }
                     if (icon) {
-                        icon.setAttribute('class', "w-5 h-5 text-red-500");
-                        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />`;
+                        icon.setAttribute('class', "w-5 h-5 text-amber-500");
+                        if (isDirLong) {
+                            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />`;
+                        } else {
+                            icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />`;
+                        }
                     }
                     const entryLabel = document.getElementById('executionEntryZoneLabel');
-                    if (entryLabel) entryLabel.textContent = "SELL ENTRY ZONE";
+                    if (entryLabel) entryLabel.textContent = "PROSPECTIVE ENTRY ZONE";
 
-                    deck.className = "bg-gradient-to-r from-red-950/20 to-red-500/5 border border-red-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                    deck.className = "bg-gradient-to-r from-yellow-950/15 to-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
                 }
             } else {
                 deck.classList.add('hidden');
@@ -1906,8 +1958,20 @@ class AppController {
      * AI Trade Journal Local Database management
      */
     saveCurrentSetupToJournal() {
-        const recText = document.getElementById('aiRecText')?.textContent || "WAIT";
-        if (recText === "WAIT" || recText === "Avoid Trade") {
+        let recText = document.getElementById('aiRecText')?.textContent || "WAIT";
+        const deck = document.getElementById('executionActionDeck');
+        const hasActionBarSetup = deck && !deck.classList.contains('hidden');
+
+        if (hasActionBarSetup && (recText === "WAIT" || recText === "Avoid Trade" || recText === "AVOID TRADE")) {
+            const actionText = document.getElementById('executionTitle')?.textContent || "POTENTIAL SETUP";
+            if (actionText.includes("BUY")) {
+                recText = "Long";
+            } else if (actionText.includes("SELL")) {
+                recText = "Short";
+            } else {
+                recText = "Potential Setup";
+            }
+        } else if (recText === "WAIT" || recText === "Avoid Trade" || recText === "AVOID TRADE") {
             alert("No actionable trade setup exists at this time. Change settings or select another asset.");
             return;
         }

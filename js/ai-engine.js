@@ -1191,7 +1191,8 @@ export class AIDecisionEngine {
             stopLoss,
             tp1, tp2, tp3,
             riskRewardRatio: rrr,
-            notes
+            notes,
+            direction: isLong ? 'LONG' : 'SHORT'
         };
     }
 
