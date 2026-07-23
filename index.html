@@ -195,6 +195,90 @@
             </div>
         </div>
 
+        <!-- DUAL-BAR AUTO ANALYSIS & EXECUTION SYSTEM -->
+        <div class="bg-[#0b0e11] border-b border-gray-800 px-4 py-2.5 flex flex-col space-y-2 select-none">
+            <!-- Green Bar: Auto Analysis Active -->
+            <div class="bg-gradient-to-r from-emerald-950/20 to-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-xl bg-[#10b981]/15 flex items-center justify-center text-[#10b981] relative">
+                        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#10b981] animate-ping"></span>
+                        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#10b981]"></span>
+                        <i data-lucide="radio" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span class="text-[#10b981] text-[10px] font-black uppercase tracking-wider block">AUTO ANALYSIS ACTIVE</span>
+                        <span class="font-bold text-white text-[13px] block" id="autoAnalysisTask">Mapping market structure</span>
+                        <span class="text-[10px] text-gray-400 block" id="autoAnalysisSub">Trend, S/R, SMC, liquidity and volatility</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6 md:space-x-12 mt-2 sm:mt-0">
+                    <div class="border-r border-gray-800/80 pr-4 md:pr-8">
+                        <span class="text-[9px] uppercase tracking-wider text-gray-400 block font-bold">CHART</span>
+                        <span class="font-bold font-mono text-white text-xs block" id="autoAnalysisChart">BTCUSDT • M15</span>
+                    </div>
+                    <div class="border-r border-gray-800/80 pr-4 md:pr-8">
+                        <span class="text-[9px] uppercase tracking-wider text-gray-400 block font-bold">COVERAGE</span>
+                        <span class="font-bold font-mono text-white text-xs block">28 strategies • 5 TF</span>
+                    </div>
+                    <div class="border-r border-gray-800/80 pr-4 md:pr-8">
+                        <span class="text-[9px] uppercase tracking-wider text-gray-400 block font-bold">PATTERNS</span>
+                        <span class="font-bold font-mono text-white text-xs block" id="autoAnalysisPatterns">16 formations</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] uppercase tracking-wider text-gray-400 block font-bold">LATEST CHECK</span>
+                        <span class="font-bold font-mono text-white text-xs block" id="autoAnalysisTime">12:47:54 AM</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 mt-2 lg:mt-0">
+                    <span class="text-[10px] px-2.5 py-0.5 rounded font-black bg-red-500/10 text-red-500 border border-red-500/20" id="autoAnalysisBadge">M15 SELL • 86</span>
+                    <span class="text-[10px] text-gray-400 flex items-center space-x-1">
+                        <i data-lucide="check-circle" class="w-3.5 h-3.5 text-[#10b981]"></i>
+                        <span>No manual refresh required</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Red/Green Bar: Action Required Execution Deck -->
+            <div id="executionActionDeck" class="bg-gradient-to-r from-red-950/20 to-red-500/5 border border-red-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-xl bg-red-500/15 flex items-center justify-center text-red-500" id="executionIconContainer">
+                        <i data-lucide="trending-down" class="w-5 h-5" id="executionIcon"></i>
+                    </div>
+                    <div>
+                        <span class="text-red-500 text-[10px] font-black uppercase tracking-wider block" id="executionActionLabel">ACTION REQUIRED</span>
+                        <span class="font-bold text-white text-[13px] block" id="executionTitle">TAKE SELL SIGNAL</span>
+                        <span class="text-[10px] text-gray-400 block" id="executionSubtext">BTCUSDT • M15 • STANDARD • score 86</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6 md:space-x-12 mt-2 sm:mt-0">
+                    <div class="border-r border-gray-800/80 pr-4 md:pr-8">
+                        <span class="text-[9px] uppercase tracking-wider text-gray-400 block font-bold" id="executionEntryZoneLabel">SELL ENTRY ZONE</span>
+                        <span class="font-bold font-mono text-white text-xs block" id="executionEntryRange">96,120.00 - 96,240.00</span>
+                        <span class="text-[10px] text-gray-400 block font-mono" id="executionLivePrice">Live 96,180.50</span>
+                    </div>
+                    <div>
+                        <span class="text-[9px] uppercase tracking-wider text-gray-400 block font-bold">DECIDE NOW</span>
+                        <span class="font-bold text-amber-500 text-xs block" id="executionDecideTitle">ENTRY TOUCHED • decide before this candle closes</span>
+                        <span class="text-[10px] text-gray-400 block" id="executionExpiry">Automatic expiry: Jul 23, 2026, 01:00 AM</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2 mt-2 lg:mt-0">
+                    <button id="executionTakeBtn" class="bg-red-500 hover:bg-red-400 text-white font-bold px-4 py-1.5 rounded transition text-xs flex items-center space-x-1">
+                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        <span id="executionTakeBtnText">TAKE SELL</span>
+                    </button>
+                    <button id="executionIgnoreBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-3 py-1.5 rounded transition text-xs border border-gray-700 flex items-center space-x-1">
+                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                        <span>Ignore</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- MAIN WORKSPACE -->
         <div class="flex-1 flex overflow-hidden">
             
