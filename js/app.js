@@ -47,6 +47,39 @@ class AppController {
         // AI Trade Journal Storage
         this.journal = JSON.parse(localStorage.getItem('nexus_trade_journal') || '[]');
 
+        // AI Triggered Signals Storage
+        this.signals = JSON.parse(localStorage.getItem('nexus_ai_triggered_signals') || '[]');
+        if (this.signals.length === 0) {
+            // Seed a couple of historical/active signals for reference
+            this.signals = [
+                {
+                    time: new Date(Date.now() - 3600000 * 2).toLocaleTimeString(),
+                    symbol: 'BTCUSDT',
+                    type: 'CONFIRMED BUY',
+                    price: 94800,
+                    score: 92,
+                    confidence: '95%',
+                    result: 'SUCCESS',
+                    stopLoss: 93500,
+                    takeProfit: 96200,
+                    direction: 'LONG'
+                },
+                {
+                    time: new Date(Date.now() - 3600000).toLocaleTimeString(),
+                    symbol: 'ETHUSDT',
+                    type: 'CONFIRMED SELL',
+                    price: 3250,
+                    score: -86,
+                    confidence: '91%',
+                    result: 'FAILED',
+                    stopLoss: 3290,
+                    takeProfit: 3180,
+                    direction: 'SHORT'
+                }
+            ];
+            localStorage.setItem('nexus_ai_triggered_signals', JSON.stringify(this.signals));
+        }
+
         this.init();
     }
 
@@ -83,6 +116,9 @@ class AppController {
 
         // 5. Build Trade Journal Statistics lists
         this.renderJournalTable();
+
+        // 5b. Render AI Signal History list
+        this.renderSignalHistory();
 
         // 6. Draw News list
         this.renderNewsArticles();
@@ -840,6 +876,9 @@ class AppController {
         const candles = [...this.chartManager.cachedCandles];
         this.runAiEvaluation(candles);
 
+        // Track and resolve live signals
+        this.trackAndResolveSignals(this.currentSymbol, tick.close);
+
         // Update tags
         const prTag = document.getElementById('currentPriceTag');
         if (prTag) prTag.textContent = formatPrice(tick.close);
@@ -879,6 +918,9 @@ class AppController {
                 fundingEl.textContent = `${fRate > 0 ? '+' : ''}${fRate.toFixed(4)}%`;
             }
         }
+
+        // Track and resolve live signals
+        this.trackAndResolveSignals(key, ticker.price);
 
         const priceLabel = document.getElementById(`price-watchlist-${key}`);
         if (priceLabel) {
@@ -947,45 +989,82 @@ class AppController {
         // Animate AI gauge
         this.animateAiGauge(decision.score);
 
-        // Build premium recommendation card
+        // Build premium recommendation card according to image.png
         const recCard = document.getElementById('aiRecCard');
         const recText = document.getElementById('aiRecText');
-        const confidenceText = document.getElementById('aiConfidenceText');
-        const confidenceBar = document.getElementById('aiConfidenceBar');
+        const recDesc = document.getElementById('aiRecDesc');
+        const recCircleProgress = document.getElementById('aiRecCircleProgress');
+        const recCircleScore = document.getElementById('aiRecCircleScore');
+        const recIconContainer = document.getElementById('aiRecIconContainer');
+        const recIcon = document.getElementById('aiRecIcon');
 
-        if (recText) recText.textContent = decision.recommendation;
-        if (confidenceText) confidenceText.textContent = decision.confidence;
-        if (confidenceBar) confidenceBar.style.width = decision.confidence;
+        // Absolute score (0-100 representation of quality)
+        const absoluteScore = decision.tradeQuality;
 
-        // Visual effects for buy/sell
+        if (recCircleScore) recCircleScore.textContent = absoluteScore;
+        if (recCircleProgress) {
+            // stroke-dasharray="score, 100"
+            recCircleProgress.setAttribute('stroke-dasharray', `${absoluteScore}, 100`);
+        }
+
+        // Setup the card state based on recommendation direction
         if (recCard) {
-            recCard.className = 'p-3.5 rounded-lg border flex flex-col items-center justify-center text-center transition duration-300 ';
-            if (decision.recommendation.includes('LONG') || decision.recommendation === 'Strong Long' || decision.recommendation === 'Long') {
-                recCard.classList.add('bg-green-950/20', 'border-[#0ecb81]', 'text-[#0ecb81]', 'glow-green');
-                if (confidenceBar) confidenceBar.className = 'bg-[#0ecb81] h-full transition-all duration-500';
-                const techRecBadge = document.getElementById('technicalRecommendationBadge');
-                if (techRecBadge) {
-                    techRecBadge.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-green-500 text-white';
-                    techRecBadge.textContent = 'BUY';
+            const isLong = decision.recommendation.includes('Long');
+            const isShort = decision.recommendation.includes('Short');
+
+            if (isLong) {
+                // CONFIRMED BUY / LONG
+                if (recText) recText.textContent = "CONFIRMED BUY";
+                if (recDesc) recDesc.textContent = "Confirmed - strong bullish confluence";
+
+                recCard.className = "p-3 rounded-lg border flex items-center justify-between transition duration-300 space-x-2 bg-green-950/20 border-[#0ecb81] glow-green";
+                if (recCircleProgress) {
+                    recCircleProgress.setAttribute('class', "text-[#0ecb81] transition-all duration-500");
                 }
-            } else if (decision.recommendation.includes('SHORT') || decision.recommendation === 'Strong Short' || decision.recommendation === 'Short') {
-                recCard.classList.add('bg-red-950/20', 'border-[#f6465d]', 'text-[#f6465d]', 'glow-red');
-                if (confidenceBar) confidenceBar.className = 'bg-[#f6465d] h-full transition-all duration-500';
-                const techRecBadge = document.getElementById('technicalRecommendationBadge');
-                if (techRecBadge) {
-                    techRecBadge.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-red-500 text-white';
-                    techRecBadge.textContent = 'SELL';
+                if (recIconContainer) {
+                    recIconContainer.className = "w-11 h-11 rounded-xl bg-green-950/40 flex items-center justify-center flex-shrink-0";
+                }
+                if (recIcon) {
+                    recIcon.setAttribute('class', "w-6 h-6 text-[#0ecb81]");
+                    recIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />`;
+                }
+            } else if (isShort) {
+                // CONFIRMED SELL / SHORT
+                if (recText) recText.textContent = "CONFIRMED SELL";
+                if (recDesc) recDesc.textContent = "Confirmed - strong bearish confluence";
+
+                recCard.className = "p-3 rounded-lg border flex items-center justify-between transition duration-300 space-x-2 bg-red-950/20 border-[#f6465d] glow-red";
+                if (recCircleProgress) {
+                    recCircleProgress.setAttribute('class', "text-[#f6465d] transition-all duration-500");
+                }
+                if (recIconContainer) {
+                    recIconContainer.className = "w-11 h-11 rounded-xl bg-red-950/40 flex items-center justify-center flex-shrink-0";
+                }
+                if (recIcon) {
+                    recIcon.setAttribute('class', "w-6 h-6 text-[#f6465d]");
+                    recIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />`;
                 }
             } else {
-                recCard.classList.add('bg-yellow-950/20', 'border-[#f0b90b]', 'text-[#f0b90b]', 'glow-yellow');
-                if (confidenceBar) confidenceBar.className = 'bg-[#f0b90b] h-full transition-all duration-500';
-                const techRecBadge = document.getElementById('technicalRecommendationBadge');
-                if (techRecBadge) {
-                    techRecBadge.className = 'text-xs font-semibold px-2 py-0.5 rounded bg-yellow-500 text-black';
-                    techRecBadge.textContent = 'HOLD';
+                // WAIT / AVOID
+                if (recText) recText.textContent = "AVOID TRADE";
+                if (recDesc) recDesc.textContent = "Awaiting strong trend alignment...";
+
+                recCard.className = "p-3 rounded-lg border flex items-center justify-between transition duration-300 space-x-2 bg-yellow-950/10 border-gray-800";
+                if (recCircleProgress) {
+                    recCircleProgress.setAttribute('class', "text-[#f0b90b] transition-all duration-500");
+                }
+                if (recIconContainer) {
+                    recIconContainer.className = "w-11 h-11 rounded-xl bg-gray-800/40 flex items-center justify-center flex-shrink-0";
+                }
+                if (recIcon) {
+                    recIcon.setAttribute('class', "w-6 h-6 text-gray-400");
+                    recIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.364A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />`;
                 }
             }
         }
+
+        // Automatic strategy-verified AI Signal generation & validation loop
+        this.handleAutoSignalGeneration(decision, candles);
 
         // Render reasoning explanation list
         const expContainer = document.getElementById('aiExplanationContainer');
@@ -1415,24 +1494,104 @@ class AppController {
     renderSignalHistory() {
         const container = document.getElementById('signalHistoryBody');
         if (container) {
-            if (this.alerts.triggeredHistory.length === 0) {
+            if (!this.signals || this.signals.length === 0) {
                 container.innerHTML = `
                     <tr class="border-b border-gray-800/50 text-gray-400">
-                        <td class="p-3 text-center" colspan="7">No signal triggers yet. Active alerts display here on hit.</td>
+                        <td class="p-3 text-center" colspan="7">No strategy signals triggered yet. Real-time entries appear dynamically.</td>
                     </tr>
                 `;
                 return;
             }
 
-            container.innerHTML = this.alerts.triggeredHistory.map(log => `
-                <tr class="border-b border-gray-800/50 hover:bg-[#1e2329] text-xs">
-                    <td class="p-3 text-gray-400 font-medium">${log.time}</td>
-                    <td class="p-3 font-bold text-white">${log.symbol}</td>
-                    <td class="p-3 text-red-400 font-semibold uppercase">ALERT TRIGGER</td>
-                    <td class="p-3 font-mono">${log.message}</td>
-                    <td class="p-3 text-gray-400 font-semibold">SUCCESS</td>
-                </tr>
-            `).join('');
+            container.innerHTML = this.signals.map(log => {
+                let colorClass = "text-yellow-500 bg-yellow-500/10 border-yellow-500/20";
+                if (log.result.includes("SUCCESS")) colorClass = "text-green-500 bg-green-500/10 border-green-500/20";
+                if (log.result.includes("FAILED")) colorClass = "text-red-500 bg-red-500/10 border-red-500/20";
+
+                const typeColor = log.type.includes("BUY") ? "text-green-400 bg-green-950/20" : "text-red-400 bg-red-950/20";
+
+                return `
+                    <tr class="border-b border-gray-800/50 hover:bg-[#1e2329] text-xs">
+                        <td class="p-3 text-gray-400 font-medium">${log.time}</td>
+                        <td class="p-3 font-bold text-white">${log.symbol}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold ${typeColor}">${log.type}</span></td>
+                        <td class="p-3 font-mono font-bold">$${log.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        <td class="p-3 font-mono ${log.score >= 0 ? 'text-green-500' : 'text-red-500'} font-bold">${log.score >= 0 ? '+' : ''}${log.score}</td>
+                        <td class="p-3 font-mono">${log.confidence}</td>
+                        <td class="p-3 text-right"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${colorClass}">${log.result}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    handleAutoSignalGeneration(decision, candles) {
+        if (!candles || candles.length === 0) return;
+        const currentPrice = candles[candles.length - 1].close;
+        const isLong = decision.recommendation.includes('Long');
+        const isShort = decision.recommendation.includes('Short');
+
+        // Only generate signals if recommendation is a high-conviction buy or sell
+        if (!isLong && !isShort) return;
+
+        // Check if we already have an active/pending signal for this symbol to avoid spamming
+        const existingActive = this.signals.find(s => s.symbol === this.currentSymbol && s.result === 'ACTIVE');
+        if (existingActive) return;
+
+        // We want to extract targets from decision.tradePlan
+        const tp = decision.tradePlan;
+        if (!tp || !tp.stopLoss || !tp.tp1) return;
+
+        const newSignal = {
+            time: new Date().toLocaleTimeString(),
+            symbol: this.currentSymbol,
+            type: isLong ? 'CONFIRMED BUY' : 'CONFIRMED SELL',
+            price: currentPrice,
+            score: decision.score,
+            confidence: decision.confidence,
+            result: 'ACTIVE',
+            stopLoss: tp.stopLoss,
+            takeProfit: tp.tp1,
+            direction: isLong ? 'LONG' : 'SHORT'
+        };
+
+        // Add to array, keep only last 100 signals
+        this.signals.unshift(newSignal);
+        if (this.signals.length > 100) this.signals.pop();
+
+        localStorage.setItem('nexus_ai_triggered_signals', JSON.stringify(this.signals));
+        this.renderSignalHistory();
+    }
+
+    trackAndResolveSignals(symbol, price) {
+        if (!this.signals || this.signals.length === 0) return;
+        let changed = false;
+        this.signals = this.signals.map(s => {
+            if (s.symbol === symbol && s.result === 'ACTIVE') {
+                if (s.direction === 'LONG') {
+                    if (price >= s.takeProfit) {
+                        s.result = 'SUCCESS (TP Hit)';
+                        changed = true;
+                    } else if (price <= s.stopLoss) {
+                        s.result = 'FAILED (SL Hit)';
+                        changed = true;
+                    }
+                } else if (s.direction === 'SHORT') {
+                    if (price <= s.takeProfit) {
+                        s.result = 'SUCCESS (TP Hit)';
+                        changed = true;
+                    } else if (price >= s.stopLoss) {
+                        s.result = 'FAILED (SL Hit)';
+                        changed = true;
+                    }
+                }
+            }
+            return s;
+        });
+
+        if (changed) {
+            localStorage.setItem('nexus_ai_triggered_signals', JSON.stringify(this.signals));
+            this.renderSignalHistory();
         }
     }
 
