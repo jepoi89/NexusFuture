@@ -12,9 +12,8 @@ export function formatPrice(num, decimals = null) {
     if (num === null || num === undefined || isNaN(num)) return '---';
     const val = parseFloat(num);
     if (decimals !== null) return val.toFixed(decimals);
-    if (val >= 1000) return val.toFixed(2);
-    if (val >= 1) return val.toFixed(4);
-    if (val >= 0.01) return val.toFixed(6);
+    // Standardize token prices to exactly 4 decimal places for values >= 0.01
+    if (val >= 0.01) return val.toFixed(4);
     return val.toFixed(8);
 }
 
