@@ -206,6 +206,20 @@ export class ChartManager {
         this.cachedCandles = candles;
         this.cachedCandles.symbol = symbol;
         
+        // Dynamic price precision: 4 decimals for standard coins, 8 decimals for tiny coins (< 0.01)
+        if (candles.length > 0) {
+            const lastPrice = candles[candles.length - 1].close;
+            const precision = lastPrice < 0.01 ? 8 : 4;
+            const minMove = lastPrice < 0.01 ? 0.00000001 : 0.0001;
+            this.candleSeries.applyOptions({
+                priceFormat: {
+                    type: 'price',
+                    precision: precision,
+                    minMove: minMove
+                }
+            });
+        }
+
         // 1. Candlestick prices
         this.candleSeries.setData(candles);
 

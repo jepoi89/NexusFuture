@@ -662,6 +662,15 @@ class AppController {
             return;
         }
 
+        // Update the cached ticker price for this symbol in tickersCache so the watchlist matches!
+        if (this.tickersCache && this.tickersCache.length > 0) {
+            const cachedTicker = this.tickersCache.find(t => t.symbol.toUpperCase() === this.currentSymbol.toUpperCase());
+            if (cachedTicker && candles.length > 0) {
+                cachedTicker.lastPrice = candles[candles.length - 1].close;
+                this.renderWatchlist(this.tickersCache);
+            }
+        }
+
         // Render chart candles
         candles.symbol = this.currentSymbol;
         this.chartManager.setData(candles, this.currentSymbol);
@@ -677,8 +686,8 @@ class AppController {
         if (zones && zones.support && zones.resistance) {
             const topSupp = document.getElementById('topSupportPrice');
             const topRes = document.getElementById('topResistancePrice');
-            if (topSupp) topSupp.textContent = `$${zones.support.pivot.toFixed(2)}`;
-            if (topRes) topRes.textContent = `$${zones.resistance.pivot.toFixed(2)}`;
+            if (topSupp) topSupp.textContent = `$${formatPrice(zones.support.pivot)}`;
+            if (topRes) topRes.textContent = `$${formatPrice(zones.resistance.pivot)}`;
 
             const suppConf = document.getElementById('suppZoneConf');
             const resConf = document.getElementById('resZoneConf');
@@ -724,9 +733,9 @@ class AppController {
 
         if (liqLongs) liqLongs.textContent = `$${formatVolume(lastCandle.volume * lastCandle.close * 0.08)}`;
         if (liqShorts) liqShorts.textContent = `$${formatVolume(lastCandle.volume * lastCandle.close * 0.05)}`;
-        if (liqHighCluster) liqHighCluster.textContent = `$${(lastCandle.close * 0.985).toFixed(2)}`;
-        if (liqBullHunt) liqBullHunt.textContent = `$${(lastCandle.close * 0.991).toFixed(2)}`;
-        if (liqBearHunt) liqBearHunt.textContent = `$${(lastCandle.close * 1.009).toFixed(2)}`;
+        if (liqHighCluster) liqHighCluster.textContent = `$${formatPrice(lastCandle.close * 0.985)}`;
+        if (liqBullHunt) liqBullHunt.textContent = `$${formatPrice(lastCandle.close * 0.991)}`;
+        if (liqBearHunt) liqBearHunt.textContent = `$${formatPrice(lastCandle.close * 1.009)}`;
 
         // Establish Stream connection
         this.binance.connectLiveStream(
@@ -1164,8 +1173,8 @@ class AppController {
         const invalidationEl = document.getElementById('aiInvalidationText');
         if (invalidationEl) {
             invalidationEl.textContent = decision.recommendation.includes('Long') ?
-                `Bullish setup invalidates immediately on a 15-minute candle closing below the recent demand swing low boundary support line at $${decision.layers.marketStructure.swingLow.toFixed(2)} with high volume.` :
-                `Bearish setup invalidates immediately on a 15-minute candle closing above the recent resistance swing high boundary level at $${decision.layers.marketStructure.swingHigh.toFixed(2)} on expanding buying activity.`;
+                `Bullish setup invalidates immediately on a 15-minute candle closing below the recent demand swing low boundary support line at $${formatPrice(decision.layers.marketStructure.swingLow)} with high volume.` :
+                `Bearish setup invalidates immediately on a 15-minute candle closing above the recent resistance swing high boundary level at $${formatPrice(decision.layers.marketStructure.swingHigh)} on expanding buying activity.`;
         }
 
         // Expected Move estimation metrics
@@ -1225,7 +1234,7 @@ class AppController {
             mStructure.innerHTML = `
                 <span class="font-bold block text-amber-500">${layers.marketStructure.bias || 'Sideways'}</span>
                 <span class="text-[11px] text-gray-400 block mt-0.5">Condition: ${layers.marketStructure.condition || 'Consolidation'}</span>
-                <span class="text-[11px] text-gray-400 block">S-High: $${layers.marketStructure.swingHigh?.toFixed(2) || '--'} | S-Low: $${layers.marketStructure.swingLow?.toFixed(2) || '--'}</span>
+                <span class="text-[11px] text-gray-400 block">S-High: $${layers.marketStructure.swingHigh ? formatPrice(layers.marketStructure.swingHigh) : '--'} | S-Low: $${layers.marketStructure.swingLow ? formatPrice(layers.marketStructure.swingLow) : '--'}</span>
                 <div class="mt-1 flex flex-wrap gap-1 text-[9px]">
                     ${layers.marketStructure.bos ? '<span class="bg-green-950/40 text-green-400 border border-green-800 px-1 rounded font-bold">BOS</span>' : ''}
                     ${layers.marketStructure.choch ? '<span class="bg-yellow-950/40 text-yellow-400 border border-yellow-800 px-1 rounded font-bold">CHoCH</span>' : ''}
@@ -1239,7 +1248,7 @@ class AppController {
             pAction.innerHTML = `
                 <span class="font-bold block text-blue-400">${layers.priceAction.patternsDetected?.join(', ') || 'No distinct patterns'}</span>
                 <span class="text-[11px] text-gray-400 block mt-0.5">Breakout: ${layers.priceAction.breakoutProb}% | Fake: ${layers.priceAction.fakeBreakoutProb}%</span>
-                <span class="text-[11px] text-gray-400 block">Reversal: ${layers.priceAction.reversalProb}% | S/R: $${layers.priceAction.support?.toFixed(1) || '--'} / $${layers.priceAction.resistance?.toFixed(1) || '--'}</span>
+                <span class="text-[11px] text-gray-400 block">Reversal: ${layers.priceAction.reversalProb}% | S/R: $${layers.priceAction.support ? formatPrice(layers.priceAction.support) : '--'} / $${layers.priceAction.resistance ? formatPrice(layers.priceAction.resistance) : '--'}</span>
             `;
         }
 
@@ -1266,7 +1275,7 @@ class AppController {
             volatilityText.innerHTML = `
                 <span class="font-bold block text-indigo-400">Suitability: ${layers.volatility.suitability || 'Balanced'}</span>
                 <span class="text-[11px] text-gray-400 block mt-0.5">HV: ${layers.volatility.hv?.toFixed(1) || '0'}% | BBW: ${(layers.volatility.bbw * 100)?.toFixed(1) || '0'}%</span>
-                <span class="text-[11px] text-gray-400 block">ATR: ${layers.volatility.atr?.toFixed(2) || '0'}</span>
+                <span class="text-[11px] text-gray-400 block">ATR: ${layers.volatility.atr ? formatPrice(layers.volatility.atr) : '0'}</span>
             `;
         }
 
@@ -1294,20 +1303,20 @@ class AppController {
         const entryPrice = document.getElementById('valEntryPrice');
         if (entryPrice) entryPrice.textContent = tp.entryZone || '--';
         const stopLoss = document.getElementById('valStopLoss');
-        if (stopLoss) stopLoss.textContent = typeof tp.stopLoss === 'number' && tp.stopLoss > 0 ? `$${tp.stopLoss.toFixed(2)}` : '--';
+        if (stopLoss) stopLoss.textContent = typeof tp.stopLoss === 'number' && tp.stopLoss > 0 ? `$${formatPrice(tp.stopLoss)}` : '--';
         const tp1 = document.getElementById('valTp1');
-        if (tp1) tp1.textContent = typeof tp.tp1 === 'number' && tp.tp1 > 0 ? `$${tp.tp1.toFixed(2)}` : '--';
+        if (tp1) tp1.textContent = typeof tp.tp1 === 'number' && tp.tp1 > 0 ? `$${formatPrice(tp.tp1)}` : '--';
         const tp2 = document.getElementById('valTp2');
-        if (tp2) tp2.textContent = typeof tp.tp2 === 'number' && tp.tp2 > 0 ? `$${tp.tp2.toFixed(2)}` : '--';
+        if (tp2) tp2.textContent = typeof tp.tp2 === 'number' && tp.tp2 > 0 ? `$${formatPrice(tp.tp2)}` : '--';
         const tp3 = document.getElementById('valTp3');
-        if (tp3) tp3.textContent = typeof tp.tp3 === 'number' && tp.tp3 > 0 ? `$${tp.tp3.toFixed(2)}` : '--';
+        if (tp3) tp3.textContent = typeof tp.tp3 === 'number' && tp.tp3 > 0 ? `$${formatPrice(tp.tp3)}` : '--';
         const riskReward = document.getElementById('valRiskReward');
         if (riskReward) riskReward.textContent = tp.riskRewardRatio || '--';
 
         // Additional Trade planner fields
         const invalidationEl = document.getElementById('valInvalidation');
         if (invalidationEl) {
-            invalidationEl.textContent = typeof tp.stopLoss === 'number' && tp.stopLoss > 0 ? `$${(tp.stopLoss * 0.992).toFixed(2)}` : '--';
+            invalidationEl.textContent = typeof tp.stopLoss === 'number' && tp.stopLoss > 0 ? `$${formatPrice(tp.stopLoss * 0.992)}` : '--';
         }
 
         const triggerLabel = document.getElementById('valConfirmationTrigger');
@@ -1378,7 +1387,7 @@ class AppController {
         const totalNotional = contractsSize * activeSetupPrice;
 
         if (sizeLabel) {
-            sizeLabel.textContent = `${contractsSize.toFixed(3)} ${this.currentSymbol.replace('USDT', '')} ($${totalNotional.toFixed(2)})`;
+            sizeLabel.textContent = `${contractsSize.toFixed(3)} ${this.currentSymbol.replace('USDT', '')} ($${formatPrice(totalNotional)})`;
         }
     }
 
@@ -1968,7 +1977,7 @@ class AppController {
 
             const mapOrder = (price, colorClass) => `
                 <div class="flex justify-between ${colorClass}">
-                    <span class="price font-semibold">${price.toFixed(2)}</span>
+                    <span class="price font-semibold">${formatPrice(price)}</span>
                     <span class="amount font-medium">${(0.1 + Math.random() * 6).toFixed(3)}</span>
                 </div>
             `;
