@@ -6,6 +6,36 @@
 const BINANCE_REST_BASE = 'https://api.binance.com';
 const BINANCE_WS_BASE = 'wss://stream.binance.com:9443/ws';
 
+const BASE_PRICES = {
+    'BTC': 95000, 'ETH': 3200, 'BNB': 600, 'SOL': 77.5, 'XRP': 2.50,
+    'ADA': 0.80, 'DOGE': 0.35, 'SUI': 3.0, 'LINK': 18, 'AVAX': 28,
+    'SHIB': 0.000025, 'TRX': 0.20, 'DOT': 6.20, 'MATIC': 0.42, 'POL': 0.42,
+    'TON': 7.10, 'LTC': 88, 'NEAR': 5.20, 'PEPE': 0.000012, 'UNI': 7.80,
+    'ICP': 9.20, 'APT': 8.50, 'HBAR': 0.12, 'XLM': 0.22, 'IMX': 1.45,
+    'GRT': 0.21, 'FIL': 4.10, 'LDO': 1.65, 'INJ': 24, 'VET': 0.028,
+    'RNDR': 7.50, 'RENDER': 7.50, 'WIF': 2.20, 'MKR': 2400, 'OP': 1.85,
+    'ARB': 0.78, 'JUP': 0.95, 'ATOM': 6.80, 'THETA': 1.75, 'FTM': 0.72,
+    'KAS': 0.16, 'FET': 1.40, 'PYTH': 0.42, 'EGLD': 32, 'BGB': 1.15,
+    'ALGO': 0.15, 'FLOKI': 0.00018, 'SEI': 0.45, 'FLOW': 0.65, 'BSV': 45,
+    'BONK': 0.000022, 'STX': 1.75, 'GALA': 0.024, 'QNT': 78, 'EOS': 0.58,
+    'SAND': 0.32, 'MANA': 0.34, 'NEO': 11.50, 'CHZ': 0.075, 'CRV': 0.32,
+    'DYDX': 1.25, 'MINA': 0.54, 'RUNE': 5.10, 'GNS': 3.40, 'AAVE': 125,
+    'AGIX': 0.68, 'AKT': 3.10, 'AXS': 5.80, 'BEAM': 0.022, 'BTT': 0.0000012,
+    'CAKE': 2.10, 'CELO': 0.62, 'COMP': 52, 'DGB': 0.008, 'ENA': 0.48,
+    'ENS': 18.50, 'ENJ': 0.22, 'ETHFI': 2.10, 'FDUSD': 1.00, 'GAS': 4.20,
+    'GLMR': 0.21, 'HOT': 0.0021, 'IOTX': 0.042, 'JASMY': 0.025, 'JTO': 2.40,
+    'KAVA': 0.62, 'KLAY': 0.18, 'LPT': 14.50, 'LRC': 0.18, 'LUNA': 0.42,
+    'OM': 0.95, 'ONDO': 0.85, 'PENDLE': 4.20, 'QTUM': 2.80, 'RAY': 1.65,
+    'REEF': 0.0015, 'RON': 2.10, 'RVN': 0.022, 'STRK': 0.48, 'TIA': 5.20,
+    'WLD': 2.10, 'YFI': 6200
+};
+
+function getAssetBasePrice(symbol) {
+    if (!symbol) return 1.0;
+    const sym = symbol.toUpperCase().replace('USDT', '').replace('-USDT', '').replace('-USD', '');
+    return BASE_PRICES[sym] || 1.0;
+}
+
 /**
  * Helper to fetch a resource with a timeout (CORS-safe fallback handling)
  */
@@ -143,18 +173,7 @@ export class BinanceAPI {
      */
     generateSimulatedKlines(symbol, interval, limit) {
         const candles = [];
-        let basePrice = 95000; // default (BTC)
-        if (symbol.includes('ETH')) basePrice = 3200;
-        else if (symbol.includes('BNB')) basePrice = 600;
-        else if (symbol.includes('SOL')) basePrice = 220;
-        else if (symbol.includes('XRP')) basePrice = 2.50;
-        else if (symbol.includes('ADA')) basePrice = 0.80;
-        else if (symbol.includes('DOGE')) basePrice = 0.35;
-        else if (symbol.includes('SUI')) basePrice = 3.0;
-        else if (symbol.includes('LINK')) basePrice = 18;
-        else if (symbol.includes('AVAX')) basePrice = 28;
-        else if (symbol.includes('SHIB')) basePrice = 0.000025;
-        else if (symbol.includes('TRX')) basePrice = 0.20;
+        let basePrice = getAssetBasePrice(symbol);
 
         let lastClose = basePrice;
         const nowMs = Date.now();
@@ -243,19 +262,7 @@ export class BinanceAPI {
 
     generateSimulatedTickers(symbols) {
         return symbols.map(symbol => {
-            let lastPrice = 1.0;
-            if (symbol.includes('BTC')) lastPrice = 95000;
-            else if (symbol.includes('ETH')) lastPrice = 3200;
-            else if (symbol.includes('BNB')) lastPrice = 600;
-            else if (symbol.includes('SOL')) lastPrice = 220;
-            else if (symbol.includes('DOGE')) lastPrice = 0.35;
-            else if (symbol.includes('XRP')) lastPrice = 2.50;
-            else if (symbol.includes('ADA')) lastPrice = 0.80;
-            else if (symbol.includes('LINK')) lastPrice = 18;
-            else if (symbol.includes('AVAX')) lastPrice = 28;
-            else if (symbol.includes('SUI')) lastPrice = 3.0;
-            else if (symbol.includes('SHIB')) lastPrice = 0.000025;
-            else if (symbol.includes('TRX')) lastPrice = 0.20;
+            let lastPrice = getAssetBasePrice(symbol);
 
             const changePercent = (Math.random() - 0.45) * 8.0; // random -4% to +4% change
             return {
@@ -359,18 +366,7 @@ export class BinanceAPI {
         
         let currentPrice = startingPrice;
         if (currentPrice === null || currentPrice === undefined) {
-            currentPrice = 95000;
-            if (this.currentSymbol.includes('eth')) currentPrice = 3200;
-            else if (this.currentSymbol.includes('bnb')) currentPrice = 600;
-            else if (this.currentSymbol.includes('sol')) currentPrice = 220;
-            else if (this.currentSymbol.includes('xrp')) currentPrice = 2.50;
-            else if (this.currentSymbol.includes('ada')) currentPrice = 0.80;
-            else if (this.currentSymbol.includes('doge')) currentPrice = 0.35;
-            else if (this.currentSymbol.includes('sui')) currentPrice = 3.0;
-            else if (this.currentSymbol.includes('link')) currentPrice = 18;
-            else if (this.currentSymbol.includes('avax')) currentPrice = 28;
-            else if (this.currentSymbol.includes('shib')) currentPrice = 0.000025;
-            else if (this.currentSymbol.includes('trx')) currentPrice = 0.20;
+            currentPrice = getAssetBasePrice(this.currentSymbol);
         }
 
         this.simulatedInterval = setInterval(() => {

@@ -10,11 +10,28 @@ import { RiskCalculator } from './risk.js';
 import { AlertsManager } from './alerts.js';
 import { formatPrice, formatPercent, formatVolume, debounce } from './utils.js';
 
-// Default layout configurations
+// Default layout configurations (Top 100 Cryptocurrency pairs with USDT)
 const POPULAR_WATCHLIST = [
-    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'DOGEUSDT', 
-    'ADAUSDT', 'XRPUSDT', 'LINKUSDT', 'AVAXUSDT', 'SUIUSDT', 
-    'SHIBUSDT', 'TRXUSDT'
+    'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT',
+    'ADAUSDT', 'DOGEUSDT', 'AVAXUSDT', 'SHIBUSDT', 'DOTUSDT',
+    'POLUSDT', 'TONUSDT', 'LINKUSDT', 'TRXUSDT', 'LTCUSDT',
+    'NEARUSDT', 'SUIUSDT', 'PEPEUSDT', 'UNIUSDT', 'ICPUSDT',
+    'APTUSDT', 'HBARUSDT', 'XLMUSDT', 'IMXUSDT', 'GRTUSDT',
+    'FILUSDT', 'LDOUSDT', 'INJUSDT', 'VETUSDT', 'RENDERUSDT',
+    'WIFUSDT', 'MKRUSDT', 'OPUSDT', 'ARBUSDT', 'JUPUSDT',
+    'ATOMUSDT', 'THETAUSDT', 'FTMUSDT', 'KASUSDT', 'FETUSDT',
+    'PYTHUSDT', 'EGLDUSDT', 'BGBUSDT', 'ALGOUSDT', 'FLOKIUSDT',
+    'SEIUSDT', 'FLOWUSDT', 'BSVUSDT', 'BONKUSDT', 'STXUSDT',
+    'GALAUSDT', 'QNTUSDT', 'EOSUSDT', 'SANDUSDT', 'MANAUSDT',
+    'NEOUSDT', 'CHZUSDT', 'CRVUSDT', 'DYDXUSDT', 'MINAUSDT',
+    'RUNEUSDT', 'GNSUSDT', 'AAVEUSDT', 'AGIXUSDT', 'AKTUSDT',
+    'AXSUSDT', 'BEAMUSDT', 'BTTUSDT', 'CAKEUSDT', 'CELOUSDT',
+    'COMPUSDT', 'DGBUSDT', 'ENAUSDT', 'ENSUSDT', 'ENJUSDT',
+    'ETHFIUSDT', 'FDUSDUSDT', 'GASUSDT', 'GLMRUSDT', 'HOTUSDT',
+    'IOTXUSDT', 'JASMYUSDT', 'JTOUSDT', 'KAVAUSDT', 'KLAYUSDT',
+    'LPTUSDT', 'LRCUSDT', 'LUNAUSDT', 'OMUSDT', 'ONDOUSDT',
+    'PENDLEUSDT', 'QTUMUSDT', 'RAYUSDT', 'REEFUSDT', 'RONUSDT',
+    'RVNUSDT', 'STRKUSDT', 'TIAUSDT', 'WLDUSDT', 'YFIUSDT'
 ];
 
 class AppController {
