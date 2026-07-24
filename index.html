@@ -798,26 +798,35 @@
                     </div>
 
                     <!-- Tab: Recent AI Signal History -->
-                    <div id="tabContentSignals" class="hidden overflow-x-auto">
-                        <table class="w-full text-left text-xs min-w-[600px]">
-                            <thead>
-                                <tr class="border-b border-gray-800 text-gray-400 bg-[#181a20]">
-                                    <th class="p-3">Time</th>
-                                    <th class="p-3">Symbol</th>
-                                    <th class="p-3">Type</th>
-                                    <th class="p-3">Price</th>
-                                    <th class="p-3">AI Score</th>
-                                    <th class="p-3">Confidence</th>
-                                    <th class="p-3 text-right">Result</th>
-                                </tr>
-                            </thead>
-                            <tbody id="signalHistoryBody">
-                                <!-- Populated dynamically -->
-                                <tr class="border-b border-gray-800/50 text-gray-400">
-                                    <td class="p-3" colspan="7 text-center">No signal triggers yet. Signal updates occur automatically when patterns are detected.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div id="tabContentSignals" class="hidden">
+                        <div class="flex justify-between items-center p-3 border-b border-gray-800/80 bg-[#161a1e]">
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">Automated Strategy Signals</span>
+                            <button id="clearAllSignalsBtn" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 hover:border-red-500/50 px-2.5 py-1 rounded transition text-xs flex items-center space-x-1 font-semibold">
+                                <span>🗑 Clear All History</span>
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs min-w-[600px]">
+                                <thead>
+                                    <tr class="border-b border-gray-800 text-gray-400 bg-[#181a20]">
+                                        <th class="p-3">Time</th>
+                                        <th class="p-3">Symbol</th>
+                                        <th class="p-3">Type</th>
+                                        <th class="p-3">Price</th>
+                                        <th class="p-3">AI Score</th>
+                                        <th class="p-3">Confidence</th>
+                                        <th class="p-3">Result</th>
+                                        <th class="p-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="signalHistoryBody">
+                                    <!-- Populated dynamically -->
+                                    <tr class="border-b border-gray-800/50 text-gray-400">
+                                        <td class="p-3 text-center" colspan="8">No signal triggers yet. Signal updates occur automatically when patterns are detected.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- Tab: Crypto Heatmap -->

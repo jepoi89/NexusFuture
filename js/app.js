@@ -53,6 +53,7 @@ class AppController {
             // Seed a couple of historical/active signals for reference
             this.signals = [
                 {
+                    id: 'sig_seed_1',
                     time: new Date(Date.now() - 3600000 * 2).toLocaleTimeString(),
                     symbol: 'BTCUSDT',
                     type: 'CONFIRMED BUY',
@@ -65,6 +66,7 @@ class AppController {
                     direction: 'LONG'
                 },
                 {
+                    id: 'sig_seed_2',
                     time: new Date(Date.now() - 3600000).toLocaleTimeString(),
                     symbol: 'ETHUSDT',
                     type: 'CONFIRMED SELL',
@@ -132,6 +134,14 @@ class AppController {
         const searchInput = document.getElementById('symbolSearchInput');
         if (searchInput) {
             searchInput.addEventListener('input', debounce(() => this.handleSearchInput(), 250));
+        }
+
+        // Clear All Signals Button Binding
+        const clearSignalsBtn = document.getElementById('clearAllSignalsBtn');
+        if (clearSignalsBtn) {
+            clearSignalsBtn.addEventListener('click', () => {
+                this.clearAllSignals();
+            });
         }
         
         // Hide suggestions on outside click
@@ -1546,7 +1556,7 @@ class AppController {
             if (!this.signals || this.signals.length === 0) {
                 container.innerHTML = `
                     <tr class="border-b border-gray-800/50 text-gray-400">
-                        <td class="p-3 text-center" colspan="7">No strategy signals triggered yet. Real-time entries appear dynamically.</td>
+                        <td class="p-3 text-center" colspan="8">No strategy signals triggered yet. Real-time entries appear dynamically.</td>
                     </tr>
                 `;
                 return;
@@ -1558,6 +1568,7 @@ class AppController {
                 if (log.result.includes("FAILED")) colorClass = "text-red-500 bg-red-500/10 border-red-500/20";
 
                 const typeColor = log.type.includes("BUY") ? "text-green-400 bg-green-950/20" : "text-red-400 bg-red-950/20";
+                const sigId = log.id || '';
 
                 return `
                     <tr class="border-b border-gray-800/50 hover:bg-[#1e2329] text-xs">
@@ -1567,10 +1578,36 @@ class AppController {
                         <td class="p-3 font-mono font-bold">$${log.price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td class="p-3 font-mono ${log.score >= 0 ? 'text-green-500' : 'text-red-500'} font-bold">${log.score >= 0 ? '+' : ''}${log.score}</td>
                         <td class="p-3 font-mono">${log.confidence}</td>
-                        <td class="p-3 text-right"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${colorClass}">${log.result}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${colorClass}">${log.result}</span></td>
+                        <td class="p-3 text-right">
+                            <button data-delete-signal="${sigId}" class="text-red-500 hover:text-red-400 font-bold px-1.5 py-0.5 rounded bg-red-950/10 border border-red-950/30 hover:border-red-500/40 transition">
+                                Delete
+                            </button>
+                        </td>
                     </tr>
                 `;
             }).join('');
+
+            container.querySelectorAll('[data-delete-signal]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-delete-signal');
+                    this.deleteSignal(id);
+                });
+            });
+        }
+    }
+
+    deleteSignal(id) {
+        this.signals = this.signals.filter(sig => sig.id !== id);
+        localStorage.setItem('nexus_ai_triggered_signals', JSON.stringify(this.signals));
+        this.renderSignalHistory();
+    }
+
+    clearAllSignals() {
+        if (confirm("Are you sure you want to delete all AI Signal history?")) {
+            this.signals = [];
+            localStorage.setItem('nexus_ai_triggered_signals', JSON.stringify(this.signals));
+            this.renderSignalHistory();
         }
     }
 
@@ -1592,6 +1629,7 @@ class AppController {
         if (!tp || !tp.stopLoss || !tp.tp1) return;
 
         const newSignal = {
+            id: 'sig_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
             time: new Date().toLocaleTimeString(),
             symbol: this.currentSymbol,
             type: isLong ? 'CONFIRMED BUY' : 'CONFIRMED SELL',
