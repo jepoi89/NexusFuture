@@ -463,6 +463,7 @@ class AppController {
                 const tLiquidation = document.getElementById('tabContentLiquidation');
                 const tNews = document.getElementById('tabContentNews');
                 const tJournal = document.getElementById('tabContentJournal');
+                const tTokeninfo = document.getElementById('tabContentTokeninfo');
 
                 if (tSentiment) tSentiment.classList.add('hidden');
                 if (tSignals) tSignals.classList.add('hidden');
@@ -471,6 +472,7 @@ class AppController {
                 if (tLiquidation) tLiquidation.classList.add('hidden');
                 if (tNews) tNews.classList.add('hidden');
                 if (tJournal) tJournal.classList.add('hidden');
+                if (tTokeninfo) tTokeninfo.classList.add('hidden');
 
                 if (targetTab === 'sentiment' && tSentiment) {
                     tSentiment.classList.remove('hidden');
@@ -486,6 +488,8 @@ class AppController {
                     tNews.classList.remove('hidden');
                 } else if (targetTab === 'journal' && tJournal) {
                     tJournal.classList.remove('hidden');
+                } else if (targetTab === 'tokeninfo' && tTokeninfo) {
+                    tTokeninfo.classList.remove('hidden');
                 }
             });
         });
@@ -737,6 +741,9 @@ class AppController {
         if (liqBullHunt) liqBullHunt.textContent = `$${formatPrice(lastCandle.close * 0.991)}`;
         if (liqBearHunt) liqBearHunt.textContent = `$${formatPrice(lastCandle.close * 1.009)}`;
 
+        // Update token general info and exchanges markets
+        this.updateTokenInfoTab(this.currentSymbol, lastCandle ? lastCandle.close : null);
+
         // Establish Stream connection
         this.binance.connectLiveStream(
             this.currentSymbol,
@@ -955,6 +962,9 @@ class AppController {
         // Track and resolve live signals
         this.trackAndResolveSignals(this.currentSymbol, tick.close);
 
+        // Update token general info and exchanges markets
+        this.updateTokenInfoTab(this.currentSymbol, tick.close);
+
         // Update tags
         const prTag = document.getElementById('currentPriceTag');
         if (prTag) prTag.textContent = formatPrice(tick.close);
@@ -993,6 +1003,9 @@ class AppController {
                 const fRate = this.currentSentimentData.fundingRate + fluctuation;
                 fundingEl.textContent = `${fRate > 0 ? '+' : ''}${fRate.toFixed(4)}%`;
             }
+
+            // Update token general info and exchanges markets on active symbol tick
+            this.updateTokenInfoTab(this.currentSymbol, ticker.price);
         }
 
         // Track and resolve live signals
@@ -2245,6 +2258,191 @@ class AppController {
                 </div>
             `;
         }).join('');
+    }
+
+    updateTokenInfoTab(symbol, lastPrice) {
+        if (!symbol) return;
+        const baseSymbol = symbol.toUpperCase().replace('USDT', '').replace('-USDT', '').replace('-USD', '');
+        lastPrice = parseFloat(lastPrice) || 1.0;
+
+        // Custom config for known tokens
+        const tokenDb = {
+            'BTC': {
+                name: 'Bitcoin',
+                website: 'https://bitcoin.org',
+                social: 'https://x.com/bitcoin',
+                circulating: 19800000,
+                total: 21000000,
+                ath: 108350.00,
+                atl: 65.53,
+                athMc: 2150000000000,
+                marketsName: 'Bitcoin'
+            },
+            'ETH': {
+                name: 'Ethereum',
+                website: 'https://ethereum.org',
+                social: 'https://x.com/ethereum',
+                circulating: 120400000,
+                total: 120400000,
+                ath: 4891.70,
+                atl: 0.42,
+                athMc: 589400000000,
+                marketsName: 'Ethereum'
+            },
+            'SOL': {
+                name: 'Solana',
+                website: 'https://solana.com',
+                social: 'https://x.com/solana',
+                circulating: 478200000,
+                total: 588500000,
+                ath: 260.06,
+                atl: 0.50,
+                athMc: 122300000000,
+                marketsName: 'Solana'
+            },
+            'BNB': {
+                name: 'BNB Chain',
+                website: 'https://bnbchain.org',
+                social: 'https://x.com/bnbchain',
+                circulating: 145800000,
+                total: 200000000,
+                ath: 720.67,
+                atl: 0.096,
+                athMc: 105100000000,
+                marketsName: 'BNB Chain'
+            }
+        };
+
+        // Fallback generator for other symbols
+        let token = tokenDb[baseSymbol];
+        if (!token) {
+            // Generate deterministic stats from baseSymbol name hash
+            let charSum = 0;
+            for (let i = 0; i < baseSymbol.length; i++) charSum += baseSymbol.charCodeAt(i);
+            const circ = 50000000 * (1 + (charSum % 50));
+            const tot = circ * (1 + (charSum % 3) * 0.5);
+            const ath = lastPrice * (1.5 + (charSum % 10) * 0.4);
+            const atl = lastPrice * 0.01 * (1 + (charSum % 10));
+
+            token = {
+                name: baseSymbol + ' Token',
+                website: 'https://coinmarketcap.com',
+                social: `https://x.com/search?q=${baseSymbol}`,
+                circulating: circ,
+                total: tot,
+                ath: ath,
+                atl: atl,
+                athMc: ath * circ,
+                marketsName: baseSymbol
+            };
+        }
+
+        const marketCap = lastPrice * token.circulating;
+        const fdv = lastPrice * token.total;
+        const h24Vol = marketCap * 0.035; // realistic volume ratio
+
+        const fromATH = ((lastPrice - token.ath) / token.ath) * 100;
+        const fromATL = ((lastPrice - token.atl) / token.atl) * 100;
+
+        // Populate elements
+        const symEl = document.getElementById('tokenInfoSymbol');
+        if (symEl) symEl.textContent = baseSymbol;
+
+        const webEl = document.getElementById('tokenWebsite');
+        if (webEl) webEl.href = token.website;
+
+        const socEl = document.getElementById('tokenSocial');
+        if (socEl) socEl.href = token.social;
+
+        const mcEl = document.getElementById('tokenMarketCap');
+        if (mcEl) mcEl.textContent = `$${formatVolume(marketCap)}`;
+
+        const fdvEl = document.getElementById('tokenFDV');
+        if (fdvEl) fdvEl.textContent = `$${formatVolume(fdv)}`;
+
+        const athMcEl = document.getElementById('tokenATHMarketCap');
+        if (athMcEl) athMcEl.textContent = `$${formatVolume(token.athMc)}`;
+
+        const volEl = document.getElementById('token24hVol');
+        if (volEl) volEl.textContent = `$${formatVolume(h24Vol)}`;
+
+        const totSupEl = document.getElementById('tokenTotalSupply');
+        if (totSupEl) totSupEl.textContent = `${formatVolume(token.total)} ${baseSymbol}`;
+
+        const circSupEl = document.getElementById('tokenCirculatingSupply');
+        if (circSupEl) circSupEl.textContent = `${formatVolume(token.circulating)} ${baseSymbol}`;
+
+        const athEl = document.getElementById('tokenATH');
+        if (athEl) athEl.textContent = `$${formatPrice(token.ath)}`;
+
+        const fromAthEl = document.getElementById('tokenFromATH');
+        if (fromAthEl) fromAthEl.textContent = `${fromATH.toFixed(2)}%`;
+
+        const atlEl = document.getElementById('tokenATL');
+        if (atlEl) atlEl.textContent = `$${formatPrice(token.atl)}`;
+
+        const fromAtlEl = document.getElementById('tokenFromATL');
+        if (fromAtlEl) fromAtlEl.textContent = `+${fromATL.toLocaleString(undefined, {maximumFractionDigits: 1})}%`;
+
+        const nameEl = document.getElementById('tokenMarketsName');
+        if (nameEl) nameEl.textContent = token.marketsName;
+
+        // Now populate Exchange Markets table body
+        const tableBody = document.getElementById('tokenMarketsTableBody');
+        if (tableBody) {
+            // Exchanges list
+            const exchanges = [
+                { name: 'Hotcoin', pairSuffix: '/USDT', priceMult: 0.9995, changeOfs: -0.05, spread: '0.014%', volMult: 0.12 },
+                { name: 'Binance', pairSuffix: '/USDT', priceMult: 1.0000, changeOfs: 0.0, spread: '0.014%', volMult: 0.45 },
+                { name: 'BitMart', pairSuffix: '/USDT', priceMult: 1.0002, changeOfs: 0.04, spread: '0.014%', volMult: 0.25 },
+                { name: 'Gate', pairSuffix: '/USDT', priceMult: 1.0002, changeOfs: 0.05, spread: '0.014%', volMult: 0.15 },
+                { name: 'OKX', pairSuffix: '/USDT', priceMult: 1.0001, changeOfs: -0.01, spread: '0.014%', volMult: 0.10 },
+                { name: 'Coinbase', pairSuffix: '/USD', priceMult: 0.9992, changeOfs: 0.18, spread: '0.014%', volMult: 0.14 }
+            ];
+
+            // Get change info from watchlist if possible
+            let baseChange = -2.01;
+            if (this.tickersCache && this.tickersCache.length > 0) {
+                const ticker = this.tickersCache.find(t => t.symbol.toUpperCase() === symbol.toUpperCase());
+                if (ticker) {
+                    baseChange = ticker.priceChangePercent;
+                }
+            }
+
+            tableBody.innerHTML = exchanges.map(ex => {
+                const exPrice = lastPrice * ex.priceMult;
+                const exChange = baseChange + ex.changeOfs;
+                const exHigh = exPrice * 1.025;
+                const exLow = exPrice * 0.975;
+                const exVol = h24Vol * ex.volMult;
+                const tokenVol = exVol / lastPrice;
+
+                const changeColor = exChange >= 0 ? 'text-[#0ecb81]' : 'text-[#f6465d]';
+                const sign = exChange >= 0 ? '+' : '';
+
+                // We can show the values in USDT or USD depending on pairSuffix
+                const unit = ex.pairSuffix.replace('/', '');
+
+                return `
+                    <tr class="border-b border-gray-800/40 hover:bg-[#1e2329]/60 text-xs text-gray-300">
+                        <td class="p-2 font-bold text-white flex items-center space-x-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span>${ex.name}</span>
+                        </td>
+                        <td class="p-2 font-semibold text-gray-400">${baseSymbol}${ex.pairSuffix}</td>
+                        <td class="p-2 font-mono text-white font-bold">${unit} ${formatPrice(exPrice)}</td>
+                        <td class="p-2 font-mono font-bold ${changeColor}">${sign}${exChange.toFixed(2)}%</td>
+                        <td class="p-2 font-mono">${unit} ${formatPrice(exHigh)}</td>
+                        <td class="p-2 font-mono">${unit} ${formatPrice(exLow)}</td>
+                        <td class="p-2 font-mono font-bold text-amber-500">${ex.spread}</td>
+                        <td class="p-2 font-mono font-medium">
+                            <div>$${formatVolume(exVol)}</div>
+                            <div class="text-[9px] text-gray-500">${formatVolume(tokenVol)} ${baseSymbol}</div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
     }
 }
 
