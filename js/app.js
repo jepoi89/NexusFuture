@@ -1156,7 +1156,13 @@ class AppController {
         const gaugeScore = document.getElementById('gaugeScore');
         if (gaugeScore) gaugeScore.textContent = decision.score;
         const gaugeScoreText = document.getElementById('gaugeScoreText');
-        if (gaugeScoreText) gaugeScoreText.textContent = decision.recommendation;
+        if (gaugeScoreText) {
+            if (decision.recommendation.length > 25) {
+                gaugeScoreText.textContent = "NO CONVICTION";
+            } else {
+                gaugeScoreText.textContent = decision.recommendation;
+            }
+        }
 
         // Animate AI gauge
         this.animateAiGauge(decision.score);
@@ -1910,7 +1916,7 @@ class AppController {
             if (expContextText) expContextText.textContent = exp.marketContext;
 
             const expWhyText = document.getElementById('expWhyText');
-            if (expWhyText) expWhyText.textContent = exp.whySetupExists;
+            if (expWhyText) expWhyText.innerHTML = exp.whySetupExists;
 
             const expSupportingList = document.getElementById('expSupportingList');
             if (expSupportingList) {
@@ -1947,7 +1953,7 @@ class AppController {
 
             const thesisSummaryText = document.getElementById('thesisSummaryText');
             if (thesisSummaryText) {
-                thesisSummaryText.textContent = `The automated intelligence suite presents a highly comprehensive trading report for ${this.currentSymbol} on the ${this.currentTimeframe} timeframe. ${exp.marketContext} ${exp.whySetupExists}`;
+                thesisSummaryText.innerHTML = exp.tradeThesisHtml;
             }
 
             const thesisTrendBadge = document.getElementById('thesisTrendBadge');
