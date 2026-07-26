@@ -27,9 +27,12 @@ import {
 
 import { detectPatterns } from './patterns.js';
 import { formatPrice } from './utils.js';
+import { SMCEngine } from './smc-engine.js';
 
 export class AIDecisionEngine {
-    constructor() {}
+    constructor() {
+        this.smcEngine = new SMCEngine();
+    }
 
     /**
      * Core Market Intelligence Multi-Layer Evaluation
@@ -48,7 +51,12 @@ export class AIDecisionEngine {
                 reasons: ['Not enough candle data for full Market Intelligence evaluation.'],
                 probabilities: { bullish: 33, bearish: 33, neutral: 34 },
                 tradeQuality: 0,
-                layers: { marketStructure: {}, priceAction: {}, volume: {}, momentum: {}, trendConfirmation: {}, volatility: {}, candlesticks: {}, multiTimeframe: {}, news: {}, sentiment: {} }
+                layers: { marketStructure: {}, priceAction: {}, volume: {}, momentum: {}, trendConfirmation: {}, volatility: {}, candlesticks: {}, multiTimeframe: {}, news: {}, sentiment: {} },
+                smc: {
+                    institutionalBias: { bias: 'Neutral', explanation: 'Insufficient candle data to determine institutional flow.' },
+                    liquidity: { equalHighs: null, equalLows: null, pools: [], sweeps: [], stopHunts: [], imbalances: [] },
+                    zones: { orderBlocks: [], breakerBlocks: [], mitigationBlocks: [], fvgs: [], ifvgs: [], supplyDemand: [], premiumDiscount: null }
+                }
             };
         }
 
@@ -390,6 +398,9 @@ export class AIDecisionEngine {
             transparentReasons.push(...dynamicAdjustmentReasons);
         }
 
+        // Run Smart Money Concepts Analysis
+        const smc = this.smcEngine.analyze(candles);
+
         // Return unified Intelligence Payload
         return {
             score: Math.round(weightedScore),
@@ -421,7 +432,8 @@ export class AIDecisionEngine {
                 news: newsInt,
                 sentiment: sentimentInt
             },
-            tradePlan
+            tradePlan,
+            smc
         };
     }
 
