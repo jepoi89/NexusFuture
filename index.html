@@ -400,8 +400,50 @@
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="journal">AI Trade Journal</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="signals">Recent AI Signal History</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="heatmap">Crypto Heatmap</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="smc">Smart Money Concepts</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="tokeninfo">Token Info</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="thesis">AI Trade Thesis</button>
+                    </div>
+
+                    <!-- Tab Content: Smart Money Concepts -->
+                    <div id="tabContentSMC" class="hidden space-y-4">
+                        <!-- Institutional Bias Banner -->
+                        <div class="p-4 rounded-lg border transition duration-300 flex flex-col space-y-2" id="smcBiasBanner">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg" id="smcBiasIcon">⚡</div>
+                                    <h3 class="text-sm font-black uppercase tracking-wider text-white">Institutional Market Bias</h3>
+                                </div>
+                                <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-black border border-amber-500/20">SMC FLOW INTELLIGENCE</span>
+                            </div>
+                            <p class="text-xs text-gray-300 leading-relaxed font-semibold" id="smcBiasExplanation">Determining institutional order flow bias...</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <!-- Liquidity Engine Card -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3.5 shadow-inner">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <span>Liquidity Engine</span>
+                                    <span class="text-[9px] text-gray-500">Retail Stop Hunts & Sweeps</span>
+                                </h3>
+                                <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1" id="smcLiquidityList">
+                                    <!-- Equal Highs / Lows / Pools -->
+                                    <div class="text-center text-xs text-gray-500 py-6">Processing liquidity nodes...</div>
+                                </div>
+                            </div>
+
+                            <!-- Institutional Zones Card -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3.5 shadow-inner">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <span>Institutional Zones</span>
+                                    <span class="text-[9px] text-gray-500">Mitigation & Imbalance Coordinates</span>
+                                </h3>
+                                <div class="space-y-2.5 max-h-96 overflow-y-auto pr-1" id="smcZonesList">
+                                    <!-- Order Blocks / Breakers / FVGs / Premium & Discount -->
+                                    <div class="text-center text-xs text-gray-500 py-6">Detecting institutional structures...</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Tab Content: Market Intelligence & Sentiment -->

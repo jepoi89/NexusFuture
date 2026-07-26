@@ -465,6 +465,7 @@ class AppController {
                 const tJournal = document.getElementById('tabContentJournal');
                 const tTokeninfo = document.getElementById('tabContentTokeninfo');
                 const tThesis = document.getElementById('tabContentThesis');
+                const tSMC = document.getElementById('tabContentSMC');
 
                 if (tSentiment) tSentiment.classList.add('hidden');
                 if (tSignals) tSignals.classList.add('hidden');
@@ -475,6 +476,7 @@ class AppController {
                 if (tJournal) tJournal.classList.add('hidden');
                 if (tTokeninfo) tTokeninfo.classList.add('hidden');
                 if (tThesis) tThesis.classList.add('hidden');
+                if (tSMC) tSMC.classList.add('hidden');
 
                 if (targetTab === 'sentiment' && tSentiment) {
                     tSentiment.classList.remove('hidden');
@@ -494,6 +496,8 @@ class AppController {
                     tTokeninfo.classList.remove('hidden');
                 } else if (targetTab === 'thesis' && tThesis) {
                     tThesis.classList.remove('hidden');
+                } else if (targetTab === 'smc' && tSMC) {
+                    tSMC.classList.remove('hidden');
                 }
             });
         });
@@ -1224,6 +1228,249 @@ class AppController {
 
         // Update new Phase 1 Market Intelligence Foundation cards and panels
         this.updateMarketIntelligenceUI(decision);
+
+        // Update Phase 2 Smart Money Concepts bottom tab panel
+        this.updateSMCUI(decision);
+    }
+
+    updateSMCUI(decision) {
+        if (!decision || !decision.smc) return;
+        const smc = decision.smc;
+
+        // 1. Institutional Bias Banner
+        const smcBiasBanner = document.getElementById('smcBiasBanner');
+        const smcBiasIcon = document.getElementById('smcBiasIcon');
+        const smcBiasExplanation = document.getElementById('smcBiasExplanation');
+
+        if (smcBiasBanner && smcBiasIcon && smcBiasExplanation) {
+            const ib = smc.institutionalBias;
+            smcBiasExplanation.textContent = ib.explanation;
+
+            if (ib.bias.includes('Bullish')) {
+                smcBiasBanner.className = "p-4 rounded-lg border transition duration-300 flex flex-col space-y-2 bg-green-950/20 border-[#0ecb81] glow-green";
+                smcBiasIcon.textContent = "📈";
+                smcBiasIcon.className = "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg bg-green-950/40 text-[#0ecb81]";
+            } else if (ib.bias.includes('Bearish')) {
+                smcBiasBanner.className = "p-4 rounded-lg border transition duration-300 flex flex-col space-y-2 bg-red-950/20 border-[#f6465d] glow-red";
+                smcBiasIcon.textContent = "📉";
+                smcBiasIcon.className = "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg bg-red-950/40 text-[#f6465d]";
+            } else {
+                smcBiasBanner.className = "p-4 rounded-lg border transition duration-300 flex flex-col space-y-2 bg-yellow-950/10 border-gray-800 glow-yellow";
+                smcBiasIcon.textContent = "⚡";
+                smcBiasIcon.className = "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg bg-yellow-950/20 text-yellow-500";
+            }
+        }
+
+        // Helper to format detailed SMC attribute rows
+        const renderSMCItem = (item) => `
+            <div class="bg-[#181a20] p-3.5 rounded border border-gray-800/80 space-y-2 text-xs">
+                <div class="flex items-center justify-between border-b border-gray-800 pb-1.5">
+                    <span class="font-bold text-white uppercase text-[11px] tracking-wide flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full ${item.type.includes('Bullish') || item.type.includes('Demand') ? 'bg-[#0ecb81]' : (item.type.includes('Bearish') || item.type.includes('Supply') ? 'bg-[#f6465d]' : 'bg-blue-500')}"></span>
+                        <span>${item.type}</span>
+                    </span>
+                    <span class="font-mono text-gray-400 font-extrabold bg-[#1e2329] px-2 py-0.5 rounded border border-gray-800">${item.coord || ''}</span>
+                </div>
+                <div class="space-y-1.5 text-gray-300 leading-relaxed text-[11px]">
+                    <div class="grid grid-cols-3 gap-2 border-b border-gray-800/40 pb-1.5 text-[10px] font-semibold text-gray-400 uppercase">
+                        <div>Strength: <span class="font-bold text-white font-mono">${item.strength || 'Normal'}</span></div>
+                        <div class="text-center">Probability: <span class="font-bold text-amber-500 font-mono">${item.probability || '70%'}</span></div>
+                        <div class="text-right">Origin: <span class="font-bold text-blue-400 font-mono">15m</span></div>
+                    </div>
+                    <div>
+                        <strong class="text-amber-500 block text-[10px] uppercase tracking-wider mb-0.5">Why it matters:</strong>
+                        <span>${item.whyItMatters}</span>
+                    </div>
+                    <div>
+                        <strong class="text-green-400 block text-[10px] uppercase tracking-wider mb-0.5">Potential Reaction:</strong>
+                        <span>${item.potentialReaction}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // 2. Liquidity Engine List
+        const liquidityList = document.getElementById('smcLiquidityList');
+        if (liquidityList) {
+            const listItems = [];
+
+            // Equal Highs
+            if (smc.liquidity.equalHighs) {
+                const eqh = smc.liquidity.equalHighs;
+                listItems.push({
+                    type: 'Equal Highs (EQH)',
+                    coord: `$${formatPrice(eqh.price)}`,
+                    strength: eqh.strength,
+                    probability: eqh.probability,
+                    whyItMatters: eqh.whyItMatters,
+                    potentialReaction: eqh.potentialReaction
+                });
+            }
+
+            // Equal Lows
+            if (smc.liquidity.equalLows) {
+                const eql = smc.liquidity.equalLows;
+                listItems.push({
+                    type: 'Equal Lows (EQL)',
+                    coord: `$${formatPrice(eql.price)}`,
+                    strength: eql.strength,
+                    probability: eql.probability,
+                    whyItMatters: eql.whyItMatters,
+                    potentialReaction: eql.potentialReaction
+                });
+            }
+
+            // Pools
+            smc.liquidity.pools.forEach(p => {
+                listItems.push({
+                    type: p.type,
+                    coord: `$${formatPrice(p.price)}`,
+                    strength: p.strength,
+                    probability: p.probability,
+                    whyItMatters: p.whyItMatters,
+                    potentialReaction: p.potentialReaction
+                });
+            });
+
+            // Sweeps
+            smc.liquidity.sweeps.forEach(s => {
+                listItems.push({
+                    type: s.type,
+                    coord: `$${formatPrice(s.sweptPrice)}`,
+                    strength: s.strength,
+                    probability: s.probability,
+                    whyItMatters: s.whyItMatters,
+                    potentialReaction: s.potentialReaction
+                });
+            });
+
+            // Stop Hunts
+            smc.liquidity.stopHunts.forEach(sh => {
+                listItems.push({
+                    type: sh.type,
+                    coord: `$${formatPrice(sh.sweptPrice)}`,
+                    strength: sh.strength,
+                    probability: sh.probability,
+                    whyItMatters: sh.whyItMatters,
+                    potentialReaction: sh.potentialReaction
+                });
+            });
+
+            // Imbalances
+            smc.liquidity.imbalances.forEach(imb => {
+                listItems.push({
+                    type: imb.type,
+                    coord: `$${formatPrice(imb.price)}`,
+                    strength: imb.strength,
+                    probability: imb.probability,
+                    whyItMatters: imb.whyItMatters,
+                    potentialReaction: imb.potentialReaction
+                });
+            });
+
+            if (listItems.length === 0) {
+                liquidityList.innerHTML = `<div class="text-center text-gray-500 text-xs py-10 font-semibold italic">Stable ranges detected. No active liquidity sweeps or stop hunts currently recorded.</div>`;
+            } else {
+                liquidityList.innerHTML = listItems.map(renderSMCItem).join('<div class="h-2"></div>');
+            }
+        }
+
+        // 3. Institutional Zones List
+        const zonesList = document.getElementById('smcZonesList');
+        if (zonesList) {
+            const listItems = [];
+
+            // Premium / Discount Zone
+            if (smc.zones.premiumDiscount) {
+                const pd = smc.zones.premiumDiscount;
+                listItems.push({
+                    type: pd.zone,
+                    coord: `$${formatPrice(pd.equilibrium)} (Equil)`,
+                    strength: pd.strength,
+                    probability: pd.probability,
+                    whyItMatters: pd.whyItMatters,
+                    potentialReaction: pd.potentialReaction
+                });
+            }
+
+            // Supply & Demand
+            smc.zones.supplyDemand.forEach(sd => {
+                listItems.push({
+                    type: sd.type,
+                    coord: `$${formatPrice(sd.low)} - $${formatPrice(sd.high)}`,
+                    strength: sd.strength,
+                    probability: sd.probability,
+                    whyItMatters: sd.whyItMatters,
+                    potentialReaction: sd.potentialReaction
+                });
+            });
+
+            // Order Blocks
+            smc.zones.orderBlocks.forEach(ob => {
+                listItems.push({
+                    type: ob.type,
+                    coord: `$${formatPrice(ob.low)} - $${formatPrice(ob.high)}`,
+                    strength: ob.strength,
+                    probability: ob.probability,
+                    whyItMatters: ob.whyItMatters,
+                    potentialReaction: ob.potentialReaction
+                });
+            });
+
+            // Breaker Blocks
+            smc.zones.breakerBlocks.forEach(bb => {
+                listItems.push({
+                    type: bb.type,
+                    coord: `$${formatPrice(bb.low)} - $${formatPrice(bb.high)}`,
+                    strength: bb.strength,
+                    probability: bb.probability,
+                    whyItMatters: bb.whyItMatters,
+                    potentialReaction: bb.potentialReaction
+                });
+            });
+
+            // Mitigation Blocks
+            smc.zones.mitigationBlocks.forEach(mb => {
+                listItems.push({
+                    type: mb.type,
+                    coord: `$${formatPrice(mb.low)} - $${formatPrice(mb.high)}`,
+                    strength: mb.strength,
+                    probability: mb.probability,
+                    whyItMatters: mb.whyItMatters,
+                    potentialReaction: mb.potentialReaction
+                });
+            });
+
+            // FVGs
+            smc.zones.fvgs.forEach(f => {
+                listItems.push({
+                    type: f.type,
+                    coord: `$${formatPrice(f.low)} - $${formatPrice(f.high)}`,
+                    strength: f.strength,
+                    probability: f.probability,
+                    whyItMatters: f.whyItMatters,
+                    potentialReaction: f.potentialReaction
+                });
+            });
+
+            // Inverse FVGs
+            smc.zones.ifvgs.forEach(ifvg => {
+                listItems.push({
+                    type: ifvg.type,
+                    coord: `$${formatPrice(ifvg.low)} - $${formatPrice(ifvg.high)}`,
+                    strength: ifvg.strength,
+                    probability: ifvg.probability,
+                    whyItMatters: ifvg.whyItMatters,
+                    potentialReaction: ifvg.potentialReaction
+                });
+            });
+
+            if (listItems.length === 0) {
+                zonesList.innerHTML = `<div class="text-center text-gray-500 text-xs py-10 font-semibold italic">Processing institutional zone boundaries...</div>`;
+            } else {
+                zonesList.innerHTML = listItems.map(renderSMCItem).join('<div class="h-2"></div>');
+            }
+        }
     }
 
     renderProbabilities(probs) {
