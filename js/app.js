@@ -9,6 +9,7 @@ import { AIDecisionEngine } from './ai-engine.js';
 import { RiskCalculator } from './risk.js';
 import { AlertsManager } from './alerts.js';
 import { formatPrice, formatPercent, formatVolume, debounce } from './utils.js';
+import { DerivativesEngine } from './derivatives-engine.js';
 
 // Default layout configurations (Top 100 Cryptocurrency pairs with USDT)
 const POPULAR_WATCHLIST = [
@@ -42,6 +43,7 @@ class AppController {
         this.aiEngine = new AIDecisionEngine();
         this.riskCalculator = new RiskCalculator();
         this.alerts = new AlertsManager();
+        this.derivativesEngine = new DerivativesEngine();
 
         this.currentSymbol = 'BTCUSDT';
         this.currentTimeframe = '15m';
@@ -456,48 +458,36 @@ class AppController {
                 e.target.classList.remove('border-transparent', 'text-gray-400');
 
                 const targetTab = e.target.getAttribute('data-tab');
-                const tSentiment = document.getElementById('tabContentSentiment');
-                const tSignals = document.getElementById('tabContentSignals');
-                const tHeatmap = document.getElementById('tabContentHeatmap');
-                const tOrderflow = document.getElementById('tabContentOrderflow');
-                const tLiquidation = document.getElementById('tabContentLiquidation');
-                const tNews = document.getElementById('tabContentNews');
-                const tJournal = document.getElementById('tabContentJournal');
-                const tTokeninfo = document.getElementById('tabContentTokeninfo');
-                const tThesis = document.getElementById('tabContentThesis');
-                const tSMC = document.getElementById('tabContentSMC');
 
-                if (tSentiment) tSentiment.classList.add('hidden');
-                if (tSignals) tSignals.classList.add('hidden');
-                if (tHeatmap) tHeatmap.classList.add('hidden');
-                if (tOrderflow) tOrderflow.classList.add('hidden');
-                if (tLiquidation) tLiquidation.classList.add('hidden');
-                if (tNews) tNews.classList.add('hidden');
-                if (tJournal) tJournal.classList.add('hidden');
-                if (tTokeninfo) tTokeninfo.classList.add('hidden');
-                if (tThesis) tThesis.classList.add('hidden');
-                if (tSMC) tSMC.classList.add('hidden');
+                // Hide all tab content div panels matching pattern
+                document.querySelectorAll('[id^="tabContent"]').forEach(el => {
+                    el.classList.add('hidden');
+                });
 
-                if (targetTab === 'sentiment' && tSentiment) {
-                    tSentiment.classList.remove('hidden');
-                } else if (targetTab === 'signals' && tSignals) {
-                    tSignals.classList.remove('hidden');
-                } else if (targetTab === 'heatmap' && tHeatmap) {
-                    tHeatmap.classList.remove('hidden');
-                } else if (targetTab === 'orderflow' && tOrderflow) {
-                    tOrderflow.classList.remove('hidden');
-                } else if (targetTab === 'liquidation' && tLiquidation) {
-                    tLiquidation.classList.remove('hidden');
-                } else if (targetTab === 'news' && tNews) {
-                    tNews.classList.remove('hidden');
-                } else if (targetTab === 'journal' && tJournal) {
-                    tJournal.classList.remove('hidden');
-                } else if (targetTab === 'tokeninfo' && tTokeninfo) {
-                    tTokeninfo.classList.remove('hidden');
-                } else if (targetTab === 'thesis' && tThesis) {
-                    tThesis.classList.remove('hidden');
-                } else if (targetTab === 'smc' && tSMC) {
-                    tSMC.classList.remove('hidden');
+                if (targetTab === 'sentiment') {
+                    document.getElementById('tabContentSentiment')?.classList.remove('hidden');
+                } else if (targetTab === 'signals') {
+                    document.getElementById('tabContentSignals')?.classList.remove('hidden');
+                } else if (targetTab === 'heatmap') {
+                    document.getElementById('tabContentHeatmap')?.classList.remove('hidden');
+                } else if (targetTab === 'orderflow') {
+                    document.getElementById('tabContentOrderflow')?.classList.remove('hidden');
+                } else if (targetTab === 'liquidation') {
+                    document.getElementById('tabContentLiquidation')?.classList.remove('hidden');
+                } else if (targetTab === 'news') {
+                    document.getElementById('tabContentNews')?.classList.remove('hidden');
+                } else if (targetTab === 'journal') {
+                    document.getElementById('tabContentJournal')?.classList.remove('hidden');
+                } else if (targetTab === 'tokeninfo') {
+                    document.getElementById('tabContentTokeninfo')?.classList.remove('hidden');
+                } else if (targetTab === 'thesis') {
+                    document.getElementById('tabContentThesis')?.classList.remove('hidden');
+                } else if (targetTab === 'smc') {
+                    document.getElementById('tabContentSMC')?.classList.remove('hidden');
+                } else if (targetTab === 'derivatives') {
+                    document.getElementById('tabContentDerivatives')?.classList.remove('hidden');
+                } else if (targetTab === 'sentiment_dashboard') {
+                    document.getElementById('tabContentSentimentDashboard')?.classList.remove('hidden');
                 }
             });
         });
@@ -1231,6 +1221,9 @@ class AppController {
 
         // Update Phase 2 Smart Money Concepts bottom tab panel
         this.updateSMCUI(decision);
+
+        // Update Phase 3 Derivatives & Sentiment Dashboard panels
+        this.updateDerivativesUI(decision);
     }
 
     updateSMCUI(decision) {
@@ -1470,6 +1463,227 @@ class AppController {
             } else {
                 zonesList.innerHTML = listItems.map(renderSMCItem).join('<div class="h-2"></div>');
             }
+        }
+    }
+
+    updateDerivativesUI(decision) {
+        if (!decision) return;
+
+        const baseSymbol = this.currentSymbol.toUpperCase().replace('USDT', '');
+        const candles = this.chartManager.cachedCandles;
+
+        // Perform derivatives analysis
+        const der = this.derivativesEngine.analyze(this.currentSymbol, candles);
+
+        // Update elements of tabContentDerivatives
+        const derNarrativeText = document.getElementById('derNarrativeText');
+        if (derNarrativeText) derNarrativeText.textContent = der.narrative;
+
+        const derExplainInstitutions = document.getElementById('derExplainInstitutions');
+        if (derExplainInstitutions) derExplainInstitutions.innerHTML = der.explanations.institutions;
+
+        const derExplainLeverage = document.getElementById('derExplainLeverage');
+        if (derExplainLeverage) derExplainLeverage.innerHTML = der.explanations.leverage;
+
+        const derExplainFunding = document.getElementById('derExplainFunding');
+        if (derExplainFunding) derExplainFunding.innerHTML = der.explanations.funding;
+
+        const derExplainLiquidations = document.getElementById('derExplainLiquidations');
+        if (derExplainLiquidations) derExplainLiquidations.innerHTML = der.explanations.liquidations;
+
+        const derOIVal = document.getElementById('derOIVal');
+        if (derOIVal) derOIVal.textContent = `$${formatVolume(der.openInterest.value)}`;
+
+        const derOIChange = document.getElementById('derOIChange');
+        if (derOIChange) {
+            const ch = der.openInterest.change24h;
+            derOIChange.textContent = `${ch >= 0 ? '+' : ''}${ch.toFixed(2)}%`;
+            derOIChange.className = ch >= 0 ? 'font-bold font-mono text-green-500' : 'font-bold font-mono text-red-500';
+        }
+
+        const derOITrend = document.getElementById('derOITrend');
+        if (derOITrend) {
+            derOITrend.textContent = der.openInterest.trend;
+            derOITrend.className = der.openInterest.trend === 'Rising' ? 'font-bold text-green-500' : 'font-bold text-red-500';
+        }
+
+        const derFundingVal = document.getElementById('derFundingVal');
+        if (derFundingVal) {
+            const f = der.fundingRate.value;
+            derFundingVal.textContent = `${f >= 0 ? '+' : ''}${f.toFixed(4)}%`;
+            derFundingVal.className = f >= 0 ? 'font-extrabold text-base font-mono text-green-400' : 'font-extrabold text-base font-mono text-red-400';
+        }
+
+        const derFundingAnnualised = document.getElementById('derFundingAnnualised');
+        if (derFundingAnnualised) {
+            const f = der.fundingRate.value;
+            derFundingAnnualised.textContent = `${(f * 3 * 365).toFixed(2)}%`;
+            derFundingAnnualised.className = f >= 0 ? 'font-bold text-green-400 font-mono' : 'font-bold text-red-400 font-mono';
+        }
+
+        const derFundingTrend = document.getElementById('derFundingTrend');
+        if (derFundingTrend) {
+            derFundingTrend.textContent = der.fundingRate.trend;
+            derFundingTrend.className = der.fundingRate.trend === 'Increasing' ? 'font-bold text-green-500' : 'font-bold text-red-500';
+        }
+
+        const derOIRelationship = document.getElementById('derOIRelationship');
+        if (derOIRelationship) derOIRelationship.textContent = der.openInterest.relationship;
+
+        const derFundingBiasImpact = document.getElementById('derFundingBiasImpact');
+        if (derFundingBiasImpact) derFundingBiasImpact.textContent = der.fundingRate.biasImpact;
+
+        const derLSRatioVal = document.getElementById('derLSRatioVal');
+        if (derLSRatioVal) derLSRatioVal.textContent = der.longShortRatio.ratio;
+
+        const derLSTrend = document.getElementById('derLSTrend');
+        if (derLSTrend) {
+            derLSTrend.textContent = der.longShortRatio.trend;
+            derLSTrend.className = der.longShortRatio.trend.includes('Longs') ? 'text-green-500 font-bold' : 'text-red-500 font-bold';
+        }
+
+        const derLSLongsBar = document.getElementById('derLSLongsBar');
+        if (derLSLongsBar) derLSLongsBar.style.width = `${der.longShortRatio.longsPct}%`;
+
+        const derLSShortsBar = document.getElementById('derLSShortsBar');
+        if (derLSShortsBar) derLSShortsBar.style.width = `${der.longShortRatio.shortsPct}%`;
+
+        const derLSLongsPct = document.getElementById('derLSLongsPct');
+        if (derLSLongsPct) derLSLongsPct.textContent = `${der.longShortRatio.longsPct}%`;
+
+        const derLSShortsPct = document.getElementById('derLSShortsPct');
+        if (derLSShortsPct) derLSShortsPct.textContent = `${der.longShortRatio.shortsPct}%`;
+
+        const derLeverageVal = document.getElementById('derLeverageVal');
+        if (derLeverageVal) derLeverageVal.textContent = `${der.estimatedLeverage.value.toFixed(1)}x`;
+
+        const derLeverageTrend = document.getElementById('derLeverageTrend');
+        if (derLeverageTrend) derLeverageTrend.textContent = der.estimatedLeverage.trend;
+
+        const derLeverageRisk = document.getElementById('derLeverageRisk');
+        if (derLeverageRisk) {
+            derLeverageRisk.textContent = der.estimatedLeverage.riskAssessment;
+            derLeverageRisk.className = der.estimatedLeverage.value > 15 ? 'text-red-400 font-bold' : 'text-green-400 font-bold';
+        }
+
+        const derWhaleFlow = document.getElementById('derWhaleFlow');
+        if (derWhaleFlow) {
+            const flow = der.whaleActivity.flowValue;
+            derWhaleFlow.textContent = `${flow >= 0 ? '+' : ''}$${formatVolume(flow)}`;
+            derWhaleFlow.className = flow >= 0 ? 'font-bold font-mono text-green-400 text-xs' : 'font-bold font-mono text-red-400 text-xs';
+        }
+
+        const derWhaleBuyVol = document.getElementById('derWhaleBuyVol');
+        if (derWhaleBuyVol) derWhaleBuyVol.textContent = `$${formatVolume(der.whaleActivity.buyVol)}`;
+
+        const derWhaleSellVol = document.getElementById('derWhaleSellVol');
+        if (derWhaleSellVol) derWhaleSellVol.textContent = `$${formatVolume(der.whaleActivity.sellVol)}`;
+
+        const derWhaleScore = document.getElementById('derWhaleScore');
+        if (derWhaleScore) derWhaleScore.textContent = `${der.whaleActivity.netAccumulationScore}/100`;
+
+        const derWhaleScoreLabel = document.getElementById('derWhaleScoreLabel');
+        if (derWhaleScoreLabel) derWhaleScoreLabel.textContent = der.whaleActivity.scoreLabel;
+
+        const derExchangeFlow = document.getElementById('derExchangeFlow');
+        if (derExchangeFlow) {
+            const flow = der.exchangeFlow.flowValue;
+            derExchangeFlow.textContent = `${flow >= 0 ? '+' : ''}$${formatVolume(flow)}`;
+            derExchangeFlow.className = flow < 0 ? 'font-bold font-mono text-green-400' : 'font-bold font-mono text-red-400';
+        }
+
+        const derStablecoinIndex = document.getElementById('derStablecoinIndex');
+        if (derStablecoinIndex) derStablecoinIndex.textContent = `${der.exchangeFlow.stablecoinIndex}/100`;
+
+        const derExchangeFlowTrend = document.getElementById('derExchangeFlowTrend');
+        if (derExchangeFlowTrend) derExchangeFlowTrend.textContent = der.exchangeFlow.trend;
+
+        const derExchangeMatrix = document.getElementById('derExchangeMatrix');
+        if (derExchangeMatrix) {
+            derExchangeMatrix.innerHTML = der.longShortRatio.exchangeBreakdown.map(ex => `
+                <div class="flex justify-between items-center py-0.5 border-b border-gray-800/40">
+                    <span class="text-gray-400 font-bold">${ex.exchange}:</span>
+                    <span class="text-white font-bold">${ex.ratio} <span class="text-[9px] text-gray-500">(${ex.longs}% / ${ex.shorts}%)</span></span>
+                </div>
+            `).join('');
+        }
+
+        // Update elements of tabContentSentimentDashboard
+        const sentFGLim = document.getElementById('sentFGLim');
+        if (sentFGLim) {
+            sentFGLim.textContent = der.sentiment.fearGreedLabel.toUpperCase();
+            sentFGLim.className = der.sentiment.fearGreedScore >= 55 ?
+                'text-[9px] bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded border border-green-500/20' :
+                'text-[9px] bg-red-500/10 text-red-400 px-1.5 py-0.5 rounded border border-red-500/20';
+        }
+
+        const sentFGScore = document.getElementById('sentFGScore');
+        if (sentFGScore) sentFGScore.textContent = der.sentiment.fearGreedScore;
+
+        const sentFGBar = document.getElementById('sentFGBar');
+        if (sentFGBar) sentFGBar.style.width = `${der.sentiment.fearGreedScore}%`;
+
+        const sentFGTrend = document.getElementById('sentFGTrend');
+        if (sentFGTrend) sentFGTrend.textContent = der.sentiment.fearGreedScore > 50 ? 'Greed Expansion' : 'Fear Decompression';
+
+        const sentNewsLabel = document.getElementById('sentNewsLabel');
+        if (sentNewsLabel) {
+            const isBull = der.sentiment.newsSentiment > 55;
+            sentNewsLabel.textContent = isBull ? 'BULLISH' : 'NEUTRAL';
+            sentNewsLabel.className = isBull ?
+                'text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20' :
+                'text-[9px] bg-gray-500/10 text-gray-400 px-1.5 py-0.5 rounded border border-gray-500/20';
+        }
+
+        const sentNewsScore = document.getElementById('sentNewsScore');
+        if (sentNewsScore) sentNewsScore.textContent = `${der.sentiment.newsSentiment}%`;
+
+        const sentNewsBar = document.getElementById('sentNewsBar');
+        if (sentNewsBar) sentNewsBar.style.width = `${der.sentiment.newsSentiment}%`;
+
+        const sentSocialLabel = document.getElementById('sentSocialLabel');
+        if (sentSocialLabel) {
+            const isGreed = der.sentiment.socialSentiment > 55;
+            sentSocialLabel.textContent = isGreed ? 'GREED' : 'BALANCED';
+            sentSocialLabel.className = isGreed ?
+                'text-[9px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20' :
+                'text-[9px] bg-gray-500/10 text-gray-400 px-1.5 py-0.5 rounded border border-gray-500/20';
+        }
+
+        const sentSocialScore = document.getElementById('sentSocialScore');
+        if (sentSocialScore) sentSocialScore.textContent = `${der.sentiment.socialSentiment}%`;
+
+        const sentSocialBar = document.getElementById('sentSocialBar');
+        if (sentSocialBar) sentSocialBar.style.width = `${der.sentiment.socialSentiment}%`;
+
+        const sentInstLabel = document.getElementById('sentInstLabel');
+        if (sentInstLabel) {
+            const isAcc = der.sentiment.institutionalSentiment > 55;
+            sentInstLabel.textContent = isAcc ? 'ACCUMULATING' : 'REBALANCING';
+            sentInstLabel.className = isAcc ?
+                'text-[9px] bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded border border-green-500/20' :
+                'text-[9px] bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded border border-yellow-500/20';
+        }
+
+        const sentInstScore = document.getElementById('sentInstScore');
+        if (sentInstScore) sentInstScore.textContent = `${der.sentiment.institutionalSentiment}%`;
+
+        const sentInstBar = document.getElementById('sentInstBar');
+        if (sentInstBar) sentInstBar.style.width = `${der.sentiment.institutionalSentiment}%`;
+
+        const sentNewsExplainer = document.getElementById('sentNewsExplainer');
+        if (sentNewsExplainer) {
+            sentNewsExplainer.textContent = `Synthesizing Bloomberg and Reuters news headlines for ${baseSymbol}. Relative news assessment settles on a ${der.sentiment.newsSentiment > 50 ? 'positive forward momentum' : 'defensive risk-monitoring posture'} with heavy emphasis on stablecoin supply injections.`;
+        }
+
+        const sentSocialExplainer = document.getElementById('sentSocialExplainer');
+        if (sentSocialExplainer) {
+            sentSocialExplainer.textContent = `Monitoring community chat volume and sentiment on X, Reddit, and Telegram for ${baseSymbol}. Engagement is currently at ${der.sentiment.socialSentiment > 50 ? 'heightened retail greed and bullish call levels' : 'subdued sideways noise with low speculative interest'}.`;
+        }
+
+        const sentInstExplainer = document.getElementById('sentInstExplainer');
+        if (sentInstExplainer) {
+            sentInstExplainer.textContent = `Tracking Coinbase Premium Gap, Grayscale Net Flows, and CME Non-Commercial Traders positions for ${baseSymbol}. Metrics reveal active institutional ${der.sentiment.institutionalSentiment > 50 ? 'inventory accumulation during dips' : 'hedging via short perpetual options protection'}.`;
         }
     }
 
