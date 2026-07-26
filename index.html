@@ -405,6 +405,8 @@
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment_dashboard">Market Sentiment Dashboard</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="tokeninfo">Token Info</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="thesis">AI Trade Thesis</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="economic_calendar">Economic Events</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="trade_checklist">Trade Checklist</button>
                     </div>
 
                     <!-- Tab Content: Smart Money Concepts -->
@@ -635,6 +637,31 @@
                                     <span class="text-xl font-bold text-gray-200 font-mono" id="marketBreadthVal">78.5%</span>
                                     <span class="text-[9px] text-gray-400">Across 12 Assets</span>
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- Daily Market Narrative Reports -->
+                        <div class="bg-[#1e2329] p-5 rounded border border-gray-800 space-y-4 shadow-inner mt-4">
+                            <div class="border-b border-gray-800 pb-3 flex flex-col md:flex-row md:items-center md:justify-between space-y-2 md:space-y-0">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center space-x-2">
+                                    <i data-lucide="file-text" class="w-4 h-4 inline-block align-middle text-amber-500"></i>
+                                    <span>AI Market Narrative: Daily Reports</span>
+                                </h3>
+                                <div class="flex bg-[#14161c] rounded p-0.5 border border-gray-800 text-[10px]" id="dailyReportsSelector">
+                                    <button id="reportMorningBtn" class="px-2.5 py-1 rounded font-bold transition uppercase bg-amber-500 text-black">Morning Report</button>
+                                    <button id="reportAfternoonBtn" class="px-2.5 py-1 rounded font-bold text-gray-400 hover:text-white transition uppercase">Afternoon Report</button>
+                                    <button id="reportEveningBtn" class="px-2.5 py-1 rounded font-bold text-gray-400 hover:text-white transition uppercase">Evening Report</button>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-black/20 rounded-lg border border-gray-800 space-y-2 leading-relaxed">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-extrabold text-amber-400 uppercase tracking-widest" id="reportActiveTitle">Morning Intel Summary</span>
+                                    <span class="text-[9px] font-mono font-bold text-gray-500" id="reportActiveTime">Generated today at 08:30 UTC</span>
+                                </div>
+                                <p class="text-xs text-gray-300 font-medium" id="reportActiveContent">
+                                    Compiling narrative...
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -1168,7 +1195,21 @@
                     </div>
 
                     <!-- Tab: Crypto Heatmap -->
-                    <div id="tabContentHeatmap" class="hidden">
+                    <div id="tabContentHeatmap" class="hidden space-y-4">
+                        <!-- Visual Treemap Panel -->
+                        <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-3 shadow-inner">
+                            <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center space-x-2">
+                                    <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-amber-500"></i>
+                                    <span>Interactive Market TreeMap Heatmap</span>
+                                </h3>
+                                <span class="text-[9px] text-gray-500 font-semibold uppercase">Click block to FOCUS Workspace</span>
+                            </div>
+                            <div id="visualHeatmapGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 text-center text-xs">
+                                <!-- Generated Dynamically via JS -->
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
                             <div class="bg-[#1e2329] p-2 rounded border border-gray-800">
                                 <h4 class="text-[11px] text-green-500 font-bold mb-1.5 uppercase tracking-wider">Top Bullish Coins</h4>
@@ -1353,6 +1394,159 @@
                                                 <div class="bg-black/25 p-1 rounded border border-gray-800 text-white" id="thesisTp2">--</div>
                                                 <div class="bg-black/25 p-1 rounded border border-gray-800 text-white" id="thesisTp3">--</div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Economic Calendar & Macro Events -->
+                    <div id="tabContentEconomicCalendar" class="hidden space-y-4">
+                        <div class="bg-[#1e2329] p-5 rounded border border-gray-800 space-y-4 shadow-inner">
+                            <div class="border-b border-gray-800 pb-3 flex items-center justify-between">
+                                <h3 class="text-sm text-amber-500 font-bold uppercase tracking-wider flex items-center space-x-2">
+                                    <i data-lucide="calendar" class="w-4 h-4 inline-block align-middle text-amber-500"></i>
+                                    <span>Institutional Macroeconomic Calendar & Economic Events</span>
+                                </h3>
+                                <span class="text-[10px] bg-red-500/10 text-red-400 px-2.5 py-0.5 rounded font-black border border-red-500/20 uppercase">Macro volatility monitor</span>
+                            </div>
+
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Tracking high-impact economic indicator announcements. Deviances between actual data releases and market forecast consensus trigger heavy local liquidity sweeps and systemic price spikes in crypto perpetual derivative contracts.
+                            </p>
+
+                            <div class="overflow-x-auto rounded border border-gray-800 bg-[#14161c]">
+                                <table class="w-full text-left text-xs min-w-[700px]">
+                                    <thead>
+                                        <tr class="border-b border-gray-800 text-gray-400 bg-[#181a20]">
+                                            <th class="p-3">Event Date / Time</th>
+                                            <th class="p-3">Country</th>
+                                            <th class="p-3">Indicator / Event</th>
+                                            <th class="p-3 text-center">Impact Level</th>
+                                            <th class="p-3 text-right">Consensus Forecast</th>
+                                            <th class="p-3 text-right">Previous Value</th>
+                                            <th class="p-3 text-right text-amber-500 font-bold">Actual Outcome</th>
+                                            <th class="p-3 text-right">AI Market Bias Impact</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="economicCalendarTableBody" class="text-gray-300">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Live Commentary Card -->
+                            <div class="p-4 bg-amber-500/5 border border-amber-500/10 rounded-lg flex items-start space-x-3">
+                                <span class="text-amber-400 text-lg">💡</span>
+                                <div class="space-y-1 text-xs">
+                                    <strong class="text-amber-400 font-bold block uppercase tracking-wider">AI Live Event Feed Insight</strong>
+                                    <p class="text-gray-300 leading-relaxed" id="macroLiveInsightText">
+                                        Analyzing US Consumer Price Index (CPI) and upcoming Federal Open Market Committee (FOMC) interest rates projections. If US core inflation indices settle higher than consensus metrics, the Federal Reserve remains hawkish, causing short-term perpetual selloffs in index majors.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Trade Checklist -->
+                    <div id="tabContentTradeChecklist" class="hidden space-y-4">
+                        <div class="bg-[#1e2329] p-5 rounded border border-gray-800 space-y-4 shadow-inner">
+                            <div class="border-b border-gray-800 pb-3 flex items-center justify-between">
+                                <h3 class="text-sm text-green-500 font-bold uppercase tracking-wider flex items-center space-x-2">
+                                    <i data-lucide="check-square" class="w-4 h-4 inline-block align-middle text-green-500"></i>
+                                    <span>Institutional Rule-Based Trading Checklist</span>
+                                </h3>
+                                <span class="text-[10px] bg-green-500/10 text-green-400 px-2.5 py-0.5 rounded font-black border border-green-500/20 uppercase">Strategic trade verification</span>
+                            </div>
+
+                            <p class="text-xs text-gray-400 leading-relaxed">
+                                Professional trading terminals mandate strict adherence to technical and risk criteria prior to deploying actual capital. Below is a multi-dimensional strategy audit evaluating structural, momentum, volume, and risk vectors for <strong class="text-white" id="checklistSymbolLabel">BTCUSDT</strong>.
+                            </p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Technical Rules List -->
+                                <div class="space-y-3 bg-[#14161c] p-4 rounded border border-gray-800/80">
+                                    <h4 class="text-xs text-amber-500 font-bold uppercase tracking-wider border-b border-gray-800 pb-2">Technical Alignment Checklist</h4>
+
+                                    <div class="space-y-2.5 text-xs">
+                                        <!-- Item 1: Trend Alignment -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkTrendIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Multi-Timeframe Trend Confirmation (1H, 4H, 1D)</span>
+                                            </div>
+                                            <span id="chkTrendValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+
+                                        <!-- Item 2: Market Structure -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkStructureIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Smart Money Structural Transition (BOS / CHoCH)</span>
+                                            </div>
+                                            <span id="chkStructureValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+
+                                        <!-- Item 3: Support / Supply-Demand zones -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkZonesIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Order Block or FVG Mitigation Zone Touch</span>
+                                            </div>
+                                            <span id="chkZonesValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+
+                                        <!-- Item 4: Volume & RVOL -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkVolumeIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Institutional Volume Surge (RVOL > 1.0x)</span>
+                                            </div>
+                                            <span id="chkVolumeValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Risk Rules List -->
+                                <div class="space-y-3 bg-[#14161c] p-4 rounded border border-gray-800/80">
+                                    <h4 class="text-xs text-amber-500 font-bold uppercase tracking-wider border-b border-gray-800 pb-2">Risk & Portfolio Safeguards</h4>
+
+                                    <div class="space-y-2.5 text-xs">
+                                        <!-- Item 5: Risk-Reward Ratio -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkRatioIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Risk-to-Reward Ratio (Min 1:2 Required)</span>
+                                            </div>
+                                            <span id="chkRatioValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+
+                                        <!-- Item 6: Liquidation Hazard -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkLiqIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Liquidation Hazard Verification (Price delta vs SL)</span>
+                                            </div>
+                                            <span id="chkLiqValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+
+                                        <!-- Item 7: Minimum Quality score -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkQualityIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Overall AI Quality Score exceeds filter standard</span>
+                                            </div>
+                                            <span id="chkQualityValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
+                                        </div>
+
+                                        <!-- Item 8: Volatility boundaries -->
+                                        <div class="flex items-center justify-between p-2 rounded bg-[#181a20]/60 border border-gray-800/40">
+                                            <div class="flex items-center space-x-2">
+                                                <span id="chkVolatilityIcon" class="text-red-500">❌</span>
+                                                <span class="text-gray-300 font-medium">Acceptable Volatility threshold is matched</span>
+                                            </div>
+                                            <span id="chkVolatilityValue" class="text-[10px] font-mono text-gray-400 bg-gray-800 px-2 py-0.5 rounded">--</span>
                                         </div>
                                     </div>
                                 </div>

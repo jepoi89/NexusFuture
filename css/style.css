@@ -1,12 +1,26 @@
 /* Premium Crypto Futures Dark/Light theme overrides */
 
-/* Hide standard scrollbars but allow scrolling on specific container cards */
+/* Sleek, visible and fully clickable scrollbars for high-fidelity trading views */
 .scrollbar-none::-webkit-scrollbar {
-    display: none;
+    width: 6px;
+    height: 6px;
+    display: block; /* ensure scrollbars are clickable and visible */
+}
+.scrollbar-none::-webkit-scrollbar-track {
+    background: #14161c;
+    border-radius: 3px;
+}
+.scrollbar-none::-webkit-scrollbar-thumb {
+    background: #f0b90b; /* Golden primary thumb */
+    border-radius: 3px;
+    border: 1px solid #181a20;
+}
+.scrollbar-none::-webkit-scrollbar-thumb:hover {
+    background: #f59e0b;
 }
 .scrollbar-none {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: auto;  /* IE and Edge */
+    scrollbar-width: thin;  /* Firefox */
 }
 
 /* Custom dark/light styles */
