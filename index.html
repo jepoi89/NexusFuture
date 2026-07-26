@@ -401,6 +401,8 @@
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="signals">Recent AI Signal History</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="heatmap">Crypto Heatmap</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="smc">Smart Money Concepts</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="derivatives">Derivatives Intelligence</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="sentiment_dashboard">Market Sentiment Dashboard</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="tokeninfo">Token Info</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="thesis">AI Trade Thesis</button>
                     </div>
@@ -632,6 +634,298 @@
                                 <div class="flex items-center justify-between">
                                     <span class="text-xl font-bold text-gray-200 font-mono" id="marketBreadthVal">78.5%</span>
                                     <span class="text-[9px] text-gray-400">Across 12 Assets</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Derivatives Intelligence Dashboard -->
+                    <div id="tabContentDerivatives" class="hidden space-y-4">
+                        <!-- AI Narrative Header Card -->
+                        <div class="bg-gradient-to-r from-amber-950/20 to-[#f59e0b]/5 border border-amber-500/20 rounded-lg p-4 flex flex-col space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    <h3 class="text-sm font-black uppercase tracking-wider text-amber-500">Derivatives AI Narrative Report</h3>
+                                </div>
+                                <span class="text-[10px] bg-amber-500/10 text-amber-500 px-2.5 py-0.5 rounded font-black border border-amber-500/20">LIVE MARKET REPORT</span>
+                            </div>
+                            <p class="text-xs text-gray-200 leading-relaxed font-semibold italic" id="derNarrativeText">
+                                Generating real-time derivatives market intelligence report...
+                            </p>
+                        </div>
+
+                        <!-- Core Explanatory Panel (Institutions, Leverage, Funding, Liquidations) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Institutions -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-1.5 flex items-center justify-between">
+                                    <span>What Institutions are Doing</span>
+                                    <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 text-gray-300 leading-relaxed" id="derExplainInstitutions">
+                                    Calculating institutional flows...
+                                </div>
+                            </div>
+                            <!-- Leverage -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-1.5 flex items-center justify-between">
+                                    <span>How Leverage Affects Price</span>
+                                    <i data-lucide="percent" class="w-3.5 h-3.5 text-amber-500"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 text-gray-300 leading-relaxed" id="derExplainLeverage">
+                                    Calculating system leverage factors...
+                                </div>
+                            </div>
+                            <!-- Funding -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-1.5 flex items-center justify-between">
+                                    <span>How Funding Impacts Bias</span>
+                                    <i data-lucide="activity" class="w-3.5 h-3.5 text-green-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 text-gray-300 leading-relaxed" id="derExplainFunding">
+                                    Calculating funding rate premiums...
+                                </div>
+                            </div>
+                            <!-- Liquidations -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between">
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-1.5 flex items-center justify-between">
+                                    <span>Where Liquidations Occur</span>
+                                    <i data-lucide="crosshair" class="w-3.5 h-3.5 text-red-400"></i>
+                                </span>
+                                <div class="mt-2 text-xs flex-1 text-gray-300 leading-relaxed" id="derExplainLiquidations">
+                                    Locating liquidation coordinate boundaries...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Technical Metrics Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                            <!-- Left: Open Interest & Funding Rate Analysis -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-4 shadow-inner">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <span>Open Interest & Funding Engine</span>
+                                    <span class="text-[9px] text-gray-500">Real-time Perp Activity</span>
+                                </h3>
+                                <div class="grid grid-cols-2 gap-3 text-xs">
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800 space-y-1">
+                                        <span class="text-gray-400 block text-[9px] uppercase font-bold">Open Interest</span>
+                                        <span class="text-white font-extrabold text-base font-mono" id="derOIVal">--</span>
+                                        <div class="flex items-center justify-between text-[10px] mt-1.5 pt-1.5 border-t border-gray-800/60">
+                                            <span class="text-gray-400">24H Change:</span>
+                                            <span id="derOIChange" class="font-bold font-mono">--%</span>
+                                        </div>
+                                        <div class="text-[9px] text-gray-400">OI Status: <span id="derOITrend" class="font-bold text-white">--</span></div>
+                                    </div>
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800 space-y-1">
+                                        <span class="text-gray-400 block text-[9px] uppercase font-bold">Funding Rate</span>
+                                        <span class="text-green-400 font-extrabold text-base font-mono" id="derFundingVal">--</span>
+                                        <div class="flex items-center justify-between text-[10px] mt-1.5 pt-1.5 border-t border-gray-800/60">
+                                            <span class="text-gray-400">Annualised:</span>
+                                            <span id="derFundingAnnualised" class="font-bold text-white font-mono">--%</span>
+                                        </div>
+                                        <div class="text-[9px] text-gray-400">Trend: <span id="derFundingTrend" class="font-bold text-white">--</span></div>
+                                    </div>
+                                </div>
+                                <div class="bg-[#181a20] p-3 rounded border border-gray-800/80 text-xs">
+                                    <span class="text-gray-400 block text-[9px] uppercase font-bold mb-1">OI / Price Relationship Summary</span>
+                                    <p class="text-white font-semibold text-[11px]" id="derOIRelationship">Analyzing OI-to-price drift correlation...</p>
+                                </div>
+                                <div class="bg-[#181a20] p-3 rounded border border-gray-800/80 text-xs">
+                                    <span class="text-gray-400 block text-[9px] uppercase font-bold mb-1">Funding Rate Bias Assessment</span>
+                                    <p class="text-white font-semibold text-[11px]" id="derFundingBiasImpact">Evaluating funding premium carry drag...</p>
+                                </div>
+                            </div>
+
+                            <!-- Middle: Long / Short Ratio & Leverage Metrics -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-4 shadow-inner">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <span>Long/Short & Leverage Engine</span>
+                                    <span class="text-[9px] text-gray-500">Position Sizing Density</span>
+                                </h3>
+                                <div class="space-y-3.5">
+                                    <!-- Ratio representation -->
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800 space-y-2">
+                                        <div class="flex justify-between text-xs">
+                                            <span class="text-gray-400 font-bold">Long/Short Ratio: <span class="text-white font-mono" id="derLSRatioVal">--</span></span>
+                                            <span class="text-[10px] text-gray-400 uppercase font-semibold" id="derLSTrend">--</span>
+                                        </div>
+                                        <div class="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden flex border border-gray-900">
+                                            <div id="derLSLongsBar" class="bg-green-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                            <div id="derLSShortsBar" class="bg-red-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                        </div>
+                                        <div class="flex justify-between text-[10px] text-gray-400 font-mono">
+                                            <span>Longs: <strong id="derLSLongsPct" class="text-green-400">50%</strong></span>
+                                            <span>Shorts: <strong id="derLSShortsPct" class="text-red-400">50%</strong></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Estimated Leverage -->
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800 space-y-1.5 text-xs">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-400 uppercase text-[9px] font-bold">Estimated Market Leverage</span>
+                                            <span class="text-amber-500 font-bold font-mono" id="derLeverageVal">10.0x</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-400 text-[10px]">Leverage Trend:</span>
+                                            <span class="font-bold text-white font-mono" id="derLeverageTrend">--</span>
+                                        </div>
+                                        <div class="border-t border-gray-800/80 pt-1.5 mt-1.5 text-[10px]">
+                                            <span class="text-gray-400 block text-[9px] uppercase font-bold">Leverage Risk Assessment:</span>
+                                            <span class="text-gray-300 font-semibold" id="derLeverageRisk">--</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Exchange Breakdown -->
+                                    <div class="p-2.5 bg-[#181a20] rounded border border-gray-800 text-[10px] space-y-1 font-mono">
+                                        <span class="text-gray-400 uppercase text-[8px] font-bold block mb-1">Exchange Ratio Matrix</span>
+                                        <div id="derExchangeMatrix" class="space-y-1">
+                                            <!-- Dynamically rendered -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Whale Flow & Exchange flow Analysis -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-4 shadow-inner">
+                                <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <span>Whale & Exchange flow Intelligence</span>
+                                    <span class="text-[9px] text-gray-500">Asset Migration Vectors</span>
+                                </h3>
+                                <div class="space-y-3">
+                                    <!-- Whale activity -->
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800 space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-400 uppercase text-[9px] font-bold">Whale Net flow (24H)</span>
+                                            <span class="font-bold font-mono text-xs" id="derWhaleFlow">--</span>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-2 text-[10px] border-t border-gray-800 pt-2 font-mono">
+                                            <div>Whale Buy Vol: <strong id="derWhaleBuyVol" class="text-green-400 block mt-0.5">--</strong></div>
+                                            <div>Whale Sell Vol: <strong id="derWhaleSellVol" class="text-red-400 block mt-0.5">--</strong></div>
+                                        </div>
+                                        <div class="border-t border-gray-800/80 pt-1.5 mt-1.5 text-xs">
+                                            <div class="flex justify-between items-center mb-1">
+                                                <span class="text-gray-400 text-[9px] uppercase font-bold">Accumulation Score:</span>
+                                                <span class="font-extrabold text-amber-500 font-mono" id="derWhaleScore">50/100</span>
+                                            </div>
+                                            <p class="text-[11px] text-gray-300 leading-snug font-semibold" id="derWhaleScoreLabel">--</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Exchange Flow -->
+                                    <div class="p-3 bg-[#181a20] rounded border border-gray-800 space-y-1.5 text-xs">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-400 uppercase text-[9px] font-bold">Net Exchange flow (24H)</span>
+                                            <span class="font-bold font-mono" id="derExchangeFlow">--</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-400 text-[10px]">Stablecoin Deposit Index:</span>
+                                            <span class="font-bold text-white font-mono" id="derStablecoinIndex">50/100</span>
+                                        </div>
+                                        <div class="border-t border-gray-800/80 pt-1.5 mt-1.5 text-[10px]">
+                                            <span class="text-gray-400 block text-[9px] uppercase font-bold">Capital Flow Trend:</span>
+                                            <span class="text-gray-300 font-semibold leading-relaxed" id="derExchangeFlowTrend">--</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Market Sentiment Dashboard -->
+                    <div id="tabContentSentimentDashboard" class="hidden space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- Fear & Greed Card -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between shadow-inner">
+                                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <h4 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center space-x-1">
+                                        <i data-lucide="compass" class="w-3.5 h-3.5 text-amber-500"></i>
+                                        <span>Fear & Greed Index</span>
+                                    </h4>
+                                    <span class="text-[9px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20" id="sentFGLim">GREED</span>
+                                </div>
+                                <div class="py-4 text-center space-y-1.5">
+                                    <span class="text-4xl font-black font-mono text-white" id="sentFGScore">--</span>
+                                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden flex border border-gray-900 shadow-inner">
+                                        <div id="sentFGBar" class="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 block">Relative 24H index change: <strong id="sentFGTrend" class="text-white">Stable</strong></span>
+                                </div>
+                            </div>
+
+                            <!-- News Sentiment Card -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between shadow-inner">
+                                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <h4 class="text-xs text-blue-400 font-bold uppercase tracking-wider flex items-center space-x-1">
+                                        <i data-lucide="newspaper" class="w-3.5 h-3.5 text-blue-400"></i>
+                                        <span>News Sentiment</span>
+                                    </h4>
+                                    <span class="text-[9px] bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20" id="sentNewsLabel">BULLISH</span>
+                                </div>
+                                <div class="py-4 text-center space-y-1.5">
+                                    <span class="text-4xl font-black font-mono text-blue-400" id="sentNewsScore">--%</span>
+                                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                                        <div id="sentNewsBar" class="bg-blue-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 block">Weighted average impact confidence ratio</span>
+                                </div>
+                            </div>
+
+                            <!-- Social Sentiment Card -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between shadow-inner">
+                                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <h4 class="text-xs text-purple-400 font-bold uppercase tracking-wider flex items-center space-x-1">
+                                        <i data-lucide="message-square" class="w-3.5 h-3.5 text-purple-400"></i>
+                                        <span>Social Sentiment</span>
+                                    </h4>
+                                    <span class="text-[9px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded border border-purple-500/20" id="sentSocialLabel">GREED</span>
+                                </div>
+                                <div class="py-4 text-center space-y-1.5">
+                                    <span class="text-4xl font-black font-mono text-purple-400" id="sentSocialScore">--%</span>
+                                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                                        <div id="sentSocialBar" class="bg-purple-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 block">X, Reddit, Telegram community discussions</span>
+                                </div>
+                            </div>
+
+                            <!-- Institutional Sentiment Card -->
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 flex flex-col justify-between shadow-inner">
+                                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                                    <h4 class="text-xs text-green-400 font-bold uppercase tracking-wider flex items-center space-x-1">
+                                        <i data-lucide="globe" class="w-3.5 h-3.5 text-green-400"></i>
+                                        <span>Institutional Sentiment</span>
+                                    </h4>
+                                    <span class="text-[9px] bg-green-500/10 text-green-400 px-1.5 py-0.5 rounded border border-green-500/20" id="sentInstLabel">ACCUMULATING</span>
+                                </div>
+                                <div class="py-4 text-center space-y-1.5">
+                                    <span class="text-4xl font-black font-mono text-green-400" id="sentInstScore">--%</span>
+                                    <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                                        <div id="sentInstBar" class="bg-green-500 h-full transition-all duration-300" style="width: 50%"></div>
+                                    </div>
+                                    <span class="text-[10px] text-gray-400 block">CME, Coinbase, Grayscale basis metrics</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Summary narrative Explainer -->
+                        <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-2">
+                            <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center justify-between border-b border-gray-800 pb-2">
+                                <span>Multi-Dimensional Sentiment Narrative</span>
+                                <span class="text-[9px] text-gray-500">Cross-Platform Sentiment Aggregation</span>
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                                <div class="space-y-1.5 bg-[#181a20] p-3 rounded border border-gray-800/60 leading-relaxed text-gray-300">
+                                    <strong class="text-blue-400 uppercase text-[10px] block">News Intelligence Outlook</strong>
+                                    <p id="sentNewsExplainer">Synthesizing Bloomberg and Reuters headline streams to capture macro regulatory shifts and ETF flow velocity...</p>
+                                </div>
+                                <div class="space-y-1.5 bg-[#181a20] p-3 rounded border border-gray-800/60 leading-relaxed text-gray-300">
+                                    <strong class="text-purple-400 uppercase text-[10px] block">Social Community Discussion</strong>
+                                    <p id="sentSocialExplainer">Monitoring sentiment volumes and dynamic word frequencies on X/Twitter, Reddit subreddits, and trading Telegram alerts...</p>
+                                </div>
+                                <div class="space-y-1.5 bg-[#181a20] p-3 rounded border border-gray-800/60 leading-relaxed text-gray-300">
+                                    <strong class="text-green-400 uppercase text-[10px] block">Institutional Capital Flows</strong>
+                                    <p id="sentInstExplainer">Analyzing Coinbase Premium Gap, Grayscale Premium Discount, and CME non-commercial commitment of traders reports...</p>
                                 </div>
                             </div>
                         </div>
