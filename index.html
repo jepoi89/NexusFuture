@@ -401,6 +401,7 @@
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="signals">Recent AI Signal History</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="heatmap">Crypto Heatmap</button>
                         <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="tokeninfo">Token Info</button>
+                        <button class="pb-2 border-b-2 border-transparent text-gray-400 hover:text-white py-1 transition summary-tab-btn" data-tab="thesis">AI Trade Thesis</button>
                     </div>
 
                     <!-- Tab Content: Market Intelligence & Sentiment -->
@@ -937,6 +938,91 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Tab Content: AI Trade Thesis -->
+                    <div id="tabContentThesis" class="hidden space-y-4">
+                        <div class="bg-[#1e2329] p-5 rounded border border-gray-800 space-y-4 shadow-inner">
+                            <div class="border-b border-gray-800 pb-3 flex items-center justify-between">
+                                <h3 class="text-sm text-amber-500 font-bold uppercase tracking-wider flex items-center space-x-2">
+                                    <i data-lucide="file-text" class="w-4 h-4 inline-block align-middle"></i>
+                                    <span>Institutional AI Trade Thesis Report</span>
+                                </h3>
+                                <span id="thesisSymbolBadge" class="text-xs bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded font-mono font-bold border border-amber-500/20">BTCUSDT</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <!-- Col 1: Summary, Trend & Structure -->
+                                <div class="space-y-3 bg-[#181a20] p-4 rounded border border-gray-800/60">
+                                    <div class="space-y-1">
+                                        <span class="text-[10px] text-amber-500 uppercase font-bold tracking-wider block">1. Executive Summary</span>
+                                        <p id="thesisSummaryText" class="text-xs text-gray-300 leading-relaxed">Executive report summary...</p>
+                                    </div>
+                                    <div class="space-y-1 border-t border-gray-800/80 pt-2.5">
+                                        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">Current Trend State</span>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <span id="thesisTrendBadge" class="text-xs font-bold text-green-400 uppercase">Strong Bullish</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-1 border-t border-gray-800/80 pt-2.5">
+                                        <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider block">Current Market Structure</span>
+                                        <div class="flex items-center space-x-2 mt-1">
+                                            <span id="thesisStructureBadge" class="text-xs font-bold text-white uppercase bg-gray-800 px-1.5 py-0.5 rounded">Bullish</span>
+                                        </div>
+                                        <p id="thesisStructureExplanation" class="text-[11px] text-gray-400 leading-relaxed mt-1">Structure explanation details...</p>
+                                    </div>
+                                </div>
+
+                                <!-- Col 2: Evidence Matrix -->
+                                <div class="space-y-3 bg-[#181a20] p-4 rounded border border-gray-800/60">
+                                    <div class="space-y-2">
+                                        <span class="text-[10px] text-green-400 uppercase font-bold tracking-wider block">✔ Bullish Support Factors</span>
+                                        <ul id="thesisBullishFactors" class="space-y-1 text-xs text-gray-300 list-disc list-inside">
+                                            <!-- Dynamic -->
+                                        </ul>
+                                    </div>
+                                    <div class="space-y-2 border-t border-gray-800/80 pt-3">
+                                        <span class="text-[10px] text-red-400 uppercase font-bold tracking-wider block">❌ Bearish Contradicting Factors</span>
+                                        <ul id="thesisBearishFactors" class="space-y-1 text-xs text-gray-300 list-disc list-inside">
+                                            <!-- Dynamic -->
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Col 3: Risk, Invalidation and Target Metrics -->
+                                <div class="space-y-3 bg-[#181a20] p-4 rounded border border-gray-800/60 flex flex-col justify-between">
+                                    <div class="space-y-2">
+                                        <div class="space-y-1">
+                                            <span class="text-[10px] text-yellow-500 uppercase font-bold tracking-wider block">Risk Assessment</span>
+                                            <p id="thesisRiskAssessmentText" class="text-xs text-gray-300 leading-relaxed">Risk analysis...</p>
+                                        </div>
+                                        <div class="space-y-1 border-t border-gray-800/80 pt-2">
+                                            <span class="text-[10px] text-red-500 uppercase font-bold tracking-wider block">Setup Invalidation Boundary</span>
+                                            <p id="thesisInvalidationText" class="text-xs text-gray-300 font-mono font-bold">--</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="border-t border-gray-800/80 pt-2.5 space-y-2 text-xs">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-400">Trade Setup Quality:</span>
+                                            <span id="thesisQualityBadge" class="font-bold text-white uppercase bg-blue-600/10 border border-blue-600/30 px-2 py-0.5 rounded text-[10px]">Good Setup</span>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-gray-400">Final System Confidence:</span>
+                                            <span id="thesisConfidenceBadge" class="font-mono font-bold text-amber-500 text-sm">--%</span>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <span class="text-[9px] text-gray-500 uppercase font-bold tracking-wider block">Targets Matrix</span>
+                                            <div class="grid grid-cols-3 gap-1 text-center font-mono text-[10px] font-bold text-green-400">
+                                                <div class="bg-black/25 p-1 rounded border border-gray-800 text-white" id="thesisTp1">--</div>
+                                                <div class="bg-black/25 p-1 rounded border border-gray-800 text-white" id="thesisTp2">--</div>
+                                                <div class="bg-black/25 p-1 rounded border border-gray-800 text-white" id="thesisTp3">--</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </main>
 
@@ -1029,7 +1115,7 @@
                     </div>
                 </div>
 
-                <!-- Section 5: Multi-Timeframe Analysis -->
+                <!-- Section 5: Multi-Timeframe Status -->
                 <div class="p-4 border-b border-gray-800">
                     <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Multi-Timeframe Status</h4>
                     <div class="grid grid-cols-5 gap-1.5 text-center text-[10px]">
@@ -1052,6 +1138,110 @@
                         <div class="bg-[#1e2329] p-1.5 rounded">
                             <span class="text-gray-400 block font-medium">1D</span>
                             <span class="font-bold uppercase text-gray-300 mt-1 block" id="mtf1d">HOLD</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Structure Card -->
+                <div class="p-4 border-b border-gray-800 bg-[#1e2329]/20" id="marketStructureCard">
+                    <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                        <span>Market Structure Engine</span>
+                        <span id="structBiasBadge" class="text-[9px] px-1.5 py-0.5 rounded font-bold uppercase bg-gray-800 text-gray-400">Neutral</span>
+                    </h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center text-[11px] text-gray-400">
+                            <span>Detected States:</span>
+                            <div class="flex flex-wrap gap-1" id="structStatesContainer">
+                                <span class="bg-gray-800 text-gray-300 text-[8px] px-1 py-0.5 rounded">HH</span>
+                            </div>
+                        </div>
+                        <p id="structExplainText" class="text-[11px] text-gray-300 leading-relaxed italic bg-black/10 p-2 rounded">
+                            Market structure explanation.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Multi-Timeframe Matrix Card -->
+                <div class="p-4 border-b border-gray-800" id="mtfMatrixCard">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2.5">MTF Intelligence Matrix</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-[9px] font-mono">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-800/80">
+                                    <th class="pb-1.5 font-bold">TF</th>
+                                    <th class="pb-1.5 font-bold text-center">Trend</th>
+                                    <th class="pb-1.5 font-bold text-center">Mom</th>
+                                    <th class="pb-1.5 font-bold text-center">Supp</th>
+                                    <th class="pb-1.5 font-bold text-center">Res</th>
+                                    <th class="pb-1.5 font-bold text-center">Struct</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mtfMatrixBody" class="text-gray-300 text-center">
+                                <!-- Generated Dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Confidence Breakdown Card -->
+                <div class="p-4 border-b border-gray-800 bg-[#14161c]" id="confidenceBreakdownCard">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Confidence Breakdown</h4>
+                    <div class="space-y-2 text-[10px]" id="confidenceBreakdownContainer">
+                        <!-- Progress bars for Trend, Structure, Momentum, Volume, News, Support, Risk -->
+                    </div>
+                </div>
+
+                <!-- AI Explainability Card -->
+                <div class="p-4 border-b border-gray-800 bg-[#14161c]/50" id="aiExplainabilityCard">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-bold text-amber-500 uppercase tracking-wider">Explainability Engine</h4>
+                        <span class="text-[10px] text-gray-500 font-mono font-bold" id="expEngineConfidence">--% Confidence</span>
+                    </div>
+
+                    <div class="space-y-3 text-xs text-gray-300">
+                        <div class="space-y-1">
+                            <span class="text-[9px] uppercase font-bold text-gray-400 block">Market Context</span>
+                            <p id="expContextText" class="text-[11px] leading-snug">--</p>
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[9px] uppercase font-bold text-gray-400 block">Why Setup Exists</span>
+                            <p id="expWhyText" class="text-[11px] leading-snug">--</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 border-t border-gray-800 pt-2.5">
+                            <div>
+                                <span class="text-[9px] uppercase font-bold text-green-400 block mb-1">Supporting Evidence</span>
+                                <ul id="expSupportingList" class="space-y-1 text-[10px] list-disc list-inside text-gray-400">
+                                    <!-- Dynamic -->
+                                </ul>
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase font-bold text-red-400 block mb-1">Contradicting Evidence</span>
+                                <ul id="expContradictingList" class="space-y-1 text-[10px] list-disc list-inside text-gray-400">
+                                    <!-- Dynamic -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-gray-800 pt-2.5 space-y-1.5">
+                            <div>
+                                <span class="text-[9px] uppercase font-bold text-yellow-500 block">Current Risk Factors</span>
+                                <p id="expRiskText" class="text-[10px] text-gray-400 leading-snug">--</p>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px]">
+                                <span class="text-gray-400 font-bold uppercase text-[9px]">Invalidation Level:</span>
+                                <span id="expInvalidationPrice" class="font-mono font-bold text-red-500">--</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px]">
+                                <span class="text-gray-400 font-bold uppercase text-[9px]">Alternative Scenario:</span>
+                                <p id="expAlternativeText" class="text-[10px] text-gray-400 text-right leading-snug max-w-[150px]">--</p>
+                            </div>
+                            <div>
+                                <span class="text-[9px] uppercase font-bold text-gray-400 block mb-1">Key Levels to Watch</span>
+                                <ul id="expKeyLevelsList" class="space-y-0.5 text-[10px] font-mono text-gray-300">
+                                    <!-- Dynamic -->
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>

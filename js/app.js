@@ -464,6 +464,7 @@ class AppController {
                 const tNews = document.getElementById('tabContentNews');
                 const tJournal = document.getElementById('tabContentJournal');
                 const tTokeninfo = document.getElementById('tabContentTokeninfo');
+                const tThesis = document.getElementById('tabContentThesis');
 
                 if (tSentiment) tSentiment.classList.add('hidden');
                 if (tSignals) tSignals.classList.add('hidden');
@@ -473,6 +474,7 @@ class AppController {
                 if (tNews) tNews.classList.add('hidden');
                 if (tJournal) tJournal.classList.add('hidden');
                 if (tTokeninfo) tTokeninfo.classList.add('hidden');
+                if (tThesis) tThesis.classList.add('hidden');
 
                 if (targetTab === 'sentiment' && tSentiment) {
                     tSentiment.classList.remove('hidden');
@@ -490,6 +492,8 @@ class AppController {
                     tJournal.classList.remove('hidden');
                 } else if (targetTab === 'tokeninfo' && tTokeninfo) {
                     tTokeninfo.classList.remove('hidden');
+                } else if (targetTab === 'thesis' && tThesis) {
+                    tThesis.classList.remove('hidden');
                 }
             });
         });
@@ -1021,7 +1025,7 @@ class AppController {
      * Trigger Multi-Timeframe Background analyses
      */
     async runMtfAnalysis() {
-        const tfs = ['1m', '5m', '15m', '1h', '4h', '1d'];
+        const tfs = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
         const mtfData = {};
 
         for (const tf of tfs) {
@@ -1217,6 +1221,9 @@ class AppController {
             confidence: parseInt(decision.confidence)
         };
         this.alerts.checkAlerts(this.currentSymbol, currentClose, technicalData);
+
+        // Update new Phase 1 Market Intelligence Foundation cards and panels
+        this.updateMarketIntelligenceUI(decision);
     }
 
     renderProbabilities(probs) {
@@ -1238,6 +1245,235 @@ class AppController {
             bullText.textContent = `${probs.bullish}%`;
             bearText.textContent = `${probs.bearish}%`;
             neutText.textContent = `${probs.neutral}%`;
+        }
+    }
+
+    updateMarketIntelligenceUI(decision) {
+        if (!decision) return;
+
+        // 1. Market Structure Card
+        const structBiasBadge = document.getElementById('structBiasBadge');
+        const structStatesContainer = document.getElementById('structStatesContainer');
+        const structExplainText = document.getElementById('structExplainText');
+
+        if (structBiasBadge && decision.layers.marketStructure) {
+            const structureState = decision.layers.marketStructure.currentMarketStructure || 'Neutral';
+            structBiasBadge.textContent = structureState;
+
+            // set badge color based on structure state
+            if (structureState === 'Bullish') {
+                structBiasBadge.className = "text-[9px] px-1.5 py-0.5 rounded font-black uppercase bg-green-500/10 text-[#0ecb81] border border-[#0ecb81]/20";
+            } else if (structureState === 'Bearish') {
+                structBiasBadge.className = "text-[9px] px-1.5 py-0.5 rounded font-black uppercase bg-red-500/10 text-[#f6465d] border border-[#f6465d]/20";
+            } else if (structureState === 'Mixed') {
+                structBiasBadge.className = "text-[9px] px-1.5 py-0.5 rounded font-black uppercase bg-yellow-500/10 text-yellow-500 border border-yellow-500/20";
+            } else {
+                structBiasBadge.className = "text-[9px] px-1.5 py-0.5 rounded font-black uppercase bg-gray-800 text-gray-400 border border-gray-700/40";
+            }
+        }
+
+        if (structStatesContainer && decision.layers.marketStructure) {
+            const ms = decision.layers.marketStructure;
+            const states = [];
+            if (ms.isHH) states.push('<span class="bg-green-950/40 text-green-400 border border-green-800 px-1 rounded text-[8px] font-bold">HH</span>');
+            if (ms.isHL) states.push('<span class="bg-emerald-950/40 text-emerald-400 border border-emerald-800 px-1 rounded text-[8px] font-bold">HL</span>');
+            if (ms.isLH) states.push('<span class="bg-orange-950/40 text-orange-400 border border-orange-800 px-1 rounded text-[8px] font-bold">LH</span>');
+            if (ms.isLL) states.push('<span class="bg-red-950/40 text-red-400 border border-red-800 px-1 rounded text-[8px] font-bold">LL</span>');
+            if (ms.bos) states.push('<span class="bg-green-950/40 text-green-400 border border-green-800 px-1 rounded text-[8px] font-bold">BOS</span>');
+            if (ms.choch) states.push('<span class="bg-yellow-950/40 text-yellow-400 border border-yellow-800 px-1 rounded text-[8px] font-bold">CHoCH</span>');
+            if (ms.trendContinuation) states.push('<span class="bg-blue-950/40 text-blue-400 border border-blue-800 px-1 rounded text-[8px] font-bold">CONT</span>');
+            if (ms.trendReversal) states.push('<span class="bg-purple-950/40 text-purple-400 border border-purple-800 px-1 rounded text-[8px] font-bold">REV</span>');
+
+            if (states.length === 0) {
+                structStatesContainer.innerHTML = '<span class="text-gray-500 italic text-[10px]">None</span>';
+            } else {
+                structStatesContainer.innerHTML = states.join(' ');
+            }
+        }
+
+        if (structExplainText && decision.layers.marketStructure) {
+            structExplainText.textContent = decision.layers.marketStructure.explanation || "No market structure explanation compiled.";
+        }
+
+        // 2. Multi-Timeframe Matrix Card
+        const mtfMatrixBody = document.getElementById('mtfMatrixBody');
+        if (mtfMatrixBody && decision.layers.multiTimeframe && decision.layers.multiTimeframe.matrix) {
+            const matrix = decision.layers.multiTimeframe.matrix;
+            const tfs = ['1m', '5m', '15m', '30m', '1h', '4h', '1d', '1w'];
+
+            const getAlignBadge = (val) => {
+                if (val.includes('Bullish')) return '<span class="text-[#0ecb81] font-bold">BULL</span>';
+                if (val.includes('Bearish')) return '<span class="text-[#f6465d] font-bold">BEAR</span>';
+                return '<span class="text-gray-500">NEUT</span>';
+            };
+
+            mtfMatrixBody.innerHTML = tfs.map(tf => {
+                const cell = matrix[tf] || { trend: 'Neutral', momentum: 'Neutral', support: 'Neutral', resistance: 'Neutral', structure: 'Neutral' };
+                return `
+                    <tr class="border-b border-gray-800/40 hover:bg-black/10">
+                        <td class="py-1 text-left font-bold text-white uppercase">${tf === '1h' ? '1H' : (tf === '4h' ? '4H' : (tf === '1d' ? '1D' : (tf === '1w' ? '1W' : tf)))}</td>
+                        <td class="py-1 text-center">${getAlignBadge(cell.trend)}</td>
+                        <td class="py-1 text-center">${getAlignBadge(cell.momentum)}</td>
+                        <td class="py-1 text-center">${getAlignBadge(cell.support)}</td>
+                        <td class="py-1 text-center">${getAlignBadge(cell.resistance)}</td>
+                        <td class="py-1 text-center">${getAlignBadge(cell.structure)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 3. Confidence Breakdown Card
+        const confidenceContainer = document.getElementById('confidenceBreakdownContainer');
+        if (confidenceContainer && decision.confidenceBreakdown) {
+            const cb = decision.confidenceBreakdown;
+            const items = [
+                { key: 'Trend', val: cb.trend, color: 'bg-green-500' },
+                { key: 'Market Structure', val: cb.marketStructure, color: 'bg-blue-500' },
+                { key: 'Momentum', val: cb.momentum, color: 'bg-cyan-500' },
+                { key: 'Volume', val: cb.volume, color: 'bg-purple-500' },
+                { key: 'News Intelligence', val: cb.news, color: 'bg-yellow-500' },
+                { key: 'Support & Resistance', val: cb.supportResistance, color: 'bg-teal-500' },
+                { key: 'Risk Management', val: cb.risk, color: 'bg-red-500' }
+            ];
+
+            confidenceContainer.innerHTML = items.map(item => `
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-[9px] uppercase tracking-wider text-gray-400 font-bold">
+                        <span>${item.key}</span>
+                        <span class="font-mono text-white font-extrabold">${item.val}%</span>
+                    </div>
+                    <div class="w-full bg-gray-800 h-1 rounded-full overflow-hidden">
+                        <div class="${item.color} h-full transition-all duration-500" style="width: ${item.val}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 4. AI Explainability Card
+        if (decision.explainability) {
+            const exp = decision.explainability;
+
+            const expEngineConfidence = document.getElementById('expEngineConfidence');
+            if (expEngineConfidence) expEngineConfidence.textContent = exp.confidenceLevel;
+
+            const expContextText = document.getElementById('expContextText');
+            if (expContextText) expContextText.textContent = exp.marketContext;
+
+            const expWhyText = document.getElementById('expWhyText');
+            if (expWhyText) expWhyText.textContent = exp.whySetupExists;
+
+            const expSupportingList = document.getElementById('expSupportingList');
+            if (expSupportingList) {
+                expSupportingList.innerHTML = exp.supportingEvidence.map(item => `<li>${item}</li>`).join('');
+            }
+
+            const expContradictingList = document.getElementById('expContradictingList');
+            if (expContradictingList) {
+                expContradictingList.innerHTML = exp.contradictingEvidence.map(item => `<li>${item}</li>`).join('');
+            }
+
+            const expRiskText = document.getElementById('expRiskText');
+            if (expRiskText) expRiskText.textContent = exp.currentRiskFactors;
+
+            const expInvalidationPrice = document.getElementById('expInvalidationPrice');
+            if (expInvalidationPrice) expInvalidationPrice.textContent = `$${formatPrice(exp.invalidationLevel)}`;
+
+            const expAlternativeText = document.getElementById('expAlternativeText');
+            if (expAlternativeText) expAlternativeText.textContent = exp.alternativeScenario;
+
+            const expKeyLevelsList = document.getElementById('expKeyLevelsList');
+            if (expKeyLevelsList) {
+                expKeyLevelsList.innerHTML = exp.keyLevelsToWatch.map(item => `<li>⚡ ${item}</li>`).join('');
+            }
+        }
+
+        // 5. Trade Thesis Panel Tab content
+        const thesisSymbolBadge = document.getElementById('thesisSymbolBadge');
+        if (thesisSymbolBadge) thesisSymbolBadge.textContent = this.currentSymbol;
+
+        if (decision.explainability && decision.tradePlan) {
+            const exp = decision.explainability;
+            const tp = decision.tradePlan;
+
+            const thesisSummaryText = document.getElementById('thesisSummaryText');
+            if (thesisSummaryText) {
+                thesisSummaryText.textContent = `The automated intelligence suite presents a highly comprehensive trading report for ${this.currentSymbol} on the ${this.currentTimeframe} timeframe. ${exp.marketContext} ${exp.whySetupExists}`;
+            }
+
+            const thesisTrendBadge = document.getElementById('thesisTrendBadge');
+            if (thesisTrendBadge) {
+                thesisTrendBadge.textContent = `${decision.currentMarketBias || 'Neutral'} - ${decision.trendStrength || 'Weak'}`;
+                if (decision.currentMarketBias === 'Bullish') {
+                    thesisTrendBadge.className = "text-xs font-bold text-[#0ecb81] uppercase bg-green-950/40 border border-[#0ecb81]/20 px-2 py-0.5 rounded";
+                } else if (decision.currentMarketBias === 'Bearish') {
+                    thesisTrendBadge.className = "text-xs font-bold text-[#f6465d] uppercase bg-red-950/40 border border-[#f6465d]/20 px-2 py-0.5 rounded";
+                } else {
+                    thesisTrendBadge.className = "text-xs font-bold text-yellow-500 uppercase bg-yellow-950/40 border border-yellow-500/20 px-2 py-0.5 rounded";
+                }
+            }
+
+            const thesisStructureBadge = document.getElementById('thesisStructureBadge');
+            if (thesisStructureBadge && decision.layers.marketStructure) {
+                const msState = decision.layers.marketStructure.currentMarketStructure || 'Neutral';
+                thesisStructureBadge.textContent = msState;
+                if (msState === 'Bullish') {
+                    thesisStructureBadge.className = "text-xs font-bold text-[#0ecb81] uppercase bg-green-950/40 border border-[#0ecb81]/20 px-2 py-0.5 rounded";
+                } else if (msState === 'Bearish') {
+                    thesisStructureBadge.className = "text-xs font-bold text-[#f6465d] uppercase bg-red-950/40 border border-[#f6465d]/20 px-2 py-0.5 rounded";
+                } else {
+                    thesisStructureBadge.className = "text-xs font-bold text-yellow-500 uppercase bg-yellow-950/40 border border-yellow-500/20 px-2 py-0.5 rounded";
+                }
+            }
+
+            const thesisStructureExplanation = document.getElementById('thesisStructureExplanation');
+            if (thesisStructureExplanation && decision.layers.marketStructure) {
+                thesisStructureExplanation.textContent = decision.layers.marketStructure.explanation;
+            }
+
+            const thesisBullishFactors = document.getElementById('thesisBullishFactors');
+            if (thesisBullishFactors) {
+                thesisBullishFactors.innerHTML = exp.supportingEvidence.map(item => `<li>${item}</li>`).join('');
+            }
+
+            const thesisBearishFactors = document.getElementById('thesisBearishFactors');
+            if (thesisBearishFactors) {
+                thesisBearishFactors.innerHTML = exp.contradictingEvidence.map(item => `<li>${item}</li>`).join('');
+            }
+
+            const thesisRiskAssessmentText = document.getElementById('thesisRiskAssessmentText');
+            if (thesisRiskAssessmentText) {
+                thesisRiskAssessmentText.textContent = `${exp.currentRiskFactors} Setups recommend capping margin to maximum recommended sizing configurations.`;
+            }
+
+            const thesisInvalidationText = document.getElementById('thesisInvalidationText');
+            if (thesisInvalidationText) {
+                thesisInvalidationText.textContent = `Invalidates @ $${formatPrice(exp.invalidationLevel)}`;
+            }
+
+            const thesisQualityBadge = document.getElementById('thesisQualityBadge');
+            if (thesisQualityBadge) {
+                thesisQualityBadge.textContent = `${decision.tradeQualityRating}`;
+                const ratingColorMap = {
+                    'Exceptional': 'text-green-400 border-green-800 bg-green-950/30',
+                    'High Probability': 'text-emerald-400 border-emerald-800 bg-emerald-950/30',
+                    'Good Setup': 'text-teal-400 border-teal-800 bg-teal-950/30',
+                    'Average': 'text-yellow-400 border-yellow-800 bg-yellow-950/30',
+                    'Weak': 'text-orange-400 border-orange-800 bg-orange-950/30',
+                    'Avoid Trade': 'text-red-400 border-red-800 bg-red-950/30'
+                };
+                thesisQualityBadge.className = `font-bold uppercase px-2 py-0.5 rounded border text-[10px] ${ratingColorMap[decision.tradeQualityRating] || 'text-white'}`;
+            }
+
+            const thesisConfidenceBadge = document.getElementById('thesisConfidenceBadge');
+            if (thesisConfidenceBadge) thesisConfidenceBadge.textContent = exp.confidenceLevel;
+
+            const thesisTp1 = document.getElementById('thesisTp1');
+            const thesisTp2 = document.getElementById('thesisTp2');
+            const thesisTp3 = document.getElementById('thesisTp3');
+
+            if (thesisTp1) thesisTp1.textContent = typeof tp.tp1 === 'number' && tp.tp1 > 0 ? `$${formatPrice(tp.tp1)}` : '--';
+            if (thesisTp2) thesisTp2.textContent = typeof tp.tp2 === 'number' && tp.tp2 > 0 ? `$${formatPrice(tp.tp2)}` : '--';
+            if (thesisTp3) thesisTp3.textContent = typeof tp.tp3 === 'number' && tp.tp3 > 0 ? `$${formatPrice(tp.tp3)}` : '--';
         }
     }
 
