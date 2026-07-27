@@ -428,7 +428,8 @@ export function getEnrichedMetadata(symbol, lastPrice) {
         return {
             ...TOKEN_METADATA[baseSymbol],
             marketCap: lastPrice * TOKEN_METADATA[baseSymbol].circulating,
-            fdv: lastPrice * (TOKEN_METADATA[baseSymbol].total || TOKEN_METADATA[baseSymbol].circulating)
+            fdv: lastPrice * (TOKEN_METADATA[baseSymbol].total || TOKEN_METADATA[baseSymbol].circulating),
+            logo: `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${baseSymbol.toLowerCase()}.png`
         };
     }
 
@@ -543,6 +544,7 @@ export function getEnrichedMetadata(symbol, lastPrice) {
         fdv: lastPrice * tot,
         ath: ath,
         atl: atl,
-        athMc: ath * circ
+        athMc: ath * circ,
+        logo: `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${baseSymbol.toLowerCase()}.png`
     };
 }

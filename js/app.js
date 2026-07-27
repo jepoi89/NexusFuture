@@ -3461,6 +3461,38 @@ class AppController {
         setElText('tokenBlockchain', token.blockchain);
         setElText('tokenCategory', token.category);
 
+        // Logo and Fallback Handling
+        const logoImg = document.getElementById('tokenLogo');
+        const logoFallback = document.getElementById('tokenLogoFallback');
+        if (logoImg && logoFallback) {
+            // Set initials as placeholder and show fallback by default while loading
+            const initials = baseSymbol.slice(0, 3);
+            logoFallback.textContent = initials;
+            logoImg.classList.add('hidden');
+            logoFallback.classList.remove('hidden');
+
+            // Handle successful load
+            logoImg.onload = () => {
+                logoImg.classList.remove('hidden');
+                logoFallback.classList.add('hidden');
+            };
+
+            // Handle image load error gracefully
+            logoImg.onerror = () => {
+                logoImg.classList.add('hidden');
+                logoFallback.classList.remove('hidden');
+            };
+
+            // Trigger the source load
+            if (token.logo) {
+                logoImg.src = token.logo;
+            } else {
+                logoImg.src = '';
+                logoImg.classList.add('hidden');
+                logoFallback.classList.remove('hidden');
+            }
+        }
+
         // Resource Links
         setElHref('tokenWebsite', token.website);
         setElHref('tokenWhitepaper', token.whitepaper);
