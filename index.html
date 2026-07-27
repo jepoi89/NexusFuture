@@ -1238,51 +1238,145 @@
                     <div id="tabContentTokeninfo" class="hidden">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                             <!-- Left: General Info Card -->
-                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-4 lg:col-span-1 shadow-inner">
-                                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
-                                    <h3 class="text-xs text-amber-500 font-bold uppercase tracking-wider flex items-center space-x-2">
-                                        <span id="tokenInfoSymbol">SOL</span> General Info
-                                    </h3>
-                                    <div class="flex space-x-2">
-                                        <a id="tokenWebsite" href="#" target="_blank" class="text-amber-500 hover:text-amber-400 text-[10px] font-semibold underline">Website</a>
-                                        <span class="text-gray-600">|</span>
-                                        <a id="tokenSocial" href="#" target="_blank" class="text-amber-500 hover:text-amber-400 text-[10px] font-semibold underline">Twitter/X</a>
+                            <div class="bg-[#1e2329] p-4 rounded border border-gray-800 space-y-4 lg:col-span-1 shadow-inner max-h-[650px] overflow-y-auto scrollbar-thin">
+                                <!-- Enriched Identity Header -->
+                                <div class="border-b border-gray-800/80 pb-3">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h2 id="tokenProjectName" class="text-xl font-black text-white tracking-tight">Solana</h2>
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                <span id="tokenInfoSymbol" class="bg-amber-500/10 text-amber-500 font-extrabold px-2 py-0.5 rounded border border-amber-500/20 text-[10px]">SOL</span>
+                                                <span id="tokenBlockchain" class="text-[10px] text-gray-400 font-semibold bg-gray-800 border border-gray-700/60 px-2 py-0.5 rounded">Solana</span>
+                                                <span id="tokenCategory" class="text-[10px] text-amber-400/90 font-semibold bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">Layer 1</span>
+                                            </div>
+                                        </div>
+                                        <span class="text-[9px] text-gray-500 uppercase tracking-widest font-black bg-[#181a20] px-2 py-1 rounded border border-gray-800">ASSET PROFILE</span>
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-xs text-gray-300">
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">Market Cap</span>
-                                        <span class="font-bold text-white font-mono" id="tokenMarketCap">--</span>
+
+                                <!-- Official Resource Links -->
+                                <div class="space-y-1.5">
+                                    <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Official Verified Resources</span>
+                                    <div class="flex flex-wrap gap-1.5">
+                                        <a id="tokenWebsite" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>🌐 Website</span>
+                                        </a>
+                                        <a id="tokenWhitepaper" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>📄 Whitepaper</span>
+                                        </a>
+                                        <a id="tokenGithub" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>💻 GitHub</span>
+                                        </a>
+                                        <a id="tokenSocial" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>𝕏 Twitter</span>
+                                        </a>
+                                        <a id="tokenTelegram" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>💬 Telegram</span>
+                                        </a>
+                                        <a id="tokenDiscord" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>👾 Discord</span>
+                                        </a>
+                                        <a id="tokenReddit" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>🤖 Reddit</span>
+                                        </a>
+                                        <a id="tokenExplorer" href="#" target="_blank" rel="noopener noreferrer" class="text-xs bg-[#181a20] hover:bg-amber-500/10 text-gray-300 hover:text-amber-500 font-bold px-2 py-1 rounded border border-gray-800 hover:border-amber-500/30 transition flex items-center space-x-1">
+                                            <span>🔍 Explorer</span>
+                                        </a>
                                     </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">Fully Diluted Valuation (FDV)</span>
-                                        <span class="font-bold text-white font-mono" id="tokenFDV">--</span>
+                                </div>
+
+                                <!-- Professional Summary Description -->
+                                <div class="space-y-1.5">
+                                    <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Project Summary</span>
+                                    <p id="tokenDescription" class="text-xs text-gray-300 leading-relaxed bg-[#181a20] p-3 rounded border border-gray-800/80 font-medium">
+                                        Loading project summary...
+                                    </p>
+                                </div>
+
+                                <!-- Market Metrics Grid -->
+                                <div class="space-y-1.5">
+                                    <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Institutional Market Statistics</span>
+                                    <div class="grid grid-cols-2 gap-3 text-xs bg-[#181a20] p-3 rounded border border-gray-800/80 text-gray-300">
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Market Cap</span>
+                                            <span class="font-extrabold text-white font-mono text-sm" id="tokenMarketCap">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Fully Diluted Valuation (FDV)</span>
+                                            <span class="font-extrabold text-white font-mono text-sm" id="tokenFDV">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">ATH Market Cap</span>
+                                            <span class="font-extrabold text-white font-mono text-sm" id="tokenATHMarketCap">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">24H Volume</span>
+                                            <span class="font-extrabold text-white font-mono text-sm" id="token24hVol">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">All-Time High (ATH)</span>
+                                            <span class="font-extrabold text-green-400 font-mono text-sm" id="tokenATH">--</span>
+                                            <span class="text-[9px] text-red-500 font-bold block mt-0.5" id="tokenFromATH">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">All-Time Low (ATL)</span>
+                                            <span class="font-extrabold text-red-400 font-mono text-sm" id="tokenATL">--</span>
+                                            <span class="text-[9px] text-green-500 font-bold block mt-0.5" id="tokenFromATL">--</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">ATH Market Cap</span>
-                                        <span class="font-bold text-white font-mono" id="tokenATHMarketCap">--</span>
+                                </div>
+
+                                <!-- Detailed Specifications Grid -->
+                                <div class="space-y-1.5">
+                                    <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Tokenomics & System Specs</span>
+                                    <div class="grid grid-cols-2 gap-3 text-xs bg-[#181a20] p-3 rounded border border-gray-800/80 text-gray-300">
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Circulating Supply</span>
+                                            <span class="font-bold text-white font-mono" id="tokenCirculatingSupply">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Total Supply</span>
+                                            <span class="font-bold text-white font-mono" id="tokenTotalSupply">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Maximum Supply</span>
+                                            <span class="font-bold text-white font-mono" id="tokenMaxSupply">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Launch Date</span>
+                                            <span class="font-bold text-white" id="tokenLaunchDate">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Consensus Mechanism</span>
+                                            <span class="font-bold text-amber-500" id="tokenConsensus">--</span>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-400 text-[10px] block">Token Type</span>
+                                            <span class="font-bold text-white" id="tokenType">--</span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">24h Trade Volume</span>
-                                        <span class="font-bold text-white font-mono" id="token24hVol">--</span>
+                                </div>
+
+                                <!-- Utility & Use Case Card -->
+                                <div class="space-y-1.5">
+                                    <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Token Utility & Real-World Use Case</span>
+                                    <div class="space-y-2 bg-[#181a20] p-3 rounded border border-gray-800/80 text-xs">
+                                        <div>
+                                            <span class="text-amber-500 font-extrabold text-[10px] uppercase tracking-wider block">Primary Utility Vector:</span>
+                                            <p id="tokenUtility" class="text-gray-300 mt-0.5 leading-relaxed font-semibold">Loading utility data...</p>
+                                        </div>
+                                        <div class="border-t border-gray-800/60 pt-2">
+                                            <span class="text-amber-500 font-extrabold text-[10px] uppercase tracking-wider block">Ecosystem Real-World Use Case:</span>
+                                            <p id="tokenUseCase" class="text-gray-300 mt-0.5 leading-relaxed font-semibold">Loading use case data...</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">Total Supply</span>
-                                        <span class="font-bold text-white font-mono" id="tokenTotalSupply">--</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">Circulating Supply</span>
-                                        <span class="font-bold text-white font-mono" id="tokenCirculatingSupply">--</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">All-Time High (ATH)</span>
-                                        <span class="font-bold text-green-400 font-mono" id="tokenATH">--</span>
-                                        <span class="text-[9px] text-red-500 font-bold block" id="tokenFromATH">--</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-gray-400 text-[10px] block">All-Time Low (ATL)</span>
-                                        <span class="font-bold text-red-400 font-mono" id="tokenATL">--</span>
-                                        <span class="text-[9px] text-green-500 font-bold block" id="tokenFromATL">--</span>
+                                </div>
+
+                                <!-- Tags list -->
+                                <div class="space-y-1.5 pb-2">
+                                    <span class="text-gray-400 text-[9px] uppercase font-bold tracking-wider block">Ecosystem Tags</span>
+                                    <div id="tokenTagsContainer" class="flex flex-wrap gap-1">
+                                        <!-- Dynamically inserted tags -->
                                     </div>
                                 </div>
                             </div>
