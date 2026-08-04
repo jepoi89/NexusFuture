@@ -266,19 +266,41 @@
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-2 mt-2 lg:mt-0">
-                    <button id="executionWhyBtn" title="Explain why the AI generated this signal." class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded transition text-xs flex items-center space-x-1">
-                        <i data-lucide="info" class="w-3.5 h-3.5"></i>
-                        <span>WHY</span>
-                    </button>
-                    <button id="executionTakeBtn" class="bg-red-500 hover:bg-red-400 text-white font-bold px-4 py-1.5 rounded transition text-xs flex items-center space-x-1">
-                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
-                        <span id="executionTakeBtnText">TAKE SELL</span>
-                    </button>
-                    <button id="executionIgnoreBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-3 py-1.5 rounded transition text-xs border border-gray-700 flex items-center space-x-1">
-                        <i data-lucide="x" class="w-3.5 h-3.5"></i>
-                        <span>Ignore</span>
-                    </button>
+                <div class="flex flex-col items-center lg:items-end space-y-2 mt-2 lg:mt-0">
+                    <!-- Dynamic Candle Countdown Timer -->
+                    <div id="executionCountdownContainer" class="flex flex-col items-center lg:items-end space-y-0.5 text-center lg:text-right text-xs">
+                        <div class="flex items-center space-x-1 text-gray-400">
+                            <span id="executionTimerIcon" class="text-amber-500">⏱</span>
+                            <span id="executionTimerLabel" class="text-[10px] uppercase tracking-wider font-bold">Candle Closes In</span>
+                        </div>
+                        <div id="executionCountdownTimer" class="font-mono font-bold text-base tracking-widest text-white leading-none">
+                            --:--
+                        </div>
+                        <div class="flex items-center space-x-1.5 font-mono text-[10px] text-gray-400">
+                            <span id="executionProgressBar" class="text-amber-500">░░░░░░░░░░</span>
+                            <span id="executionProgressPercent" class="font-bold">0%</span>
+                        </div>
+                        <div id="executionConfirmationStatus" class="flex items-center space-x-1 text-[9px] mt-0.5">
+                            <span id="executionStatusBadge" class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded font-black uppercase tracking-wider">
+                                ⏳ Awaiting Candle Confirmation
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <button id="executionWhyBtn" title="Explain why the AI generated this signal." class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-3 py-1.5 rounded transition text-xs flex items-center space-x-1">
+                            <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                            <span>WHY</span>
+                        </button>
+                        <button id="executionTakeBtn" class="bg-red-500 hover:bg-red-400 text-white font-bold px-4 py-1.5 rounded transition text-xs flex items-center space-x-1">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                            <span id="executionTakeBtnText">TAKE SELL</span>
+                        </button>
+                        <button id="executionIgnoreBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold px-3 py-1.5 rounded transition text-xs border border-gray-700 flex items-center space-x-1">
+                            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                            <span>Ignore</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
