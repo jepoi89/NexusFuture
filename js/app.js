@@ -50,6 +50,11 @@ class AppController {
         this.currentTimeframe = '15m';
         this.isDarkMode = true;
 
+        this.lastLoadedSymbol = '';
+        this.lastLoadedTimeframe = '';
+        this.candleConfirmed = false;
+        this.countdownInterval = null;
+
         // Cached lists and configurations
         this.tickersCache = [];
         this.cachedMtfData = null;
@@ -715,6 +720,12 @@ class AppController {
         this.currentSymbol = symbol.toUpperCase();
         console.log(`Swapping active viewport to: ${this.currentSymbol}`);
 
+        if (this.currentSymbol !== this.lastLoadedSymbol || this.currentTimeframe !== this.lastLoadedTimeframe) {
+            this.candleConfirmed = false;
+            this.lastLoadedSymbol = this.currentSymbol;
+            this.lastLoadedTimeframe = this.currentTimeframe;
+        }
+
         // Update static UI text fields
         const tag = document.getElementById('currentSymbolTag');
         if (tag) tag.textContent = this.currentSymbol;
@@ -832,6 +843,8 @@ class AppController {
             },
             lastCandle ? lastCandle.close : null
         );
+
+        this.startCandleCountdown();
     }
 
     /**
@@ -2644,44 +2657,48 @@ class AppController {
                 if (isGoodSetup) {
                     if (isLong) {
                         if (actionLabel) {
-                            actionLabel.textContent = "ACTION REQUIRED";
-                            actionLabel.className = "text-[#0ecb81] text-[10px] font-black uppercase tracking-wider block";
+                            actionLabel.textContent = this.candleConfirmed ? "ACTION REQUIRED" : "PENDING CANDLE CLOSE";
+                            actionLabel.className = this.candleConfirmed ? "text-[#0ecb81] text-[10px] font-black uppercase tracking-wider block" : "text-amber-500 text-[10px] font-black uppercase tracking-wider block";
                         }
                         if (title) {
-                            title.textContent = "TAKE BUY SIGNAL";
+                            title.textContent = this.candleConfirmed ? "TAKE BUY SIGNAL" : "POTENTIAL BUY SETUP";
                             title.className = "font-bold text-white text-[13px] block";
                         }
                         if (iconContainer) {
-                            iconContainer.className = "w-11 h-11 rounded-xl bg-green-950/40 flex items-center justify-center text-[#0ecb81]";
+                            iconContainer.className = this.candleConfirmed ? "w-11 h-11 rounded-xl bg-green-950/40 flex items-center justify-center text-[#0ecb81]" : "w-11 h-11 rounded-xl bg-yellow-950/40 flex items-center justify-center text-amber-500";
                         }
                         if (icon) {
-                            icon.setAttribute('class', "w-5 h-5 text-[#0ecb81]");
+                            icon.setAttribute('class', this.candleConfirmed ? "w-5 h-5 text-[#0ecb81]" : "w-5 h-5 text-amber-500");
                             icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />`;
                         }
                         const entryLabel = document.getElementById('executionEntryZoneLabel');
-                        if (entryLabel) entryLabel.textContent = "BUY ENTRY ZONE";
+                        if (entryLabel) entryLabel.textContent = this.candleConfirmed ? "BUY ENTRY ZONE" : "PROSPECTIVE ENTRY ZONE";
 
-                        deck.className = "bg-gradient-to-r from-emerald-950/20 to-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                        deck.className = this.candleConfirmed ?
+                            "bg-gradient-to-r from-emerald-950/20 to-[#10b981]/5 border border-[#10b981]/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300" :
+                            "bg-gradient-to-r from-yellow-950/15 to-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
                     } else {
                         if (actionLabel) {
-                            actionLabel.textContent = "ACTION REQUIRED";
-                            actionLabel.className = "text-red-500 text-[10px] font-black uppercase tracking-wider block";
+                            actionLabel.textContent = this.candleConfirmed ? "ACTION REQUIRED" : "PENDING CANDLE CLOSE";
+                            actionLabel.className = this.candleConfirmed ? "text-red-500 text-[10px] font-black uppercase tracking-wider block" : "text-amber-500 text-[10px] font-black uppercase tracking-wider block";
                         }
                         if (title) {
-                            title.textContent = "TAKE SELL SIGNAL";
+                            title.textContent = this.candleConfirmed ? "TAKE SELL SIGNAL" : "POTENTIAL SELL SETUP";
                             title.className = "font-bold text-white text-[13px] block";
                         }
                         if (iconContainer) {
-                            iconContainer.className = "w-11 h-11 rounded-xl bg-red-950/40 flex items-center justify-center text-red-500";
+                            iconContainer.className = this.candleConfirmed ? "w-11 h-11 rounded-xl bg-red-950/40 flex items-center justify-center text-red-500" : "w-11 h-11 rounded-xl bg-yellow-950/40 flex items-center justify-center text-amber-500";
                         }
                         if (icon) {
-                            icon.setAttribute('class', "w-5 h-5 text-red-500");
+                            icon.setAttribute('class', this.candleConfirmed ? "w-5 h-5 text-red-500" : "w-5 h-5 text-amber-500");
                             icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />`;
                         }
                         const entryLabel = document.getElementById('executionEntryZoneLabel');
-                        if (entryLabel) entryLabel.textContent = "SELL ENTRY ZONE";
+                        if (entryLabel) entryLabel.textContent = this.candleConfirmed ? "SELL ENTRY ZONE" : "PROSPECTIVE ENTRY ZONE";
 
-                        deck.className = "bg-gradient-to-r from-red-950/20 to-red-500/5 border border-red-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
+                        deck.className = this.candleConfirmed ?
+                            "bg-gradient-to-r from-red-950/20 to-red-500/5 border border-red-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300" :
+                            "bg-gradient-to-r from-yellow-950/15 to-amber-500/5 border border-amber-500/20 rounded-lg p-3 flex flex-wrap items-center justify-between text-xs text-gray-300 transition duration-300";
                     }
                 } else {
                     // Possible Setup
@@ -4016,6 +4033,220 @@ class AppController {
                 `;
             }).join('');
         }
+    }
+
+    parseTimeframeToMinutes(tf) {
+        const lower = tf.toLowerCase().trim();
+        if (lower.includes('month') || (lower === '1m' && tf === '1M')) return 30 * 24 * 60;
+        if (lower.includes('week') || lower === '1w') return 7 * 24 * 60;
+        if (lower.includes('daily') || lower.includes('day') || lower === '1d') return 24 * 60;
+
+        const value = parseInt(lower) || 1;
+        if (lower.includes('h') || lower.includes('hour')) {
+            return value * 60;
+        }
+        if (lower.includes('m') || lower.includes('min')) {
+            return value;
+        }
+        return 15;
+    }
+
+    getStandardTimeframe(tf) {
+        if (!tf) return '15m';
+        const lower = tf.toLowerCase().trim();
+        if (lower.includes('month') || tf === '1M' || lower === 'monthly') return '1M';
+        if (lower.includes('week') || lower === '1w' || lower === 'weekly') return '1w';
+        if (lower.includes('daily') || lower === '1d' || lower === 'daily') return '1d';
+
+        const val = parseInt(lower) || 1;
+        if (lower.includes('h') || lower.includes('hour')) {
+            return `${val}h`;
+        }
+        if (lower.includes('m') || lower.includes('min')) {
+            return `${val}m`;
+        }
+        return tf;
+    }
+
+    getRemainingCandleTime(tf) {
+        const std = this.getStandardTimeframe(tf);
+        const now = new Date();
+        const nowMs = now.getTime();
+
+        let remainingMs = 0;
+        let totalMs = 0;
+
+        if (std === '1M') {
+            const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+            const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1, 0, 0, 0, 0);
+            totalMs = nextMonthStart.getTime() - currentMonthStart.getTime();
+            remainingMs = nextMonthStart.getTime() - nowMs;
+        } else if (std === '1w') {
+            const day = now.getDay();
+            const daysUntilNextMonday = (1 - day + 7) % 7 || 7;
+            const nextMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilNextMonday, 0, 0, 0, 0);
+            totalMs = 7 * 24 * 60 * 60 * 1000;
+            remainingMs = nextMonday.getTime() - nowMs;
+        } else if (std === '1d') {
+            const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+            totalMs = 24 * 60 * 60 * 1000;
+            remainingMs = nextMidnight.getTime() - nowMs;
+        } else {
+            const minutes = this.parseTimeframeToMinutes(std);
+            const intervalMs = minutes * 60 * 1000;
+            const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+            const elapsedMs = nowMs - startOfDay.getTime();
+            const elapsedIntervals = Math.floor(elapsedMs / intervalMs);
+            const nextBoundaryMs = startOfDay.getTime() + (elapsedIntervals + 1) * intervalMs;
+
+            totalMs = intervalMs;
+            remainingMs = nextBoundaryMs - nowMs;
+        }
+
+        remainingMs = Math.max(0, remainingMs);
+        const percentCompleted = totalMs > 0 ? ((totalMs - remainingMs) / totalMs) * 100 : 0;
+
+        return { remainingMs, totalMs, percentCompleted };
+    }
+
+    getProgressBarString(percent) {
+        const totalBlocks = 10;
+        const filledBlocks = Math.round((percent / 100) * totalBlocks);
+        const emptyBlocks = totalBlocks - filledBlocks;
+        const solid = '█'.repeat(Math.max(0, Math.min(10, filledBlocks)));
+        const light = '░'.repeat(Math.max(0, Math.min(10, emptyBlocks)));
+        return `${solid}${light}`;
+    }
+
+    formatTimeRemaining(totalSeconds, timeframe) {
+        if (totalSeconds <= 0) return "00:00";
+
+        const days = Math.floor(totalSeconds / (24 * 3600));
+        const hours = Math.floor((totalSeconds % (24 * 3600)) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        const pad = (num) => String(num).padStart(2, '0');
+
+        const std = this.getStandardTimeframe(timeframe);
+
+        if (std === '1M' || std === '1w' || days > 0) {
+            return `${days}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        if (hours > 0) {
+            return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        return `${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    startCandleCountdown() {
+        if (this.countdownInterval) {
+            clearInterval(this.countdownInterval);
+        }
+
+        const timerTimeframe = this.currentTimeframe;
+        const timerSymbol = this.currentSymbol;
+
+        const updateTimer = () => {
+            if (timerTimeframe !== this.currentTimeframe || timerSymbol !== this.currentSymbol) {
+                clearInterval(this.countdownInterval);
+                return;
+            }
+
+            const { remainingMs, totalMs, percentCompleted } = this.getRemainingCandleTime(this.currentTimeframe);
+
+            const seconds = Math.floor(remainingMs / 1000);
+            const displayTime = this.formatTimeRemaining(seconds, this.currentTimeframe);
+
+            const timerEl = document.getElementById('executionCountdownTimer');
+            const progressEl = document.getElementById('executionProgressBar');
+            const percentEl = document.getElementById('executionProgressPercent');
+            const statusBadge = document.getElementById('executionStatusBadge');
+            const timerIcon = document.getElementById('executionTimerIcon');
+            const timerLabel = document.getElementById('executionTimerLabel');
+
+            if (timerEl) {
+                timerEl.textContent = displayTime;
+            }
+            if (progressEl) {
+                progressEl.textContent = this.getProgressBarString(percentCompleted);
+            }
+            if (percentEl) {
+                percentEl.textContent = `${Math.round(percentCompleted)}%`;
+            }
+
+            if (seconds <= 0) {
+                if (timerLabel) {
+                    timerLabel.textContent = "Updating Analysis...";
+                    timerLabel.className = "text-[10px] uppercase tracking-wider font-bold text-blue-400";
+                }
+                if (timerIcon) {
+                    timerIcon.textContent = "🔄";
+                    timerIcon.className = "text-blue-400 animate-spin";
+                }
+                if (timerEl) {
+                    timerEl.className = "font-mono font-bold text-base tracking-widest text-blue-400 leading-none";
+                }
+
+                clearInterval(this.countdownInterval);
+                this.candleConfirmed = true;
+                this.loadActiveSymbol(this.currentSymbol).then(() => {
+                    this.startCandleCountdown();
+                });
+                return;
+            } else if (seconds < 10) {
+                if (timerLabel) {
+                    timerLabel.textContent = "Final Seconds";
+                    timerLabel.className = "text-[10px] uppercase tracking-wider font-bold text-red-500 animate-bounce";
+                }
+                if (timerIcon) {
+                    timerIcon.textContent = "🔴";
+                    timerIcon.className = "text-red-500 animate-ping";
+                }
+                if (timerEl) {
+                    timerEl.className = "font-mono font-bold text-base tracking-widest text-red-500 leading-none scale-105 transition-all duration-100";
+                }
+            } else if (seconds < 60) {
+                if (timerLabel) {
+                    timerLabel.textContent = "Candle Closing Soon";
+                    timerLabel.className = "text-[10px] uppercase tracking-wider font-bold text-orange-500";
+                }
+                if (timerIcon) {
+                    timerIcon.textContent = "🟠";
+                    timerIcon.className = "text-orange-500";
+                }
+                if (timerEl) {
+                    timerEl.className = "font-mono font-bold text-base tracking-widest text-orange-500 leading-none";
+                }
+            } else {
+                if (timerLabel) {
+                    timerLabel.textContent = "Candle Closes In";
+                    timerLabel.className = "text-[10px] uppercase tracking-wider font-bold text-gray-400";
+                }
+                if (timerIcon) {
+                    timerIcon.textContent = "⏱";
+                    timerIcon.className = "text-amber-500";
+                }
+                if (timerEl) {
+                    timerEl.className = "font-mono font-bold text-base tracking-widest text-white leading-none";
+                }
+            }
+
+            if (statusBadge) {
+                if (this.candleConfirmed) {
+                    statusBadge.textContent = "✔ Confirmed";
+                    statusBadge.className = "bg-green-500/10 text-green-400 border border-green-500/20 px-1.5 py-0.5 rounded font-black uppercase tracking-wider text-[9px]";
+                } else {
+                    statusBadge.textContent = "⏳ Awaiting Candle Confirmation";
+                    statusBadge.className = "bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded font-black uppercase tracking-wider text-[9px]";
+                }
+            }
+        };
+
+        updateTimer();
+        this.countdownInterval = setInterval(updateTimer, 1000);
     }
 }
 
