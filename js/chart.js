@@ -730,13 +730,150 @@ export class ChartManager {
             // Horizontal lines require only one click
             this.createHorizontalLine(clickedPrice);
             this.drawingMode = null;
+        } else if (this.drawingMode === 'vertical') {
+            // Vertical lines require only one click
+            this.createVerticalLine(clickedTime);
+            this.drawingMode = null;
+        } else if (this.drawingMode === 'text') {
+            // Text annotation requires only one click
+            this.createTextAnnotation(clickedTime, clickedPrice);
+            this.drawingMode = null;
         } else if (this.drawingMode === 'trendline' && this.drawingPoints.length === 2) {
             this.createTrendLine(this.drawingPoints[0], this.drawingPoints[1]);
             this.drawingMode = null;
         } else if (this.drawingMode === 'fib' && this.drawingPoints.length === 2) {
             this.createFibonacciRetracement(this.drawingPoints[0].price, this.drawingPoints[1].price);
             this.drawingMode = null;
+        } else if (this.drawingMode === 'rectangle' && this.drawingPoints.length === 2) {
+            this.createRectangle(this.drawingPoints[0], this.drawingPoints[1]);
+            this.drawingMode = null;
+        } else if (this.drawingMode === 'arrow' && this.drawingPoints.length === 2) {
+            this.createArrow(this.drawingPoints[0], this.drawingPoints[1]);
+            this.drawingMode = null;
         }
+    }
+
+    createVerticalLine(timeValue) {
+        // Find index of the time in cached candles to draw a steep line through min and max prices
+        const minPrice = Math.min(...this.cachedCandles.map(c => c.low));
+        const maxPrice = Math.max(...this.cachedCandles.map(c => c.high));
+
+        const vertLine = this.chart.addLineSeries({
+            color: '#a855f7',
+            lineWidth: 2,
+            lineStyle: 1, // dotted
+            priceLineVisible: false
+        });
+
+        // Add 2 points closely spaced to render as a vertical segment
+        const idx = this.cachedCandles.findIndex(c => c.time === timeValue);
+        const lineData = [];
+        if (idx !== -1) {
+            const t1 = this.cachedCandles[idx].time;
+            const t2 = this.cachedCandles[idx + 1] ? this.cachedCandles[idx + 1].time : t1;
+            lineData.push({ time: t1, value: minPrice });
+            lineData.push({ time: t2, value: maxPrice });
+        } else {
+            lineData.push({ time: timeValue, value: minPrice });
+        }
+
+        vertLine.setData(lineData);
+        this.drawings.push({
+            type: 'vertical',
+            time: timeValue,
+            seriesObjects: [vertLine]
+        });
+    }
+
+    createTextAnnotation(timeValue, priceValue) {
+        // Place a custom text note marker at the clicked coordinate
+        const textMarker = this.chart.addLineSeries({
+            color: '#34d399',
+            lineWidth: 0,
+            priceLineVisible: false
+        });
+        textMarker.setData([{ time: timeValue, value: priceValue }]);
+        textMarker.setMarkers([{
+            time: timeValue,
+            position: 'inBar',
+            color: '#34d399',
+            shape: 'circle',
+            text: 'Note: Entry Zone'
+        }]);
+
+        this.drawings.push({
+            type: 'text',
+            time: timeValue,
+            price: priceValue,
+            seriesObjects: [textMarker]
+        });
+    }
+
+    createRectangle(pt1, pt2) {
+        const topHorizontal = this.chart.addLineSeries({ color: '#38bdf8', lineWidth: 1.5, priceLineVisible: false });
+        const botHorizontal = this.chart.addLineSeries({ color: '#38bdf8', lineWidth: 1.5, priceLineVisible: false });
+
+        const t1 = typeof pt1.time === 'object' ? pt1.time.timestamp : pt1.time;
+        const t2 = typeof pt2.time === 'object' ? pt2.time.timestamp : pt2.time;
+
+        const topPrice = Math.max(pt1.price, pt2.price);
+        const botPrice = Math.min(pt1.price, pt2.price);
+
+        const topPoints = [];
+        const botPoints = [];
+
+        this.cachedCandles.forEach(c => {
+            const ct = typeof c.time === 'object' ? c.time.timestamp : c.time;
+            if (ct >= Math.min(t1, t2) && ct <= Math.max(t1, t2)) {
+                topPoints.push({ time: c.time, value: topPrice });
+                botPoints.push({ time: c.time, value: botPrice });
+            }
+        });
+
+        topHorizontal.setData(topPoints);
+        botHorizontal.setData(botPoints);
+
+        this.drawings.push({
+            type: 'rectangle',
+            seriesObjects: [topHorizontal, botHorizontal]
+        });
+    }
+
+    createArrow(pt1, pt2) {
+        const arrowLine = this.chart.addLineSeries({
+            color: '#fb7171',
+            lineWidth: 2,
+            priceLineVisible: false
+        });
+
+        const t1 = typeof pt1.time === 'object' ? pt1.time.timestamp : pt1.time;
+        const t2 = typeof pt2.time === 'object' ? pt2.time.timestamp : pt2.time;
+
+        const linePoints = [];
+        this.cachedCandles.forEach(c => {
+            const ct = typeof c.time === 'object' ? c.time.timestamp : c.time;
+            if (ct >= Math.min(t1, t2) && ct <= Math.max(t1, t2)) {
+                const slope = (pt2.price - pt1.price) / (t2 - t1);
+                const val = pt1.price + (ct - t1) * slope;
+                linePoints.push({ time: c.time, value: val });
+            }
+        });
+
+        arrowLine.setData(linePoints);
+
+        // Put an arrow head marker at the end point
+        arrowLine.setMarkers([{
+            time: pt2.time,
+            position: pt2.price > pt1.price ? 'belowBar' : 'aboveBar',
+            color: '#fb7171',
+            shape: pt2.price > pt1.price ? 'arrowUp' : 'arrowDown',
+            text: 'Target'
+        }]);
+
+        this.drawings.push({
+            type: 'arrow',
+            seriesObjects: [arrowLine]
+        });
     }
 
     createHorizontalLine(priceValue) {
