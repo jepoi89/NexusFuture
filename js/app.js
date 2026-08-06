@@ -117,6 +117,38 @@ class AppController {
         // Load correct visual layout modes
         this.applyWorkspaceLayout(this.layoutMode);
 
+        // Restore saved draggable columns resizer split
+        const savedSplit = localStorage.getItem('nexus_workspace_split');
+        if (savedSplit) {
+            const leftCol = document.getElementById('workspaceLeftColumn');
+            const rightCol = document.getElementById('workspaceRightColumn');
+            if (leftCol && rightCol) {
+                const leftPct = parseFloat(savedSplit);
+                const rightPct = 100 - leftPct;
+                leftCol.style.width = `${leftPct}%`;
+                rightCol.style.width = `${rightPct}%`;
+            }
+        }
+
+        // Restore saved collapsible right sidebar preference
+        const savedSidebarCollapsed = localStorage.getItem('nexus_sidebar_collapsed');
+        if (savedSidebarCollapsed === 'true') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+
+        // Restore saved collapsible bottom tabs panel preference
+        const savedBottomCollapsed = localStorage.getItem('nexus_bottom_collapsed');
+        if (savedBottomCollapsed === 'true') {
+            const bottomPanel = document.getElementById('bottomPanelContainer');
+            if (bottomPanel) {
+                bottomPanel.classList.add('collapsed');
+                const bottomChevron = document.getElementById('bottomChevronIcon');
+                if (bottomChevron) {
+                    bottomChevron.setAttribute('data-lucide', 'chevron-up');
+                }
+            }
+        }
+
         // 1. Initialise UI Binding Events
         this.bindEvents();
 
@@ -592,6 +624,160 @@ class AppController {
             const badge = document.getElementById('alertCountBadge');
             if (badge) badge.classList.remove('hidden');
         };
+
+        // --- Draggable Workspace Resizer Splitter ---
+        const resizer = document.getElementById('workspaceResizer');
+        const leftCol = document.getElementById('workspaceLeftColumn');
+        const rightCol = document.getElementById('workspaceRightColumn');
+        const terminalWs = document.getElementById('terminalWorkspace');
+
+        if (resizer && leftCol && rightCol && terminalWs) {
+            let isDragging = false;
+
+            resizer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                resizer.classList.add('dragging');
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const containerRect = terminalWs.getBoundingClientRect();
+                const relativeX = e.clientX - containerRect.left;
+                let leftPct = (relativeX / containerRect.width) * 100;
+
+                // Set bounds (e.g., minimum 40% and maximum 85%)
+                leftPct = Math.max(40, Math.min(85, leftPct));
+                const rightPct = 100 - leftPct;
+
+                leftCol.style.width = `${leftPct}%`;
+                rightCol.style.width = `${rightPct}%`;
+
+                localStorage.setItem('nexus_workspace_split', leftPct.toFixed(2));
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    resizer.classList.remove('dragging');
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+        }
+
+        // --- Collapsible Right Sidebar ---
+        const toggleRightSidebarBtn = document.getElementById('toggleRightSidebarBtn');
+        if (toggleRightSidebarBtn) {
+            toggleRightSidebarBtn.addEventListener('click', () => {
+                const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+                localStorage.setItem('nexus_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+            });
+        }
+
+        // --- Collapsible Bottom Tabs Panel ---
+        const toggleBottomPanelBtn = document.getElementById('toggleBottomPanelBtn');
+        const bottomPanel = document.getElementById('bottomPanelContainer');
+        const bottomChevron = document.getElementById('bottomChevronIcon');
+
+        if (toggleBottomPanelBtn && bottomPanel) {
+            toggleBottomPanelBtn.addEventListener('click', () => {
+                const isCollapsed = bottomPanel.classList.toggle('collapsed');
+                localStorage.setItem('nexus_bottom_collapsed', isCollapsed ? 'true' : 'false');
+                if (bottomChevron) {
+                    if (isCollapsed) {
+                        bottomChevron.setAttribute('data-lucide', 'chevron-up');
+                    } else {
+                        bottomChevron.setAttribute('data-lucide', 'chevron-down');
+                    }
+                    lucide.createIcons();
+                }
+            });
+        }
+
+        // --- Fullscreen Chart Mode ---
+        const toggleFullscreenChartBtn = document.getElementById('toggleFullscreenChartBtn');
+        if (toggleFullscreenChartBtn) {
+            toggleFullscreenChartBtn.addEventListener('click', () => {
+                document.body.classList.toggle('fullscreen-chart-active');
+            });
+        }
+
+        // --- Minimize/Maximize Floating AI Summary Overlay Card ---
+        const minimizeFloatingAiBtn = document.getElementById('minimizeFloatingAiBtn');
+        const floatingAiSummary = document.getElementById('floatingAiSummary');
+
+        if (minimizeFloatingAiBtn && floatingAiSummary) {
+            minimizeFloatingAiBtn.addEventListener('click', () => {
+                const isMin = floatingAiSummary.classList.toggle('minimized');
+                const icon = minimizeFloatingAiBtn.querySelector('i') || minimizeFloatingAiBtn;
+                if (isMin) {
+                    icon.setAttribute('data-lucide', 'plus-square');
+                } else {
+                    icon.setAttribute('data-lucide', 'minus-square');
+                }
+                lucide.createIcons();
+            });
+        }
+
+        // --- Floating Toolbar extra drawing buttons event listeners ---
+        const drawVerticalBtn = document.getElementById('drawVerticalBtn');
+        if (drawVerticalBtn) {
+            drawVerticalBtn.addEventListener('click', () => {
+                this.chartManager.startDrawingMode('vertical');
+            });
+        }
+        const drawRectangleBtn = document.getElementById('drawRectangleBtn');
+        if (drawRectangleBtn) {
+            drawRectangleBtn.addEventListener('click', () => {
+                this.chartManager.startDrawingMode('rectangle');
+            });
+        }
+        const drawArrowBtn = document.getElementById('drawArrowBtn');
+        if (drawArrowBtn) {
+            drawArrowBtn.addEventListener('click', () => {
+                this.chartManager.startDrawingMode('arrow');
+            });
+        }
+        const drawTextBtn = document.getElementById('drawTextBtn');
+        if (drawTextBtn) {
+            drawTextBtn.addEventListener('click', () => {
+                this.chartManager.startDrawingMode('text');
+            });
+        }
+
+        // --- Floating AI Recommendation card clicks ---
+        const floatingWhyBtn = document.getElementById('floatingWhyBtn');
+        if (floatingWhyBtn) {
+            floatingWhyBtn.addEventListener('click', () => {
+                this.showAiAssessmentModal();
+            });
+        }
+        const floatingTakeBtn = document.getElementById('floatingTakeBtn');
+        if (floatingTakeBtn) {
+            floatingTakeBtn.addEventListener('click', () => {
+                this.saveCurrentSetupToJournal();
+            });
+        }
+
+        // --- Stacked Cards Collapse/Expand within Right Column ---
+        document.querySelectorAll('.toggle-card-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.getAttribute('data-card');
+                const targetEl = document.getElementById(targetId);
+                const icon = btn.querySelector('i') || btn;
+                if (targetEl) {
+                    const isCollapsed = targetEl.classList.toggle('hidden');
+                    if (isCollapsed) {
+                        icon.setAttribute('data-lucide', 'chevron-down');
+                    } else {
+                        icon.setAttribute('data-lucide', 'chevron-up');
+                    }
+                    lucide.createIcons();
+                }
+            });
+        });
     }
 
     applyWorkspaceLayout(mode) {
@@ -1190,6 +1376,44 @@ class AppController {
                 gaugeScoreText.textContent = "NO CONVICTION";
             } else {
                 gaugeScoreText.textContent = decision.recommendation;
+            }
+        }
+
+        // Dynamic Floating AI Summary Overlay Card Update
+        const floatRecBadge = document.getElementById('floatingRecBadge');
+        const floatConfidence = document.getElementById('floatingConfidenceText');
+        const floatGrade = document.getElementById('floatingGradeText');
+        const floatCard = document.getElementById('floatingAiSummary');
+
+        if (floatConfidence) {
+            floatConfidence.textContent = decision.confidence || '0%';
+        }
+        if (floatGrade) {
+            const gradeLetter = decision.tradeQuality >= 90 ? 'A' : (decision.tradeQuality >= 80 ? 'B' : (decision.tradeQuality >= 70 ? 'C' : 'D'));
+            floatGrade.textContent = gradeLetter;
+        }
+
+        if (floatRecBadge) {
+            const isLong = decision.recommendation.includes('Long');
+            const isShort = decision.recommendation.includes('Short');
+            if (isLong) {
+                floatRecBadge.textContent = "BUY / LONG";
+                floatRecBadge.className = "font-black text-sm tracking-wider text-[#0ecb81]";
+                if (floatCard) {
+                    floatCard.className = "absolute right-2.5 top-2.5 bg-[#181a20]/90 backdrop-blur border border-[#0ecb81] rounded-lg shadow-2xl p-2.5 w-64 z-20 transition duration-300 glow-green";
+                }
+            } else if (isShort) {
+                floatRecBadge.textContent = "SELL / SHORT";
+                floatRecBadge.className = "font-black text-sm tracking-wider text-[#f6465d]";
+                if (floatCard) {
+                    floatCard.className = "absolute right-2.5 top-2.5 bg-[#181a20]/90 backdrop-blur border border-[#f6465d] rounded-lg shadow-2xl p-2.5 w-64 z-20 transition duration-300 glow-red";
+                }
+            } else {
+                floatRecBadge.textContent = "HOLD / WAIT";
+                floatRecBadge.className = "font-black text-sm tracking-wider text-amber-500";
+                if (floatCard) {
+                    floatCard.className = "absolute right-2.5 top-2.5 bg-[#181a20]/90 backdrop-blur border border-gray-800 rounded-lg shadow-2xl p-2.5 w-64 z-20 transition duration-300";
+                }
             }
         }
 

@@ -118,3 +118,88 @@ aside {
 ::-webkit-scrollbar-thumb:hover {
     background: #474f59;
 }
+
+/* --- Redesigned Terminal Layout CSS Styles --- */
+
+/* Draggable resizer splitter */
+#workspaceResizer {
+    width: 4px;
+    background-color: #1f2229;
+    cursor: col-resize;
+    transition: background-color 0.15s;
+    z-index: 30;
+}
+#workspaceResizer:hover, #workspaceResizer.dragging {
+    background-color: #f59e0b;
+}
+
+/* Collapsible Bottom Panel */
+#bottomPanelContainer {
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#bottomPanelContainer.collapsed {
+    height: 40px !important;
+    min-height: 40px !important;
+}
+#bottomPanelContainer.collapsed #bottomTabContentWrapper {
+    display: none !important;
+}
+
+/* Collapsible Right Sidebar */
+#workspaceRightColumn {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-collapsed #workspaceRightColumn {
+    width: 0px !important;
+    min-width: 0px !important;
+    display: none !important;
+}
+.sidebar-collapsed #workspaceResizer {
+    display: none !important;
+}
+.sidebar-collapsed #workspaceLeftColumn {
+    width: 100% !important;
+}
+
+/* Fullscreen Chart mode overrides */
+body.fullscreen-chart-active header,
+body.fullscreen-chart-active .bg-[#12141a], /* Row 2 statistics summary top bar */
+body.fullscreen-chart-active .bg-[#181a20]/90, /* Row 3 running Statistics ticker */
+body.fullscreen-chart-active .select-none.bg-[#0b0e11] /* Dual-bar auto analysis & execution deck */
+{
+    display: none !important;
+}
+
+body.fullscreen-chart-active #workspaceRightColumn,
+body.fullscreen-chart-active #workspaceResizer,
+body.fullscreen-chart-active #bottomPanelContainer
+{
+    display: none !important;
+}
+
+body.fullscreen-chart-active #workspaceLeftColumn {
+    width: 100% !important;
+    height: 100vh !important;
+}
+
+body.fullscreen-chart-active #chartContainer {
+    height: 100vh !important;
+    min-height: 100vh !important;
+}
+
+body.fullscreen-chart-active #chartDiv {
+    height: calc(100vh - 40px) !important;
+}
+
+/* Floating AI Summary overlay minimizer transitions */
+#floatingAiSummary {
+    transition: height 0.25s ease, opacity 0.2s ease;
+}
+#floatingAiSummary.minimized {
+    height: 34px !important;
+    width: 180px !important;
+    overflow: hidden;
+}
+#floatingAiSummary.minimized #floatingAiSummaryContent {
+    display: none !important;
+}
